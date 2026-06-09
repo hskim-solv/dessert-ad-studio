@@ -16,3 +16,5 @@ models/**/1/*.engine
 .DS_Store
 
 .omx/metrics.json
+
+*.egg-info/
