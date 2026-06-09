@@ -40,7 +40,12 @@ def build_model() -> onnx.ModelProto:
             numpy_helper.from_array(bias, name="bias"),
         ],
     )
-    model = helper.make_model(graph, producer_name="dessert-ad-studio")
+    model = helper.make_model(
+        graph,
+        producer_name="dessert-ad-studio",
+        opset_imports=[helper.make_opsetid("", 13)],
+    )
+    model.ir_version = 8
     onnx.checker.check_model(model)
     return model
 

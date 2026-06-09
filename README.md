@@ -48,6 +48,13 @@ docker compose up triton -d
 python scripts/triton_smoke.py
 ```
 
+The default local Triton image is the smaller full server tag
+`nvcr.io/nvidia/tritonserver:22.12-py3`. Override it on a larger VM if needed:
+
+```bash
+TRITON_IMAGE=nvcr.io/nvidia/tritonserver:24.05-py3 docker compose up triton -d
+```
+
 ## Configuration
 
 Copy `.env.example` to `.env` and edit local values. Do not commit `.env`.
