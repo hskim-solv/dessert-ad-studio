@@ -1,0 +1,41 @@
+services:
+  triton:
+    image: nvcr.io/nvidia/tritonserver:24.05-py3
+    command: ["tritonserver", "--model-repository=/models"]
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+      - "8002:8002"
+    volumes:
+      - ./models:/models:ro
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      TRITON_URL: triton:8001
+      REQUIRE_TRITON: "1"
+      IMAGE_BACKEND: mock
+      OUTPUT_DIR: /app/outputs
+      GENERATION_LOG_PATH: /app/logs/generations.jsonl
+    ports:
+      - "8080:8000"
+    volumes:
+      - ./outputs:/app/outputs
+      - ./logs:/app/logs
+    depends_on:
+      - triton
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    environment:
+      API_BASE_URL: http://api:8000
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./outputs:/app/outputs
+    depends_on:
+      - api

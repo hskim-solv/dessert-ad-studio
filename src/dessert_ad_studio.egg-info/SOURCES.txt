@@ -1,0 +1,8 @@
+README.md
+pyproject.toml
+src/dessert_ad_studio/__init__.py
+src/dessert_ad_studio.egg-info/PKG-INFO
+src/dessert_ad_studio.egg-info/SOURCES.txt
+src/dessert_ad_studio.egg-info/dependency_links.txt
+src/dessert_ad_studio.egg-info/requires.txt
+src/dessert_ad_studio.egg-info/top_level.txt

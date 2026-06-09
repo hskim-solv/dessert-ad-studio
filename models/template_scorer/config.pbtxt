@@ -1,0 +1,26 @@
+name: "template_scorer"
+platform: "onnxruntime_onnx"
+max_batch_size: 16
+
+input [
+  {
+    name: "features"
+    data_type: TYPE_FP32
+    dims: [ 8 ]
+  }
+]
+
+output [
+  {
+    name: "scores"
+    data_type: TYPE_FP32
+    dims: [ 4 ]
+  }
+]
+
+instance_group [
+  {
+    count: 1
+    kind: KIND_CPU
+  }
+]
