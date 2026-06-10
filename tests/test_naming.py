@@ -54,6 +54,27 @@ def test_normal_name_passes_through() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Control character stripping tests
+# ---------------------------------------------------------------------------
+
+
+def test_null_byte_is_stripped() -> None:
+    result = safe_filename_stem("말차\x00푸딩")
+    assert "\x00" not in result
+    assert result == "말차푸딩"
+
+
+def test_control_chars_are_stripped() -> None:
+    result = safe_filename_stem("a\x01b\x1fc")
+    assert result == "abc"
+
+
+def test_only_control_chars_falls_back_to_product() -> None:
+    result = safe_filename_stem("\x00\x01\x1f")
+    assert result == "product"
+
+
+# ---------------------------------------------------------------------------
 # Integration test: traversal product_name stays inside output_dir
 # ---------------------------------------------------------------------------
 
