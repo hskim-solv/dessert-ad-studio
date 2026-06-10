@@ -16,7 +16,12 @@ services:
     environment:
       TRITON_URL: triton:8001
       REQUIRE_TRITON: "1"
-      IMAGE_BACKEND: mock
+      COPY_BACKEND: ${COPY_BACKEND:-mock}
+      COPY_MODEL_ID: ${COPY_MODEL_ID:-gpt-5.4-mini}
+      IMAGE_BACKEND: ${IMAGE_BACKEND:-mock}
+      IMAGE_MODEL_ID: ${IMAGE_MODEL_ID:-gpt-image-1-mini}
+      IMAGE_QUALITY: ${IMAGE_QUALITY:-low}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OUTPUT_DIR: /app/outputs
       GENERATION_LOG_PATH: /app/logs/generations.jsonl
     ports:

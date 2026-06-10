@@ -59,6 +59,32 @@ TRITON_IMAGE=nvcr.io/nvidia/tritonserver:24.05-py3 docker compose up triton -d
 
 Copy `.env.example` to `.env` and edit local values. Do not commit `.env`.
 
+### Generation backends
+
+Copy and image generation switch independently:
+
+| Variable | Values | Default |
+| --- | --- | --- |
+| `COPY_BACKEND` | `mock`, `openai` | `mock` |
+| `IMAGE_BACKEND` | `mock`, `openai`, `flux2` | `mock` |
+| `COPY_MODEL_ID` | any chat model id | `gpt-5.4-mini` |
+| `IMAGE_MODEL_ID` | any GPT image model id | `gpt-image-1-mini` |
+| `IMAGE_QUALITY` | `low`, `medium`, `high` | `low` |
+
+Real backends need `OPENAI_API_KEY` in `.env`. Uploading a reference image in
+Streamlit switches the OpenAI image backend from text-to-image to edit mode.
+Keep `IMAGE_QUALITY=low` while iterating; raise it only for final demo shots.
+
+### OpenAI smoke check (manual, costs quota)
+
+```bash
+python scripts/openai_smoke.py                      # copy + text-to-image
+python scripts/openai_smoke.py my_product_photo.jpg # copy + reference edit
+```
+
+Run it once after setting a key to confirm the configured model ids exist and
+to record baseline latency/token usage. It is intentionally not part of pytest.
+
 ## Docker Compose demo
 
 Generate the ONNX model before starting Triton:
