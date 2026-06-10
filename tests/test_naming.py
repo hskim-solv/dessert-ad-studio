@@ -84,7 +84,7 @@ def test_mock_backend_traversal_stays_inside_output_dir(tmp_path: Path) -> None:
     result = backend.generate_image(
         sample_request("../../etc/passwd"), image_prompt="지시문"
     )
-    assert Path(result).resolve().is_relative_to(tmp_path.resolve())
+    assert Path(result.path).resolve().is_relative_to(tmp_path.resolve())
 
 
 def test_openai_image_backend_traversal_stays_inside_output_dir(tmp_path: Path) -> None:
@@ -108,4 +108,4 @@ def test_openai_image_backend_traversal_stays_inside_output_dir(tmp_path: Path) 
     result = backend.generate_image(
         sample_request("../../etc/passwd"), image_prompt="지시문"
     )
-    assert Path(result).resolve().is_relative_to(tmp_path.resolve())
+    assert Path(result.path).resolve().is_relative_to(tmp_path.resolve())

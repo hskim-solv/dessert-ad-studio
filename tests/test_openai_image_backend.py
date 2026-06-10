@@ -8,7 +8,7 @@ import openai
 import pytest
 from PIL import Image
 
-from dessert_ad_studio.backends.base import AdBackendError
+from dessert_ad_studio.backends.base import AdBackendError, ImageResult
 from dessert_ad_studio.backends.openai_image import OpenAIImageBackend
 from dessert_ad_studio.schemas import GenerationRequest
 
@@ -82,16 +82,27 @@ def test_generate_without_reference_calls_generate(tmp_path: Path) -> None:
         output_dir=tmp_path, model_id="gpt-image-test", quality="low", client=client
     )
 
-    image_path = backend.generate_image(sample_request(), image_prompt="광고 이미지 지시문")
+    result = backend.generate_image(sample_request(), image_prompt="광고 이미지 지시문")
 
-    assert Path(image_path).exists()
-    assert Path(image_path).suffix == ".png"
+    assert isinstance(result, ImageResult)
+    assert Path(result.path).exists()
+    assert Path(result.path).suffix == ".png"
     assert client.images.edit_kwargs is None
     kwargs = client.images.generate_kwargs
     assert kwargs["model"] == "gpt-image-test"
     assert kwargs["quality"] == "low"
     assert kwargs["size"] == "1024x1024"
-    assert backend.last_usage == {"total_tokens": 4160}
+    assert result.usage == {"total_tokens": 4160}
+
+
+def test_generate_image_keeps_no_request_state_on_the_instance(tmp_path: Path) -> None:
+    """The API caches one backend per config and serves concurrent requests
+    from a threadpool; per-request data must travel in the return value."""
+    backend = OpenAIImageBackend(output_dir=tmp_path, client=make_fake_client(tiny_png_b64()))
+
+    backend.generate_image(sample_request(), image_prompt="지시문")
+
+    assert not hasattr(backend, "last_usage")
 
 
 def test_generate_with_reference_calls_edit(tmp_path: Path) -> None:
@@ -99,7 +110,7 @@ def test_generate_with_reference_calls_edit(tmp_path: Path) -> None:
     backend = OpenAIImageBackend(output_dir=tmp_path, client=client)
     reference = b"normalized-png-bytes"
 
-    backend.generate_image(
+    result = backend.generate_image(
         sample_request(), image_prompt="광고 이미지 지시문", reference_image=reference
     )
 
@@ -107,6 +118,7 @@ def test_generate_with_reference_calls_edit(tmp_path: Path) -> None:
     kwargs = client.images.edit_kwargs
     assert kwargs["image"] == ("reference.png", reference, "image/png")
     assert kwargs["prompt"] == "광고 이미지 지시문"
+    assert result.usage is None
 
 
 def test_empty_response_payload_maps_to_backend_error(tmp_path: Path) -> None:

@@ -15,7 +15,7 @@ from openai import (
     RateLimitError,
 )
 
-from dessert_ad_studio.backends.base import AdBackendError
+from dessert_ad_studio.backends.base import AdBackendError, ImageResult
 from dessert_ad_studio.backends.naming import safe_filename_stem
 from dessert_ad_studio.schemas import GenerationRequest
 
@@ -34,7 +34,6 @@ class OpenAIImageBackend:
         self.output_dir = Path(output_dir)
         self.model_id = model_id or os.getenv("IMAGE_MODEL_ID", "gpt-image-1-mini")
         self.quality = quality or os.getenv("IMAGE_QUALITY", "low")
-        self.last_usage: dict[str, int | None] | None = None
         self._client = client
 
     def _get_client(self) -> Any:
@@ -52,7 +51,7 @@ class OpenAIImageBackend:
         request: GenerationRequest,
         image_prompt: str,
         reference_image: bytes | None = None,
-    ) -> str:
+    ) -> ImageResult:
         client = self._get_client()
         try:
             if reference_image is not None:
@@ -97,6 +96,7 @@ class OpenAIImageBackend:
             raise AdBackendError("이미지 응답을 디코딩하지 못했습니다. 다시 시도해주세요.") from exc
         path.write_bytes(raw)
         usage = getattr(result, "usage", None)
+        usage_record = None
         if usage is not None:
-            self.last_usage = {"total_tokens": getattr(usage, "total_tokens", None)}
-        return str(path)
+            usage_record = {"total_tokens": getattr(usage, "total_tokens", None)}
+        return ImageResult(path=str(path), usage=usage_record)

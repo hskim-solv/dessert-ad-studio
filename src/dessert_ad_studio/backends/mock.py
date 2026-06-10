@@ -5,6 +5,7 @@ import textwrap
 
 from PIL import Image, ImageDraw, ImageFont
 
+from dessert_ad_studio.backends.base import CopyResult, ImageResult
 from dessert_ad_studio.backends.naming import safe_filename_stem
 from dessert_ad_studio.schemas import CopyOption, GenerationRequest
 
@@ -16,9 +17,9 @@ class MockAdBackend:
     def __init__(self, output_dir: str | Path = "outputs") -> None:
         self.output_dir = Path(output_dir)
 
-    def generate_copy(self, request: GenerationRequest) -> list[CopyOption]:
+    def generate_copy(self, request: GenerationRequest) -> CopyResult:
         product = request.product_name
-        return [
+        options = [
             CopyOption(
                 headline=f"{product}, 오늘의 달콤한 선택",
                 body=f"{request.price_text or '지금 매장에서'} 만나는 기분 좋은 디저트 타임.",
@@ -35,13 +36,14 @@ class MockAdBackend:
                 call_to_action="지금 바로 주문하세요.",
             ),
         ]
+        return CopyResult(options=options)
 
     def generate_image(
         self,
         request: GenerationRequest,
         image_prompt: str,
         reference_image: bytes | None = None,
-    ) -> str:
+    ) -> ImageResult:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         suffix = "_ref" if reference_image is not None else ""
         filename = f"{safe_filename_stem(request.product_name)}_mock_ad{suffix}.png"
@@ -65,4 +67,4 @@ class MockAdBackend:
         prompt_line = textwrap.shorten(image_prompt.replace("\n", " "), width=90)
         draw.text((140, 870), prompt_line, fill=(110, 80, 70), font=font)
         image.save(path)
-        return str(path)
+        return ImageResult(path=str(path))

@@ -15,7 +15,7 @@ from openai import (
 )
 from pydantic import BaseModel
 
-from dessert_ad_studio.backends.base import AdBackendError
+from dessert_ad_studio.backends.base import AdBackendError, CopyResult
 from dessert_ad_studio.prompts import build_copy_prompt
 from dessert_ad_studio.schemas import CopyOption, GenerationRequest
 
@@ -35,7 +35,6 @@ class OpenAICopyBackend:
 
     def __init__(self, model_id: str | None = None, client: Any | None = None) -> None:
         self.model_id = model_id or os.getenv("COPY_MODEL_ID", "gpt-5.4-mini")
-        self.last_usage: dict[str, int] | None = None
         self._client = client
 
     def _get_client(self) -> Any:
@@ -48,7 +47,7 @@ class OpenAICopyBackend:
                 ) from exc
         return self._client
 
-    def generate_copy(self, request: GenerationRequest) -> list[CopyOption]:
+    def generate_copy(self, request: GenerationRequest) -> CopyResult:
         client = self._get_client()
         try:
             completion = client.chat.completions.parse(
@@ -76,10 +75,11 @@ class OpenAICopyBackend:
         if parsed is None or len(parsed.options) != 3:
             raise AdBackendError("광고 문구 3개 생성에 실패했습니다. 다시 시도해주세요.")
         usage = getattr(completion, "usage", None)
+        usage_record = None
         if usage is not None:
-            self.last_usage = {
+            usage_record = {
                 "prompt_tokens": usage.prompt_tokens,
                 "completion_tokens": usage.completion_tokens,
                 "total_tokens": usage.total_tokens,
             }
-        return list(parsed.options)
+        return CopyResult(options=list(parsed.options), usage=usage_record)

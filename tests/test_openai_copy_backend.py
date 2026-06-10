@@ -4,7 +4,7 @@ import httpx
 import openai
 import pytest
 
-from dessert_ad_studio.backends.base import AdBackendError
+from dessert_ad_studio.backends.base import AdBackendError, CopyResult
 from dessert_ad_studio.backends.openai_copy import CopyOptionsPayload, OpenAICopyBackend
 from dessert_ad_studio.schemas import CopyOption, GenerationRequest
 
@@ -86,14 +86,15 @@ def make_fake_client(payload: CopyOptionsPayload | None) -> SimpleNamespace:
     return SimpleNamespace(chat=SimpleNamespace(completions=completions))
 
 
-def test_generate_copy_returns_three_options_and_records_usage() -> None:
+def test_generate_copy_returns_three_options_with_usage() -> None:
     client = make_fake_client(make_payload())
     backend = OpenAICopyBackend(model_id="gpt-test-mini", client=client)
 
-    options = backend.generate_copy(sample_request())
+    result = backend.generate_copy(sample_request())
 
-    assert [option.headline for option in options] == ["헤드라인 0", "헤드라인 1", "헤드라인 2"]
-    assert backend.last_usage == {
+    assert isinstance(result, CopyResult)
+    assert [option.headline for option in result.options] == ["헤드라인 0", "헤드라인 1", "헤드라인 2"]
+    assert result.usage == {
         "prompt_tokens": 120,
         "completion_tokens": 88,
         "total_tokens": 208,
@@ -103,6 +104,16 @@ def test_generate_copy_returns_three_options_and_records_usage() -> None:
     assert kwargs["response_format"] is CopyOptionsPayload
     assert kwargs["messages"][0]["role"] == "system"
     assert "초코 마들렌" in kwargs["messages"][1]["content"]
+
+
+def test_generate_copy_keeps_no_request_state_on_the_instance() -> None:
+    """The API caches one backend per config and serves concurrent requests
+    from a threadpool; per-request data must travel in the return value."""
+    backend = OpenAICopyBackend(model_id="gpt-test-mini", client=make_fake_client(make_payload()))
+
+    backend.generate_copy(sample_request())
+
+    assert not hasattr(backend, "last_usage")
 
 
 def test_generate_copy_rejects_wrong_option_count() -> None:

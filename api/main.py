@@ -115,8 +115,8 @@ def generate(request: GenerationRequest) -> GenerationResponse:
     )
 
     try:
-        copy_options = copy_backend.generate_copy(request)
-        image_path = image_backend.generate_image(
+        copy_result = copy_backend.generate_copy(request)
+        image_result = image_backend.generate_image(
             request,
             image_prompt=image_prompt,
             reference_image=reference_image,
@@ -136,22 +136,23 @@ def generate(request: GenerationRequest) -> GenerationResponse:
                 "triton_latency_ms": ranking.latency_ms,
                 "copy_backend": copy_backend.name,
                 "copy_model_id": getattr(copy_backend, "model_id", None),
-                "copy_usage": getattr(copy_backend, "last_usage", None),
+                "copy_usage": copy_result.usage,
                 "image_backend": image_backend.name,
                 "image_model_id": getattr(image_backend, "model_id", None),
+                "image_usage": image_result.usage,
                 "used_reference": reference_image is not None,
                 "reference_image_name": request.reference_image_name,
                 "elapsed_ms": elapsed_ms,
-                "image_path": image_path,
+                "image_path": image_result.path,
             }
         )
     except OSError:
         pass  # best-effort cost log; never fail a completed generation on it
 
     return GenerationResponse(
-        copy_options=copy_options,
+        copy_options=copy_result.options,
         selected_template=ranking,
-        image_path=image_path,
+        image_path=image_result.path,
         image_backend=image_backend.name,
         copy_backend=copy_backend.name,
         used_reference=reference_image is not None,

@@ -1,5 +1,7 @@
 import base64
 import io
+import json
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -120,6 +122,53 @@ def test_generate_rejects_unknown_backend(monkeypatch: pytest.MonkeyPatch) -> No
     response = client.post("/generate", json=base_payload())
 
     assert response.status_code == 501
+
+
+def test_generate_logs_usage_from_returned_results(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """JSONL usage must come from each request's own result objects, not from
+    attributes on the cached (shared) backend instances."""
+    import api.main as api_main
+    from dessert_ad_studio.backends.base import CopyResult, ImageResult
+    from dessert_ad_studio.schemas import CopyOption
+
+    log_path = tmp_path / "generations.jsonl"
+    monkeypatch.setenv("GENERATION_LOG_PATH", str(log_path))
+
+    class FakeCopyBackend:
+        name = "fake-copy"
+        model_id = "fake-copy-model"
+
+        def generate_copy(self, request):
+            options = [
+                CopyOption(headline=f"헤드라인 {i}", body="본문", call_to_action="행동 유도")
+                for i in range(3)
+            ]
+            return CopyResult(
+                options=options,
+                usage={"prompt_tokens": 11, "completion_tokens": 22, "total_tokens": 33},
+            )
+
+    class FakeImageBackend:
+        name = "fake-image"
+        model_id = "fake-image-model"
+        supports_reference_image = True
+
+        def generate_image(self, request, image_prompt, reference_image=None):
+            path = tmp_path / "fake.png"
+            path.write_bytes(b"png")
+            return ImageResult(path=str(path), usage={"total_tokens": 44})
+
+    monkeypatch.setattr(api_main, "_copy_backend_for", lambda name, output_dir: FakeCopyBackend())
+    monkeypatch.setattr(api_main, "_image_backend_for", lambda name, output_dir: FakeImageBackend())
+
+    response = client.post("/generate", json=base_payload())
+
+    assert response.status_code == 200
+    record = json.loads(log_path.read_text(encoding="utf-8").splitlines()[-1])
+    assert record["copy_usage"] == {"prompt_tokens": 11, "completion_tokens": 22, "total_tokens": 33}
+    assert record["image_usage"] == {"total_tokens": 44}
 
 
 def test_generate_survives_log_write_failure(monkeypatch: pytest.MonkeyPatch) -> None:
