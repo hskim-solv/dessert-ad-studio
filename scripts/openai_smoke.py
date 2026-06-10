@@ -39,6 +39,12 @@ def main() -> None:
         user_constraints="봄 시즌 한정 느낌",
     )
 
+    reference_image = None
+    if len(sys.argv) > 1:
+        raw = Path(sys.argv[1]).read_bytes()
+        encoded = base64.b64encode(raw).decode("ascii")
+        reference_image = decode_reference_image(encoded)
+
     copy_backend = OpenAICopyBackend()
     started = perf_counter()
     options = copy_backend.generate_copy(request)
@@ -52,12 +58,6 @@ def main() -> None:
             "copy_usage": copy_backend.last_usage,
         }
     )
-
-    reference_image = None
-    if len(sys.argv) > 1:
-        raw = Path(sys.argv[1]).read_bytes()
-        encoded = base64.b64encode(raw).decode("ascii")
-        reference_image = decode_reference_image(encoded)
 
     image_backend = OpenAIImageBackend(output_dir="outputs")
     prompt = build_image_prompt(
