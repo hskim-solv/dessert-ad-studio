@@ -5,6 +5,7 @@ import textwrap
 
 from PIL import Image, ImageDraw, ImageFont
 
+from dessert_ad_studio.backends.naming import safe_filename_stem
 from dessert_ad_studio.schemas import CopyOption, GenerationRequest
 
 
@@ -42,7 +43,7 @@ class MockAdBackend:
     ) -> str:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         suffix = "_ref" if reference_image is not None else ""
-        filename = f"{request.product_name.replace(' ', '_')}_mock_ad{suffix}.png"
+        filename = f"{safe_filename_stem(request.product_name)}_mock_ad{suffix}.png"
         path = self.output_dir / filename
 
         image = Image.new("RGB", (1024, 1024), color=(250, 238, 224))

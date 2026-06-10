@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from dessert_ad_studio.backends.naming import safe_filename_stem
 from dessert_ad_studio.schemas import GenerationRequest
 
 
@@ -51,6 +52,6 @@ class Flux2Backend:
             guidance_scale=3.5,
         )
         image = result.images[0]
-        path = self.output_dir / f"{request.product_name.replace(' ', '_')}_flux2_ad.png"
+        path = self.output_dir / f"{safe_filename_stem(request.product_name)}_flux2_ad.png"
         image.save(path)
         return str(path)

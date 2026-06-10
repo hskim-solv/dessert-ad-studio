@@ -16,6 +16,7 @@ from openai import (
 )
 
 from dessert_ad_studio.backends.base import AdBackendError
+from dessert_ad_studio.backends.naming import safe_filename_stem
 from dessert_ad_studio.schemas import GenerationRequest
 
 
@@ -88,7 +89,7 @@ class OpenAIImageBackend:
         if not image_b64:
             raise AdBackendError("이미지 생성 응답이 비어 있습니다. 다시 시도해주세요.")
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        path = self.output_dir / f"{request.product_name.replace(' ', '_')}_openai_ad.png"
+        path = self.output_dir / f"{safe_filename_stem(request.product_name)}_openai_ad.png"
         try:
             raw = base64.b64decode(image_b64)
         except (binascii.Error, ValueError) as exc:
