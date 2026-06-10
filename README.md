@@ -77,6 +77,8 @@ Keep `IMAGE_QUALITY=low` while iterating; raise it only for final demo shots.
 
 ### OpenAI smoke check (manual, costs quota)
 
+After pulling this branch, re-run `pip install -e ".[dev]"` once (it adds the `openai` dependency).
+
 ```bash
 python scripts/openai_smoke.py                      # copy + text-to-image
 python scripts/openai_smoke.py my_product_photo.jpg # copy + reference edit
@@ -93,6 +95,8 @@ Generate the ONNX model before starting Triton:
 python scripts/export_template_scorer_onnx.py
 docker compose up --build
 ```
+
+To use `openai` backends in the compose demo, put `OPENAI_API_KEY` (and any backend overrides) in `.env` beside `docker-compose.yml`; Compose reads it automatically.
 
 Open Streamlit:
 
