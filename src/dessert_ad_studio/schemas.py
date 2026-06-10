@@ -16,7 +16,8 @@ class GenerationRequest(BaseModel):
     template_hint: TemplateHint
     price_text: str = Field(default="", max_length=40)
     user_constraints: str = Field(default="", max_length=300)
-    reference_image_path: str | None = None
+    reference_image_b64: str | None = None
+    reference_image_name: str | None = None
 
 
 class CopyOption(BaseModel):
@@ -37,5 +38,7 @@ class GenerationResponse(BaseModel):
     selected_template: TemplateRanking
     image_path: str
     image_backend: str
+    copy_backend: str
+    used_reference: bool
     prompt_summary: str
     elapsed_ms: float

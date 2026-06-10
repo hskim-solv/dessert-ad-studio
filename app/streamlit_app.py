@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import os
 from pathlib import Path
 
@@ -40,10 +41,16 @@ with st.form("generation_form"):
     template_label = st.selectbox("시각 템플릿", list(TEMPLATE_OPTIONS))
     price_text = st.text_input("가격/혜택", value="6,800원")
     user_constraints = st.text_area("추가 요청", value="봄 시즌 한정 느낌, 따뜻한 카페 조명")
-    uploaded = st.file_uploader("참고 이미지", type=["png", "jpg", "jpeg"])
+    uploaded = st.file_uploader(
+        "참고 이미지 (업로드하면 사진을 바탕으로 광고 이미지를 만들어요)",
+        type=["png", "jpg", "jpeg", "webp"],
+    )
     submitted = st.form_submit_button("광고 생성")
 
 if submitted:
+    reference_image_b64 = None
+    if uploaded is not None:
+        reference_image_b64 = base64.b64encode(uploaded.getvalue()).decode("ascii")
     payload = {
         "campaign_purpose": PURPOSE_OPTIONS[campaign_label],
         "product_name": product_name,
@@ -51,12 +58,20 @@ if submitted:
         "template_hint": TEMPLATE_OPTIONS[template_label],
         "price_text": price_text,
         "user_constraints": user_constraints,
-        "reference_image_path": uploaded.name if uploaded else None,
+        "reference_image_b64": reference_image_b64,
+        "reference_image_name": uploaded.name if uploaded else None,
     }
-    with st.spinner("FastAPI와 Triton 템플릿 스코어러를 호출하는 중입니다..."):
+    spinner_text = "광고 문구와 이미지를 생성하는 중입니다... (이미지 생성은 수십 초 걸릴 수 있어요)"
+    with st.spinner(spinner_text):
         try:
             response = httpx.post(f"{API_BASE_URL}/generate", json=payload, timeout=120)
             response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            try:
+                detail = exc.response.json().get("detail")
+            except Exception:
+                detail = None
+            st.error(detail or f"생성 요청 실패: {exc}")
         except Exception as exc:
             st.error(f"생성 요청 실패: {exc}")
         else:
@@ -72,6 +87,12 @@ if submitted:
             st.json(ranking)
 
             st.subheader("생성 이미지")
+            used_reference = "예" if result["used_reference"] else "아니요"
+            st.caption(
+                f"문구 백엔드: {result['copy_backend']} · "
+                f"이미지 백엔드: {result['image_backend']} · "
+                f"참고 이미지 반영: {used_reference}"
+            )
             image_path = Path(result["image_path"])
             if image_path.exists():
                 st.image(str(image_path), caption=f"backend={result['image_backend']}")

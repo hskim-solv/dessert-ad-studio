@@ -3,11 +3,15 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from dessert_ad_studio.backends.base import ImageResult
+from dessert_ad_studio.backends.naming import safe_filename_stem
 from dessert_ad_studio.schemas import GenerationRequest
 
 
 class Flux2Backend:
     name = "flux2"
+    # Text-to-image only until the next round wires an i2i pipeline.
+    supports_reference_image = False
 
     def __init__(self, output_dir: str | Path = "outputs", model_id: str | None = None) -> None:
         self.output_dir = Path(output_dir)
@@ -35,7 +39,12 @@ class Flux2Backend:
         self._pipeline = pipeline
         return pipeline
 
-    def generate_image(self, request: GenerationRequest, image_prompt: str) -> str:
+    def generate_image(
+        self,
+        request: GenerationRequest,
+        image_prompt: str,
+        reference_image: bytes | None = None,
+    ) -> ImageResult:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         pipeline = self._load_pipeline()
         result = pipeline(
@@ -46,6 +55,6 @@ class Flux2Backend:
             guidance_scale=3.5,
         )
         image = result.images[0]
-        path = self.output_dir / f"{request.product_name.replace(' ', '_')}_flux2_ad.png"
+        path = self.output_dir / f"{safe_filename_stem(request.product_name)}_flux2_ad.png"
         image.save(path)
-        return str(path)
+        return ImageResult(path=str(path))
