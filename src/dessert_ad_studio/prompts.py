@@ -45,8 +45,15 @@ def build_copy_prompt(request: GenerationRequest) -> str:
     )
 
 
-def build_image_prompt(request: GenerationRequest, ranked_template: str) -> str:
-    return "\n".join(
+def build_image_prompt(
+    request: GenerationRequest,
+    ranked_template: str,
+    has_reference: bool = False,
+) -> str:
+    lines: list[str] = []
+    if has_reference:
+        lines.append("업로드된 제품 사진의 피사체와 구도를 보존하면서 광고 이미지로 연출한다.")
+    lines.extend(
         [
             "SNS 정사각형 광고 이미지 생성 지시문",
             f"상품: {request.product_name}",
@@ -58,6 +65,7 @@ def build_image_prompt(request: GenerationRequest, ranked_template: str) -> str:
             f"제약: {request.user_constraints or '브랜드 로고나 허위 수상 문구를 추가하지 않는다.'}",
         ]
     )
+    return "\n".join(lines)
 
 
 def template_features(request: GenerationRequest) -> list[float]:
