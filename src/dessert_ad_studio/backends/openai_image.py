@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import binascii
 import os
 from pathlib import Path
 from typing import Any
@@ -80,12 +81,19 @@ class OpenAIImageBackend:
         except APIError as exc:
             raise AdBackendError(f"이미지 생성 API 호출에 실패했습니다: {exc}") from exc
 
-        image_b64 = result.data[0].b64_json
+        data = result.data
+        if not data:
+            raise AdBackendError("이미지 생성 응답이 비어 있습니다. 다시 시도해주세요.")
+        image_b64 = data[0].b64_json
         if not image_b64:
             raise AdBackendError("이미지 생성 응답이 비어 있습니다. 다시 시도해주세요.")
         self.output_dir.mkdir(parents=True, exist_ok=True)
         path = self.output_dir / f"{request.product_name.replace(' ', '_')}_openai_ad.png"
-        path.write_bytes(base64.b64decode(image_b64))
+        try:
+            raw = base64.b64decode(image_b64)
+        except (binascii.Error, ValueError) as exc:
+            raise AdBackendError("이미지 응답을 디코딩하지 못했습니다. 다시 시도해주세요.") from exc
+        path.write_bytes(raw)
         usage = getattr(result, "usage", None)
         if usage is not None:
             self.last_usage = {"total_tokens": getattr(usage, "total_tokens", None)}

@@ -3,6 +3,8 @@ import io
 from pathlib import Path
 from types import SimpleNamespace
 
+import httpx
+import openai
 import pytest
 from PIL import Image
 
@@ -26,6 +28,14 @@ def tiny_png_b64() -> str:
     return base64.b64encode(buffer.getvalue()).decode("ascii")
 
 
+def _make_httpx_request() -> httpx.Request:
+    return httpx.Request("POST", "https://api.openai.com/v1/images/generations")
+
+
+def _make_httpx_response(status_code: int = 400) -> httpx.Response:
+    return httpx.Response(status_code, request=_make_httpx_request())
+
+
 class FakeImages:
     def __init__(self, b64: str) -> None:
         self._b64 = b64
@@ -44,8 +54,26 @@ class FakeImages:
         return SimpleNamespace(data=[SimpleNamespace(b64_json=self._b64)], usage=None)
 
 
+class RaisingImages:
+    """FakeImages variant that raises a given SDK exception from generate()."""
+
+    def __init__(self, exc: Exception) -> None:
+        self._exc = exc
+
+    def generate(self, **kwargs):
+        raise self._exc
+
+    def edit(self, **kwargs):
+        raise self._exc
+
+
 def make_fake_client(b64: str) -> SimpleNamespace:
     return SimpleNamespace(images=FakeImages(b64))
+
+
+# ---------------------------------------------------------------------------
+# Existing Task 6 tests
+# ---------------------------------------------------------------------------
 
 
 def test_generate_without_reference_calls_generate(tmp_path: Path) -> None:
@@ -96,4 +124,77 @@ def test_missing_api_key_maps_to_backend_error(
     backend = OpenAIImageBackend(output_dir=tmp_path)
 
     with pytest.raises(AdBackendError, match="OPENAI_API_KEY"):
+        backend.generate_image(sample_request(), image_prompt="지시문")
+
+
+# ---------------------------------------------------------------------------
+# New: SDK exception mapping tests (Commit 1)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "exc, expected_status_code",
+    [
+        (
+            openai.AuthenticationError("invalid key", response=_make_httpx_response(401), body=None),
+            503,
+        ),
+        (
+            openai.RateLimitError("rate limit", response=_make_httpx_response(429), body=None),
+            503,
+        ),
+        (
+            openai.BadRequestError("bad request", response=_make_httpx_response(400), body=None),
+            422,
+        ),
+        (
+            openai.APIError("api error", request=_make_httpx_request(), body=None),
+            503,
+        ),
+    ],
+)
+def test_sdk_exceptions_map_to_backend_error(
+    tmp_path: Path, exc: Exception, expected_status_code: int
+) -> None:
+    client = SimpleNamespace(images=RaisingImages(exc))
+    backend = OpenAIImageBackend(output_dir=tmp_path, client=client)
+
+    with pytest.raises(AdBackendError) as exc_info:
+        backend.generate_image(sample_request(), image_prompt="지시문")
+
+    assert exc_info.value.status_code == expected_status_code
+
+
+def test_data_none_response_maps_to_backend_error(tmp_path: Path) -> None:
+    """result.data is None → TypeError 누출 전에 AdBackendError로 매핑"""
+    client = SimpleNamespace(
+        images=SimpleNamespace(
+            generate=lambda **kw: SimpleNamespace(data=None, usage=None)
+        )
+    )
+    backend = OpenAIImageBackend(output_dir=tmp_path, client=client)
+
+    with pytest.raises(AdBackendError, match="비어"):
+        backend.generate_image(sample_request(), image_prompt="지시문")
+
+
+def test_data_empty_list_response_maps_to_backend_error(tmp_path: Path) -> None:
+    """result.data == [] → IndexError 누출 전에 AdBackendError로 매핑"""
+    client = SimpleNamespace(
+        images=SimpleNamespace(
+            generate=lambda **kw: SimpleNamespace(data=[], usage=None)
+        )
+    )
+    backend = OpenAIImageBackend(output_dir=tmp_path, client=client)
+
+    with pytest.raises(AdBackendError, match="비어"):
+        backend.generate_image(sample_request(), image_prompt="지시문")
+
+
+def test_malformed_b64_maps_to_backend_error(tmp_path: Path) -> None:
+    """non-empty but invalid b64 → binascii.Error 누출 전에 AdBackendError로 매핑"""
+    client = make_fake_client("!!!not-base64!!!")
+    backend = OpenAIImageBackend(output_dir=tmp_path, client=client)
+
+    with pytest.raises(AdBackendError, match="디코딩"):
         backend.generate_image(sample_request(), image_prompt="지시문")
