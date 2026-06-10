@@ -73,6 +73,8 @@ Copy and image generation switch independently:
 
 Real backends need `OPENAI_API_KEY` in `.env`. Uploading a reference image in
 Streamlit switches the OpenAI image backend from text-to-image to edit mode.
+The `flux2` backend is text-to-image only for now: uploading a reference image
+with it returns a 400 instead of silently ignoring the photo.
 Keep `IMAGE_QUALITY=low` while iterating; raise it only for final demo shots.
 
 ### OpenAI smoke check (manual, costs quota)
