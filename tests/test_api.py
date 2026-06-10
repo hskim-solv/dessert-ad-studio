@@ -91,3 +91,13 @@ def test_generate_rejects_unknown_backend(monkeypatch: pytest.MonkeyPatch) -> No
     response = client.post("/generate", json=base_payload())
 
     assert response.status_code == 501
+
+
+def test_generate_survives_log_write_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+    from dessert_ad_studio.generation_logger import GenerationLogger
+
+    monkeypatch.setattr(GenerationLogger, "write", lambda self, record: (_ for _ in ()).throw(OSError("disk full")))
+
+    response = client.post("/generate", json=base_payload())
+
+    assert response.status_code == 200

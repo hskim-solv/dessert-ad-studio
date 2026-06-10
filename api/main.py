@@ -118,23 +118,26 @@ def generate(request: GenerationRequest) -> GenerationResponse:
     elapsed_ms = (perf_counter() - started) * 1000
 
     logger = GenerationLogger(Path(os.getenv("GENERATION_LOG_PATH", "logs/generations.jsonl")))
-    logger.write(
-        {
-            "campaign_purpose": request.campaign_purpose,
-            "template": ranking.template_name,
-            "template_scorer": ranking.scorer,
-            "triton_latency_ms": ranking.latency_ms,
-            "copy_backend": copy_backend.name,
-            "copy_model_id": getattr(copy_backend, "model_id", None),
-            "copy_usage": getattr(copy_backend, "last_usage", None),
-            "image_backend": image_backend.name,
-            "image_model_id": getattr(image_backend, "model_id", None),
-            "used_reference": reference_image is not None,
-            "reference_image_name": request.reference_image_name,
-            "elapsed_ms": elapsed_ms,
-            "image_path": image_path,
-        }
-    )
+    try:
+        logger.write(
+            {
+                "campaign_purpose": request.campaign_purpose,
+                "template": ranking.template_name,
+                "template_scorer": ranking.scorer,
+                "triton_latency_ms": ranking.latency_ms,
+                "copy_backend": copy_backend.name,
+                "copy_model_id": getattr(copy_backend, "model_id", None),
+                "copy_usage": getattr(copy_backend, "last_usage", None),
+                "image_backend": image_backend.name,
+                "image_model_id": getattr(image_backend, "model_id", None),
+                "used_reference": reference_image is not None,
+                "reference_image_name": request.reference_image_name,
+                "elapsed_ms": elapsed_ms,
+                "image_path": image_path,
+            }
+        )
+    except OSError:
+        pass  # best-effort cost log; never fail a completed generation on it
 
     return GenerationResponse(
         copy_options=copy_options,
