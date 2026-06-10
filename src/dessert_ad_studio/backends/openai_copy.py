@@ -7,6 +7,8 @@ from openai import (
     APIError,
     AuthenticationError,
     BadRequestError,
+    ContentFilterFinishReasonError,
+    LengthFinishReasonError,
     OpenAI,
     OpenAIError,
     RateLimitError,
@@ -65,6 +67,8 @@ class OpenAICopyBackend:
             ) from exc
         except BadRequestError as exc:
             raise AdBackendError(f"문구 생성 요청이 거부되었습니다: {exc}", status_code=422) from exc
+        except (ContentFilterFinishReasonError, LengthFinishReasonError) as exc:
+            raise AdBackendError("광고 문구 생성이 중단되었습니다. 다시 시도해주세요.") from exc
         except APIError as exc:
             raise AdBackendError(f"문구 생성 API 호출에 실패했습니다: {exc}") from exc
 

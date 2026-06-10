@@ -1,5 +1,7 @@
 from types import SimpleNamespace
 
+import httpx
+import openai
 import pytest
 
 from dessert_ad_studio.backends.base import AdBackendError
@@ -30,6 +32,32 @@ def make_payload(count: int = 3) -> CopyOptionsPayload:
     )
 
 
+def _make_httpx_response(status_code: int = 400) -> httpx.Response:
+    req = httpx.Request("POST", "https://api.openai.com/v1/chat/completions")
+    return httpx.Response(status_code, request=req)
+
+
+def _make_chat_completion() -> openai.types.chat.ChatCompletion:
+    from openai.types.chat import ChatCompletion
+    from openai.types.chat.chat_completion import Choice
+    from openai.types.chat.chat_completion_message import ChatCompletionMessage
+
+    return ChatCompletion(
+        id="test-id",
+        choices=[
+            Choice(
+                finish_reason="length",
+                index=0,
+                message=ChatCompletionMessage(role="assistant", content="hi"),
+                logprobs=None,
+            )
+        ],
+        created=1,
+        model="gpt-4o-mini",
+        object="chat.completion",
+    )
+
+
 class FakeCompletions:
     def __init__(self, payload: CopyOptionsPayload | None) -> None:
         self._payload = payload
@@ -41,6 +69,16 @@ class FakeCompletions:
             choices=[SimpleNamespace(message=SimpleNamespace(parsed=self._payload))],
             usage=SimpleNamespace(prompt_tokens=120, completion_tokens=88, total_tokens=208),
         )
+
+
+class RaisingCompletions:
+    """FakeCompletions variant that raises a given SDK exception from parse()."""
+
+    def __init__(self, exc: Exception) -> None:
+        self._exc = exc
+
+    def parse(self, **kwargs):
+        raise self._exc
 
 
 def make_fake_client(payload: CopyOptionsPayload | None) -> SimpleNamespace:
@@ -80,3 +118,42 @@ def test_missing_api_key_maps_to_backend_error(monkeypatch: pytest.MonkeyPatch) 
 
     with pytest.raises(AdBackendError, match="OPENAI_API_KEY"):
         backend.generate_copy(sample_request())
+
+
+@pytest.mark.parametrize(
+    "exc, expected_status_code",
+    [
+        (
+            openai.AuthenticationError("invalid key", response=_make_httpx_response(401), body=None),
+            503,
+        ),
+        (
+            openai.RateLimitError("rate limit", response=_make_httpx_response(429), body=None),
+            503,
+        ),
+        (
+            openai.BadRequestError("bad request", response=_make_httpx_response(400), body=None),
+            422,
+        ),
+        (
+            openai.ContentFilterFinishReasonError(),
+            503,
+        ),
+        (
+            openai.LengthFinishReasonError(completion=_make_chat_completion()),
+            503,
+        ),
+    ],
+)
+def test_sdk_exceptions_map_to_backend_error(
+    exc: Exception, expected_status_code: int
+) -> None:
+    client = SimpleNamespace(
+        chat=SimpleNamespace(completions=RaisingCompletions(exc))
+    )
+    backend = OpenAICopyBackend(model_id="gpt-test-mini", client=client)
+
+    with pytest.raises(AdBackendError) as exc_info:
+        backend.generate_copy(sample_request())
+
+    assert exc_info.value.status_code == expected_status_code
