@@ -139,6 +139,19 @@ def test_missing_api_key_maps_to_backend_error(
         backend.generate_image(sample_request(), image_prompt="지시문")
 
 
+def test_blank_api_key_maps_to_backend_error_without_calling_api(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "   ")
+    # Safety net: if the blank key ever slips past the guard, fail on a local
+    # connection error instead of sending a request to the real API.
+    monkeypatch.setenv("OPENAI_BASE_URL", "http://127.0.0.1:1")
+    backend = OpenAIImageBackend(output_dir=tmp_path)
+
+    with pytest.raises(AdBackendError, match="설정되지"):
+        backend.generate_image(sample_request(), image_prompt="지시문")
+
+
 # ---------------------------------------------------------------------------
 # New: SDK exception mapping tests (Commit 1)
 # ---------------------------------------------------------------------------

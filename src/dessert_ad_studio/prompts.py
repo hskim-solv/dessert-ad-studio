@@ -2,6 +2,10 @@ from __future__ import annotations
 
 from dessert_ad_studio.schemas import GenerationRequest
 
+# Single source of truth for how many copy options one generation produces;
+# the copy prompts and the response validation must agree on it.
+COPY_OPTION_COUNT = 3
+
 PURPOSE_LABELS = {
     "new_menu": "신메뉴",
     "seasonal_event": "시즌 이벤트",
@@ -40,7 +44,7 @@ def build_copy_prompt(request: GenerationRequest) -> str:
             f"- 선호 템플릿: {TEMPLATE_LABELS[request.template_hint]}",
             price_line,
             constraint_line,
-            "출력은 헤드라인, 본문, 행동유도문구를 가진 후보 3개로 제한한다.",
+            f"출력은 헤드라인, 본문, 행동유도문구를 가진 후보 {COPY_OPTION_COUNT}개로 제한한다.",
         ]
     )
 

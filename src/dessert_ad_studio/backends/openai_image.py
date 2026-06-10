@@ -38,6 +38,12 @@ class OpenAIImageBackend:
 
     def _get_client(self) -> Any:
         if self._client is None:
+            if not os.getenv("OPENAI_API_KEY", "").strip():
+                # A whitespace-only key would pass client construction and
+                # only fail on the first paid call; treat it as unset now.
+                raise AdBackendError(
+                    "OpenAI API 키가 설정되지 않았습니다. .env의 OPENAI_API_KEY를 확인해주세요."
+                )
             try:
                 self._client = OpenAI(timeout=120.0)
             except OpenAIError as exc:

@@ -123,11 +123,33 @@ def test_generate_copy_rejects_wrong_option_count() -> None:
         backend.generate_copy(sample_request())
 
 
+def test_generate_copy_rejects_unparsed_payload_with_distinct_message() -> None:
+    """A refusal/None parse is a different failure than a wrong option count
+    and should not claim anything about the number of options."""
+    backend = OpenAICopyBackend(client=make_fake_client(None))
+
+    with pytest.raises(AdBackendError, match="해석하지"):
+        backend.generate_copy(sample_request())
+
+
 def test_missing_api_key_maps_to_backend_error(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     backend = OpenAICopyBackend()
 
     with pytest.raises(AdBackendError, match="OPENAI_API_KEY"):
+        backend.generate_copy(sample_request())
+
+
+def test_blank_api_key_maps_to_backend_error_without_calling_api(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "   ")
+    # Safety net: if the blank key ever slips past the guard, fail on a local
+    # connection error instead of sending a request to the real API.
+    monkeypatch.setenv("OPENAI_BASE_URL", "http://127.0.0.1:1")
+    backend = OpenAICopyBackend()
+
+    with pytest.raises(AdBackendError, match="설정되지"):
         backend.generate_copy(sample_request())
 
 
