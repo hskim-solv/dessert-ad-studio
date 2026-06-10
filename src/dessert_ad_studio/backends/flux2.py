@@ -35,7 +35,12 @@ class Flux2Backend:
         self._pipeline = pipeline
         return pipeline
 
-    def generate_image(self, request: GenerationRequest, image_prompt: str) -> str:
+    def generate_image(
+        self,
+        request: GenerationRequest,
+        image_prompt: str,
+        reference_image: bytes | None = None,
+    ) -> str:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         pipeline = self._load_pipeline()
         result = pipeline(

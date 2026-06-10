@@ -34,9 +34,15 @@ class MockAdBackend:
             ),
         ]
 
-    def generate_image(self, request: GenerationRequest, image_prompt: str) -> str:
+    def generate_image(
+        self,
+        request: GenerationRequest,
+        image_prompt: str,
+        reference_image: bytes | None = None,
+    ) -> str:
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        filename = f"{request.product_name.replace(' ', '_')}_mock_ad.png"
+        suffix = "_ref" if reference_image is not None else ""
+        filename = f"{request.product_name.replace(' ', '_')}_mock_ad{suffix}.png"
         path = self.output_dir / filename
 
         image = Image.new("RGB", (1024, 1024), color=(250, 238, 224))
@@ -50,6 +56,9 @@ class MockAdBackend:
             width=4,
         )
         draw.ellipse((332, 230, 692, 590), fill=(230, 120, 140), outline=(90, 60, 50), width=4)
+        if reference_image is not None:
+            draw.rectangle((40, 40, 200, 120), fill=(40, 160, 90))
+            draw.text((70, 70), "REF", fill=(255, 255, 255), font=font)
         draw.text((140, 830), request.product_name, fill=(80, 45, 35), font=font)
         prompt_line = textwrap.shorten(image_prompt.replace("\n", " "), width=90)
         draw.text((140, 870), prompt_line, fill=(110, 80, 70), font=font)
