@@ -53,3 +53,14 @@ def test_corrupt_image_raises_open_error() -> None:
 
     with pytest.raises(ReferenceImageError, match="열 수 없습니다"):
         decode_reference_image(corrupt)
+
+
+def test_oversized_pixel_count_raises_resolution_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from dessert_ad_studio import reference_image
+
+    monkeypatch.setattr(reference_image, "MAX_REFERENCE_IMAGE_PIXELS", 100)
+
+    with pytest.raises(ReferenceImageError, match="해상도"):
+        decode_reference_image(encode_image("PNG"))

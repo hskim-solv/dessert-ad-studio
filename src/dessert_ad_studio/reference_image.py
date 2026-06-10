@@ -6,6 +6,7 @@ import io
 from PIL import Image
 
 MAX_REFERENCE_IMAGE_BYTES = 10 * 1024 * 1024
+MAX_REFERENCE_IMAGE_PIXELS = 50_000_000
 ALLOWED_FORMATS = {"PNG", "JPEG", "WEBP"}
 
 
@@ -14,7 +15,10 @@ class ReferenceImageError(ValueError):
 
 
 def decode_reference_image(encoded: str | None) -> bytes | None:
-    """Decode base64 input, validate it, and return normalized RGBA PNG bytes."""
+    """Decode base64 input, validate it, and return normalized RGBA PNG bytes.
+
+    Input contract: plain base64 (RFC 4648) without a ``data:`` URI prefix.
+    """
     if not encoded:
         return None
     try:
@@ -28,6 +32,10 @@ def decode_reference_image(encoded: str | None) -> bytes | None:
             image_format = (image.format or "").upper()
             if image_format not in ALLOWED_FORMATS:
                 raise ReferenceImageError("PNG, JPEG, WEBP 형식의 참고 이미지만 지원합니다.")
+            if image.width * image.height > MAX_REFERENCE_IMAGE_PIXELS:
+                raise ReferenceImageError(
+                    "참고 이미지 해상도가 너무 큽니다. 5천만 화소 이하 이미지를 사용해주세요."
+                )
             buffer = io.BytesIO()
             image.convert("RGBA").save(buffer, format="PNG")
     except ReferenceImageError:
