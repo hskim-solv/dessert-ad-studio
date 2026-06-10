@@ -66,6 +66,35 @@ def test_generate_with_reference_image_flags_usage() -> None:
     )
 
 
+def test_generate_rejects_reference_image_for_flux2(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("IMAGE_BACKEND", "flux2")
+    payload = {
+        **base_payload(),
+        "reference_image_b64": tiny_png_b64(),
+        "reference_image_name": "store_photo.png",
+    }
+
+    response = client.post("/generate", json=payload)
+
+    assert response.status_code == 400
+    assert "참고 이미지" in response.json()["detail"]
+
+
+def test_flux2_reference_rejection_spends_no_copy_tokens(monkeypatch: pytest.MonkeyPatch) -> None:
+    from dessert_ad_studio.backends.mock import MockAdBackend
+
+    def fail_if_called(self, request):
+        raise AssertionError("copy backend must not be called when the reference is rejected")
+
+    monkeypatch.setattr(MockAdBackend, "generate_copy", fail_if_called)
+    monkeypatch.setenv("IMAGE_BACKEND", "flux2")
+    payload = {**base_payload(), "reference_image_b64": tiny_png_b64()}
+
+    response = client.post("/generate", json=payload)
+
+    assert response.status_code == 400
+
+
 def test_generate_rejects_invalid_reference_encoding() -> None:
     payload = {**base_payload(), "reference_image_b64": "not-base64!!!"}
 

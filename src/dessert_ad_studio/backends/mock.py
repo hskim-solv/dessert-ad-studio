@@ -11,6 +11,7 @@ from dessert_ad_studio.schemas import CopyOption, GenerationRequest
 
 class MockAdBackend:
     name = "mock"
+    supports_reference_image = True
 
     def __init__(self, output_dir: str | Path = "outputs") -> None:
         self.output_dir = Path(output_dir)

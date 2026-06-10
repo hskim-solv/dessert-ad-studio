@@ -99,6 +99,15 @@ def generate(request: GenerationRequest) -> GenerationResponse:
     except ReferenceImageError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
+    if reference_image is not None and not image_backend.supports_reference_image:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"{image_backend.name} 이미지 백엔드는 아직 참고 이미지를 지원하지 않습니다. "
+                "참고 이미지 없이 다시 시도하거나 IMAGE_BACKEND=openai로 전환해주세요."
+            ),
+        )
+
     image_prompt = build_image_prompt(
         request,
         ranked_template=ranking.template_name,

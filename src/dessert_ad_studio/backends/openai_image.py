@@ -22,6 +22,7 @@ from dessert_ad_studio.schemas import GenerationRequest
 
 class OpenAIImageBackend:
     name = "openai"
+    supports_reference_image = True
 
     def __init__(
         self,

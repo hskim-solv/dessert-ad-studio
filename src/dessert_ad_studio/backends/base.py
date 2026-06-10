@@ -29,9 +29,15 @@ class CopyBackend(Protocol):
 
 @runtime_checkable
 class ImageBackend(Protocol):
-    """Generates one ad image and returns the saved file path."""
+    """Generates one ad image and returns the saved file path.
+
+    ``supports_reference_image`` declares whether ``reference_image`` is
+    actually applied; the API rejects reference uploads for backends that
+    would silently ignore them.
+    """
 
     name: str
+    supports_reference_image: bool
 
     def generate_image(
         self,

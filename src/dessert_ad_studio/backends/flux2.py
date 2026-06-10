@@ -9,6 +9,8 @@ from dessert_ad_studio.schemas import GenerationRequest
 
 class Flux2Backend:
     name = "flux2"
+    # Text-to-image only until the next round wires an i2i pipeline.
+    supports_reference_image = False
 
     def __init__(self, output_dir: str | Path = "outputs", model_id: str | None = None) -> None:
         self.output_dir = Path(output_dir)
