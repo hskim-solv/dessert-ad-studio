@@ -91,3 +91,28 @@ def test_inference_failure_maps_to_backend_error(tmp_path: Path) -> None:
 
     assert "이미지 생성" in exc_info.value.detail
     assert exc_info.value.status_code == 503
+
+
+def test_default_model_id_is_klein_4b(monkeypatch: pytest.MonkeyPatch) -> None:
+    """기본 모델은 실재하는 비게이트 변형이어야 한다 (FLUX.2-klein은 Hub에 없음)"""
+    monkeypatch.delenv("FLUX2_MODEL_ID", raising=False)
+    assert Flux2Backend().model_id == "black-forest-labs/FLUX.2-klein-4B"
+
+
+def test_env_var_overrides_model_id(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("FLUX2_MODEL_ID", "custom/other-model")
+    assert Flux2Backend().model_id == "custom/other-model"
+
+
+def test_generation_uses_distilled_model_params(tmp_path: Path) -> None:
+    """klein-4B는 distilled — 모델 카드 권장값 4 steps / guidance 1.0"""
+    captured: dict = {}
+    backend = Flux2Backend(output_dir=tmp_path)
+    backend._pipeline = fake_image_pipeline(captured)
+
+    backend.generate_image(sample_request(), image_prompt="지시문")
+
+    assert captured["num_inference_steps"] == 4
+    assert captured["guidance_scale"] == 1.0
+    assert captured["width"] == 1024
+    assert captured["height"] == 1024

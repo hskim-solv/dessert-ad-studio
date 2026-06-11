@@ -7,6 +7,11 @@ from dessert_ad_studio.backends.base import AdBackendError, ImageResult
 from dessert_ad_studio.backends.naming import safe_filename_stem
 from dessert_ad_studio.schemas import GenerationRequest
 
+DEFAULT_MODEL_ID = "black-forest-labs/FLUX.2-klein-4B"
+# klein-4B is distilled; the model card recommends 4 steps with guidance 1.0.
+NUM_INFERENCE_STEPS = 4
+GUIDANCE_SCALE = 1.0
+
 
 class Flux2Backend:
     name = "flux2"
@@ -15,7 +20,7 @@ class Flux2Backend:
 
     def __init__(self, output_dir: str | Path = "outputs", model_id: str | None = None) -> None:
         self.output_dir = Path(output_dir)
-        self.model_id = model_id or os.getenv("FLUX2_MODEL_ID", "black-forest-labs/FLUX.2-klein")
+        self.model_id = model_id or os.getenv("FLUX2_MODEL_ID", DEFAULT_MODEL_ID)
         self._pipeline = None
 
     def _load_pipeline(self):
@@ -55,8 +60,8 @@ class Flux2Backend:
                 prompt=image_prompt,
                 width=1024,
                 height=1024,
-                num_inference_steps=28,
-                guidance_scale=3.5,
+                num_inference_steps=NUM_INFERENCE_STEPS,
+                guidance_scale=GUIDANCE_SCALE,
             )
         except Exception as exc:
             raise AdBackendError(f"FLUX.2 이미지 생성에 실패했습니다: {exc}") from exc
