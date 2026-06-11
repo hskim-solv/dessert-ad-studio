@@ -25,8 +25,8 @@ dependencies = [
 [project.optional-dependencies]
 image = [
   "torch>=2.3",
-  "diffusers>=0.31",
-  "transformers>=4.44",
+  "diffusers>=0.37",
+  "transformers>=4.51",
   "accelerate>=0.33",
   "safetensors>=0.4",
 ]

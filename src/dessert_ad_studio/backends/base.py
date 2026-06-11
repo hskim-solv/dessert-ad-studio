@@ -27,7 +27,7 @@ class ImageResult:
     """
 
     path: str
-    usage: Mapping[str, int | None] | None = None
+    usage: Mapping[str, float | int | None] | None = None
 
 
 class AdBackendError(Exception):

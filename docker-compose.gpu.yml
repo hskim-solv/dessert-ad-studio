@@ -1,0 +1,26 @@
+# GPU overlay for the flux2 image backend. Always combine with the base file:
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build -d --no-deps api
+# --no-deps skips the triton container; REQUIRE_TRITON=0 below makes the api
+# fall back to LocalTemplateScorer so template scoring still works.
+services:
+  api:
+    build:
+      args:
+        INSTALL_IMAGE_EXTRAS: "1"
+    environment:
+      REQUIRE_TRITON: "0"
+      IMAGE_BACKEND: flux2
+      FLUX2_MODEL_ID: ${FLUX2_MODEL_ID:-black-forest-labs/FLUX.2-klein-4B}
+      HF_HOME: /data/hf-cache
+    volumes:
+      - hf-cache:/data/hf-cache
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+volumes:
+  hf-cache:
