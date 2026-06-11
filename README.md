@@ -100,6 +100,23 @@ docker compose up --build
 
 To use `openai` backends in the compose demo, put `OPENAI_API_KEY` (and any backend overrides) in `.env` beside `docker-compose.yml`; Compose reads it automatically.
 
+### GPU demo with the flux2 backend
+
+On an NVIDIA GPU machine (e.g. a GCP L4 VM with nvidia-container-toolkit),
+start only the api service with the GPU overlay:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build -d --no-deps api
+```
+
+The overlay installs the `[image]` extras into the image, switches
+`IMAGE_BACKEND` to `flux2`, and sets `REQUIRE_TRITON=0` so template scoring
+falls back to the local scorer without the Triton container. The first
+request downloads the model weights (~8GB) into the `hf-cache` volume.
+To run the backend without Docker instead: `pip install -e ".[image]"` then
+`python scripts/flux2_smoke.py`. Full VM procedure:
+`docs/runbooks/gcp-flux2-validation.md`.
+
 Open Streamlit:
 
 ```text
