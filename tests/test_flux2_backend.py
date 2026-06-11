@@ -152,3 +152,58 @@ def test_traversal_product_name_stays_inside_output_dir(
 def test_reference_image_capability_stays_off() -> None:
     """flux2는 t2i 전용 — 선언이 바뀌면 api의 업로드 거부 동작도 깨진다"""
     assert Flux2Backend.supports_reference_image is False
+
+
+def test_concurrent_first_calls_load_pipeline_once(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """공유 인스턴스에 동시 첫 요청 2건 → 파이프라인 로드는 정확히 1회"""
+    import threading
+
+    load_calls = []
+    barrier = threading.Barrier(2)
+
+    def fake_from_pretrained(model_id, torch_dtype):
+        try:
+            barrier.wait(timeout=2)
+        except threading.BrokenBarrierError:
+            pass
+        load_calls.append(model_id)
+
+        class _Pipe:
+            def enable_model_cpu_offload(self):
+                return None
+
+            def __call__(self, **kwargs):
+                return fake_image_pipeline()(**kwargs)
+
+        return _Pipe()
+
+    fake_torch = SimpleNamespace(
+        bfloat16="bf16",
+        float32="fp32",
+        cuda=SimpleNamespace(is_available=lambda: False),
+    )
+    fake_diffusers = SimpleNamespace(
+        DiffusionPipeline=SimpleNamespace(from_pretrained=fake_from_pretrained)
+    )
+    monkeypatch.setitem(sys.modules, "torch", fake_torch)
+    monkeypatch.setitem(sys.modules, "diffusers", fake_diffusers)
+
+    backend = Flux2Backend(output_dir=tmp_path)
+    errors = []
+
+    def worker():
+        try:
+            backend.generate_image(sample_request(), image_prompt="지시문")
+        except Exception as exc:  # noqa: BLE001 - 테스트 수집용
+            errors.append(exc)
+
+    threads = [threading.Thread(target=worker) for _ in range(2)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join(timeout=10)
+
+    assert errors == []
+    assert len(load_calls) == 1
