@@ -93,7 +93,11 @@ def test_generate_copy_returns_three_options_with_usage() -> None:
     result = backend.generate_copy(sample_request())
 
     assert isinstance(result, CopyResult)
-    assert [option.headline for option in result.options] == ["헤드라인 0", "헤드라인 1", "헤드라인 2"]
+    assert [option.headline for option in result.options] == [
+        "헤드라인 0",
+        "헤드라인 1",
+        "헤드라인 2",
+    ]
     assert result.usage == {
         "prompt_tokens": 120,
         "completion_tokens": 88,
@@ -157,7 +161,9 @@ def test_blank_api_key_maps_to_backend_error_without_calling_api(
     "exc, expected_status_code",
     [
         (
-            openai.AuthenticationError("invalid key", response=_make_httpx_response(401), body=None),
+            openai.AuthenticationError(
+                "invalid key", response=_make_httpx_response(401), body=None
+            ),
             503,
         ),
         (
@@ -178,12 +184,8 @@ def test_blank_api_key_maps_to_backend_error_without_calling_api(
         ),
     ],
 )
-def test_sdk_exceptions_map_to_backend_error(
-    exc: Exception, expected_status_code: int
-) -> None:
-    client = SimpleNamespace(
-        chat=SimpleNamespace(completions=RaisingCompletions(exc))
-    )
+def test_sdk_exceptions_map_to_backend_error(exc: Exception, expected_status_code: int) -> None:
+    client = SimpleNamespace(chat=SimpleNamespace(completions=RaisingCompletions(exc)))
     backend = OpenAICopyBackend(model_id="gpt-test-mini", client=client)
 
     with pytest.raises(AdBackendError) as exc_info:

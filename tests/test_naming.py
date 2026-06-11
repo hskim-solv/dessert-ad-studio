@@ -81,9 +81,7 @@ def test_only_control_chars_falls_back_to_product() -> None:
 
 def test_mock_backend_traversal_stays_inside_output_dir(tmp_path: Path) -> None:
     backend = MockAdBackend(output_dir=tmp_path)
-    result = backend.generate_image(
-        sample_request("../../etc/passwd"), image_prompt="지시문"
-    )
+    result = backend.generate_image(sample_request("../../etc/passwd"), image_prompt="지시문")
     assert Path(result.path).resolve().is_relative_to(tmp_path.resolve())
 
 
@@ -99,13 +97,9 @@ def test_openai_image_backend_traversal_stays_inside_output_dir(tmp_path: Path) 
     b64 = base64.b64encode(buffer.getvalue()).decode("ascii")
     client = SimpleNamespace(
         images=SimpleNamespace(
-            generate=lambda **kw: SimpleNamespace(
-                data=[SimpleNamespace(b64_json=b64)], usage=None
-            )
+            generate=lambda **kw: SimpleNamespace(data=[SimpleNamespace(b64_json=b64)], usage=None)
         )
     )
     backend = OpenAIImageBackend(output_dir=tmp_path, client=client)
-    result = backend.generate_image(
-        sample_request("../../etc/passwd"), image_prompt="지시문"
-    )
+    result = backend.generate_image(sample_request("../../etc/passwd"), image_prompt="지시문")
     assert Path(result.path).resolve().is_relative_to(tmp_path.resolve())

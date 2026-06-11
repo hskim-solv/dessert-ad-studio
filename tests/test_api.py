@@ -167,7 +167,11 @@ def test_generate_logs_usage_from_returned_results(
 
     assert response.status_code == 200
     record = json.loads(log_path.read_text(encoding="utf-8").splitlines()[-1])
-    assert record["copy_usage"] == {"prompt_tokens": 11, "completion_tokens": 22, "total_tokens": 33}
+    assert record["copy_usage"] == {
+        "prompt_tokens": 11,
+        "completion_tokens": 22,
+        "total_tokens": 33,
+    }
     assert record["image_usage"] == {"total_tokens": 44}
 
 
@@ -214,7 +218,11 @@ def test_image_failure_still_logs_spent_copy_usage(
 
     assert response.status_code == 503
     record = json.loads(log_path.read_text(encoding="utf-8").splitlines()[-1])
-    assert record["copy_usage"] == {"prompt_tokens": 11, "completion_tokens": 22, "total_tokens": 33}
+    assert record["copy_usage"] == {
+        "prompt_tokens": 11,
+        "completion_tokens": 22,
+        "total_tokens": 33,
+    }
     assert record["error"] == "이미지 생성 API 호출에 실패했습니다: boom"
     assert record["image_path"] is None
     assert record["image_usage"] is None
@@ -235,7 +243,9 @@ def test_copy_failure_logs_no_row(monkeypatch: pytest.MonkeyPatch, tmp_path: Pat
         def generate_copy(self, request):
             raise AdBackendError("문구 생성 API 호출에 실패했습니다: boom")
 
-    monkeypatch.setattr(api_main, "_copy_backend_for", lambda name, output_dir: FailingCopyBackend())
+    monkeypatch.setattr(
+        api_main, "_copy_backend_for", lambda name, output_dir: FailingCopyBackend()
+    )
 
     response = client.post("/generate", json=base_payload())
 
@@ -246,7 +256,9 @@ def test_copy_failure_logs_no_row(monkeypatch: pytest.MonkeyPatch, tmp_path: Pat
 def test_generate_survives_log_write_failure(monkeypatch: pytest.MonkeyPatch) -> None:
     from dessert_ad_studio.generation_logger import GenerationLogger
 
-    monkeypatch.setattr(GenerationLogger, "write", lambda self, record: (_ for _ in ()).throw(OSError("disk full")))
+    monkeypatch.setattr(
+        GenerationLogger, "write", lambda self, record: (_ for _ in ()).throw(OSError("disk full"))
+    )
 
     response = client.post("/generate", json=base_payload())
 

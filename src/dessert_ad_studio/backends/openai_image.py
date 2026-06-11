@@ -76,7 +76,9 @@ class OpenAIImageBackend:
                     quality=self.quality,
                 )
         except AuthenticationError as exc:
-            raise AdBackendError("OpenAI API 키가 유효하지 않습니다. 키 값을 확인해주세요.") from exc
+            raise AdBackendError(
+                "OpenAI API 키가 유효하지 않습니다. 키 값을 확인해주세요."
+            ) from exc
         except RateLimitError as exc:
             raise AdBackendError(
                 "OpenAI API 호출 한도를 초과했습니다. 잠시 후 다시 시도하거나 팀 사용량을 확인해주세요."

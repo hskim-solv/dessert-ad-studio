@@ -161,7 +161,9 @@ def test_blank_api_key_maps_to_backend_error_without_calling_api(
     "exc, expected_status_code",
     [
         (
-            openai.AuthenticationError("invalid key", response=_make_httpx_response(401), body=None),
+            openai.AuthenticationError(
+                "invalid key", response=_make_httpx_response(401), body=None
+            ),
             503,
         ),
         (
@@ -193,9 +195,7 @@ def test_sdk_exceptions_map_to_backend_error(
 def test_data_none_response_maps_to_backend_error(tmp_path: Path) -> None:
     """result.data is None → TypeError 누출 전에 AdBackendError로 매핑"""
     client = SimpleNamespace(
-        images=SimpleNamespace(
-            generate=lambda **kw: SimpleNamespace(data=None, usage=None)
-        )
+        images=SimpleNamespace(generate=lambda **kw: SimpleNamespace(data=None, usage=None))
     )
     backend = OpenAIImageBackend(output_dir=tmp_path, client=client)
 
@@ -206,9 +206,7 @@ def test_data_none_response_maps_to_backend_error(tmp_path: Path) -> None:
 def test_data_empty_list_response_maps_to_backend_error(tmp_path: Path) -> None:
     """result.data == [] → IndexError 누출 전에 AdBackendError로 매핑"""
     client = SimpleNamespace(
-        images=SimpleNamespace(
-            generate=lambda **kw: SimpleNamespace(data=[], usage=None)
-        )
+        images=SimpleNamespace(generate=lambda **kw: SimpleNamespace(data=[], usage=None))
     )
     backend = OpenAIImageBackend(output_dir=tmp_path, client=client)
 
