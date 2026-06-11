@@ -112,7 +112,8 @@ docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build -d --n
 The overlay installs the `[image]` extras into the image, switches
 `IMAGE_BACKEND` to `flux2`, and sets `REQUIRE_TRITON=0` so template scoring
 falls back to the local scorer without the Triton container. The first
-request downloads the model weights (~8GB) into the `hf-cache` volume.
+request downloads the model weights into the `hf-cache` volume (~8GB for
+the default model; set `FLUX2_MODEL_ID` to override).
 To run the backend without Docker instead: `pip install -e ".[image]"` then
 `python scripts/flux2_smoke.py`. Full VM procedure:
 `docs/runbooks/gcp-flux2-validation.md`.
