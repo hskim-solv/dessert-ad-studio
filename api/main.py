@@ -29,7 +29,7 @@ def get_template_scorer():
     triton_url = os.getenv("TRITON_URL", "localhost:8001")
     if require_triton:
         return TritonTemplateScorer(url=triton_url)
-    return TritonTemplateScorer(url=triton_url)
+    return LocalTemplateScorer()
 
 
 @lru_cache(maxsize=None)

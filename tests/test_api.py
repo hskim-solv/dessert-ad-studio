@@ -263,3 +263,25 @@ def test_generate_survives_log_write_failure(monkeypatch: pytest.MonkeyPatch) ->
     response = client.post("/generate", json=base_payload())
 
     assert response.status_code == 200
+
+
+def test_template_scorer_defaults_to_local_without_require_triton(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Without REQUIRE_TRITON=1 the scorer must be local from the start, so
+    Triton-less deployments never pay a per-request connection failure."""
+    import api.main as api_main
+    from dessert_ad_studio.triton import LocalTemplateScorer
+
+    monkeypatch.delenv("REQUIRE_TRITON", raising=False)
+
+    assert isinstance(api_main.get_template_scorer(), LocalTemplateScorer)
+
+
+def test_template_scorer_uses_triton_when_required(monkeypatch: pytest.MonkeyPatch) -> None:
+    import api.main as api_main
+    from dessert_ad_studio.triton import TritonTemplateScorer
+
+    monkeypatch.setenv("REQUIRE_TRITON", "1")
+
+    assert isinstance(api_main.get_template_scorer(), TritonTemplateScorer)
