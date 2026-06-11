@@ -59,6 +59,7 @@ gcloud compute ssh flux2-l4 --zone="$ZONE" --quiet --ssh-flag="-F/dev/null" \
   python scripts/flux2_smoke.py"
 
 # (3) API 경유 — 기대: HTTP 200, "image_backend":"flux2", scorer local-template-scorer(REQUIRE_TRITON=0 폴백)
+#     최초 요청은 API 프로세스의 파이프라인 로드가 포함되어 ~63초 소요(실측표 참조) — hang이 아님
 cat > /tmp/flux2_req.json <<'EOF'
 {
   "campaign_purpose": "new_menu",
@@ -107,6 +108,10 @@ gcloud compute instances describe flux2-l4 --zone="$ZONE" --format="value(status
 
 ## 부록 A: VM 신규 생성
 
+신규 생성 순서: **create → 본문 2의 코드 전송(scp bundle + clone) → setup_vm.sh →
+본문 2의 컨테이너 기동**. setup_vm.sh는 코드 전송으로만 VM에 올라가므로 전송 전에
+실행하면 `No such file`로 실패한다.
+
 ```bash
 # 이미지 패밀리 실재 확인 (nvidia-550은 단종됨 — 2026-06-11 기준 570/580 제공)
 gcloud compute images list --project=ubuntu-os-accelerator-images \
@@ -122,6 +127,7 @@ gcloud compute instances create flux2-l4 \
   --maintenance-policy=TERMINATE
 # ZONE_RESOURCE_POOL_EXHAUSTED(STOCKOUT)면 같은 리전의 다른 존 → 쿼터 보유 타 리전 순으로 재시도
 
+# (본문 2의 코드 전송을 먼저 수행한 뒤)
 # Docker + NVIDIA Container Toolkit 설치 (컨테이너 nvidia-smi까지 자동 검증, 실측 ~2분)
 gcloud compute ssh flux2-l4 --zone="$ZONE" --quiet --ssh-flag="-F/dev/null" \
   --command="bash ~/dessert-ad-studio/scripts/gcp/setup_vm.sh"
@@ -131,4 +137,5 @@ gcloud compute ssh flux2-l4 --zone="$ZONE" --quiet --ssh-flag="-F/dev/null" \
 
 ```bash
 gcloud compute instances delete flux2-l4 --zone="$ZONE"   # 디스크 과금 종료
+# VM 디스크 위의 hf-cache 볼륨(모델 캐시 ~8GB)도 함께 소멸 — 재실행 시 모델 재다운로드
 ```
