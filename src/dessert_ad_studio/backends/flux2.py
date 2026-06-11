@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import time
 from pathlib import Path
 
 from dessert_ad_studio.backends.base import AdBackendError, ImageResult
@@ -22,6 +23,16 @@ class Flux2Backend:
         self.output_dir = Path(output_dir)
         self.model_id = model_id or os.getenv("FLUX2_MODEL_ID", DEFAULT_MODEL_ID)
         self._pipeline = None
+
+    @staticmethod
+    def _cuda_available() -> bool:
+        # Tests stub out _load_pipeline, so torch may be absent here even
+        # after a successful load; treat that as CPU.
+        try:
+            import torch
+        except ImportError:
+            return False
+        return torch.cuda.is_available()
 
     def _load_pipeline(self):
         if self._pipeline is not None:
@@ -55,6 +66,13 @@ class Flux2Backend:
     ) -> ImageResult:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         pipeline = self._load_pipeline()
+
+        cuda = self._cuda_available()
+        if cuda:
+            import torch
+
+            torch.cuda.reset_peak_memory_stats()
+        started = time.monotonic()
         try:
             result = pipeline(
                 prompt=image_prompt,
@@ -65,7 +83,20 @@ class Flux2Backend:
             )
         except Exception as exc:
             raise AdBackendError(f"FLUX.2 이미지 생성에 실패했습니다: {exc}") from exc
+        generation_seconds = time.monotonic() - started
+
         image = result.images[0]
         path = self.output_dir / f"{safe_filename_stem(request.product_name)}_flux2_ad.png"
         image.save(path)
-        return ImageResult(path=str(path))
+
+        vram_peak_gb: float | None = None
+        if cuda:
+            import torch
+
+            vram_peak_gb = round(torch.cuda.max_memory_allocated() / 1024**3, 2)
+        usage = {
+            "generation_seconds": round(generation_seconds, 2),
+            "num_inference_steps": NUM_INFERENCE_STEPS,
+            "vram_peak_gb": vram_peak_gb,
+        }
+        return ImageResult(path=str(path), usage=usage)

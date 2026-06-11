@@ -9,7 +9,7 @@ from types import SimpleNamespace
 import pytest
 from PIL import Image
 
-from dessert_ad_studio.backends.base import AdBackendError
+from dessert_ad_studio.backends.base import AdBackendError, ImageResult
 from dessert_ad_studio.backends.flux2 import Flux2Backend
 from dessert_ad_studio.schemas import GenerationRequest
 
@@ -116,3 +116,39 @@ def test_generation_uses_distilled_model_params(tmp_path: Path) -> None:
     assert captured["guidance_scale"] == 1.0
     assert captured["width"] == 1024
     assert captured["height"] == 1024
+
+
+def test_success_returns_result_with_telemetry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """성공 시 usage에 latency/steps/VRAM 3종 키 — CPU(torch 없음)면 vram은 None"""
+    monkeypatch.setitem(sys.modules, "torch", None)
+    backend = Flux2Backend(output_dir=tmp_path)
+    backend._pipeline = fake_image_pipeline()
+
+    result = backend.generate_image(sample_request(), image_prompt="지시문")
+
+    assert isinstance(result, ImageResult)
+    assert Path(result.path).exists()
+    assert result.usage is not None
+    assert set(result.usage) == {"generation_seconds", "num_inference_steps", "vram_peak_gb"}
+    assert result.usage["generation_seconds"] >= 0
+    assert result.usage["num_inference_steps"] == 4
+    assert result.usage["vram_peak_gb"] is None
+
+
+def test_traversal_product_name_stays_inside_output_dir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setitem(sys.modules, "torch", None)
+    backend = Flux2Backend(output_dir=tmp_path)
+    backend._pipeline = fake_image_pipeline()
+
+    result = backend.generate_image(sample_request("../../etc/passwd"), image_prompt="지시문")
+
+    assert Path(result.path).resolve().is_relative_to(tmp_path.resolve())
+
+
+def test_reference_image_capability_stays_off() -> None:
+    """flux2는 t2i 전용 — 선언이 바뀌면 api의 업로드 거부 동작도 깨진다"""
+    assert Flux2Backend.supports_reference_image is False
