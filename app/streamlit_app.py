@@ -61,7 +61,9 @@ if submitted:
         "reference_image_b64": reference_image_b64,
         "reference_image_name": uploaded.name if uploaded else None,
     }
-    spinner_text = "광고 문구와 이미지를 생성하는 중입니다... (이미지 생성은 수십 초 걸릴 수 있어요)"
+    spinner_text = (
+        "광고 문구와 이미지를 생성하는 중입니다... (이미지 생성은 수십 초 걸릴 수 있어요)"
+    )
     with st.spinner(spinner_text):
         try:
             response = httpx.post(f"{API_BASE_URL}/generate", json=payload, timeout=120)

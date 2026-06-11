@@ -47,4 +47,6 @@ def test_image_prompt_without_reference_has_no_preserve_line() -> None:
 def test_image_prompt_with_reference_prepends_preserve_instruction() -> None:
     prompt = build_image_prompt(sample_request(), ranked_template="cozy_cafe", has_reference=True)
 
-    assert prompt.splitlines()[0] == ("업로드된 제품 사진의 피사체와 구도를 보존하면서 광고 이미지로 연출한다.")
+    assert prompt.splitlines()[0] == (
+        "업로드된 제품 사진의 피사체와 구도를 보존하면서 광고 이미지로 연출한다."
+    )

@@ -33,6 +33,9 @@ image = [
 dev = [
   "pytest>=8.2",
   "ruff>=0.5",
+  # Official httpx successor (github.com/pydantic/httpx2, Tom Christie / Pydantic Services);
+  # starlette>=1.2 testclient imports httpx2 and deprecates httpx.
+  "httpx2>=2.3",
 ]
 
 [tool.setuptools.packages.find]

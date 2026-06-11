@@ -66,13 +66,17 @@ class OpenAICopyBackend:
                 response_format=CopyOptionsPayload,
             )
         except AuthenticationError as exc:
-            raise AdBackendError("OpenAI API 키가 유효하지 않습니다. 키 값을 확인해주세요.") from exc
+            raise AdBackendError(
+                "OpenAI API 키가 유효하지 않습니다. 키 값을 확인해주세요."
+            ) from exc
         except RateLimitError as exc:
             raise AdBackendError(
                 "OpenAI API 호출 한도를 초과했습니다. 잠시 후 다시 시도하거나 팀 사용량을 확인해주세요."
             ) from exc
         except BadRequestError as exc:
-            raise AdBackendError(f"문구 생성 요청이 거부되었습니다: {exc}", status_code=422) from exc
+            raise AdBackendError(
+                f"문구 생성 요청이 거부되었습니다: {exc}", status_code=422
+            ) from exc
         except (ContentFilterFinishReasonError, LengthFinishReasonError) as exc:
             raise AdBackendError("광고 문구 생성이 중단되었습니다. 다시 시도해주세요.") from exc
         except APIError as exc:

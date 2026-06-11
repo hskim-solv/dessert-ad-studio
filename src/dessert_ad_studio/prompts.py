@@ -29,7 +29,9 @@ TEMPLATE_LABELS = {
 
 
 def build_copy_prompt(request: GenerationRequest) -> str:
-    price_line = f"- 가격/혜택: {request.price_text}" if request.price_text else "- 가격/혜택: 입력 없음"
+    price_line = (
+        f"- 가격/혜택: {request.price_text}" if request.price_text else "- 가격/혜택: 입력 없음"
+    )
     constraint_line = (
         f"- 사용자 제약: {request.user_constraints}"
         if request.user_constraints

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *.env.example) ;; */.env|.env) echo 'BLOCKED: .env 직접 편집은 차단되어 있습니다. 변수는 .env.example에 추가하고 실제 값은 사용자가 직접 채웁니다.' >&2; exit 2;; esac",
+            "statusMessage": "Checking protected paths"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_response.filePath // .tool_input.file_path // empty'); case \"$f\" in *.py) RUFF=\"$CLAUDE_PROJECT_DIR/.venv/bin/ruff\"; [ -x \"$RUFF\" ] || RUFF=ruff; \"$RUFF\" check --fix \"$f\" >/dev/null 2>&1 || true; \"$RUFF\" format \"$f\" >/dev/null 2>&1 || true;; esac",
+            "statusMessage": "Running ruff"
+          }
+        ]
+      }
+    ]
+  }
+}
