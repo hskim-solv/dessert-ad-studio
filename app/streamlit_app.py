@@ -16,6 +16,7 @@ from pydantic import ValidationError
 
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 LAST_GENERATION_KEY = "last_successful_generation"
+DOWNLOAD_IGNORE_MIN_VERSION = (1, 43, 0)
 
 PURPOSE_OPTIONS = {
     "신메뉴 출시": "new_menu",
@@ -43,6 +44,28 @@ def _encode_uploaded_file(uploaded_file) -> str | None:
     if uploaded_file is None:
         return None
     return base64.b64encode(uploaded_file.getvalue()).decode("ascii")
+
+
+def _parse_version_prefix(version: str) -> tuple[int, int, int]:
+    parts: list[int] = []
+    for raw_part in version.split(".")[:3]:
+        digits = ""
+        for character in raw_part:
+            if not character.isdigit():
+                break
+            digits += character
+        parts.append(int(digits) if digits else 0)
+
+    while len(parts) < 3:
+        parts.append(0)
+
+    return tuple(parts[:3])
+
+
+def _download_button_rerun_kwargs() -> dict[str, str]:
+    if _parse_version_prefix(st.__version__) >= DOWNLOAD_IGNORE_MIN_VERSION:
+        return {"on_click": "ignore"}
+    return {}
 
 
 def _save_generation(
@@ -122,7 +145,7 @@ def _render_result(result: dict, request: GenerationRequest, analysis: dict[str,
                 data=overlay_path.read_bytes(),
                 file_name=overlay_path.name,
                 mime="image/png",
-                on_click="ignore",
+                **_download_button_rerun_kwargs(),
             )
         else:
             st.image(str(image_path), caption="원본 생성 이미지", use_column_width=True)
