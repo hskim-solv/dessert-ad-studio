@@ -8,7 +8,6 @@ import httpx
 import streamlit as st
 from dessert_ad_studio.banner_overlay import (
     BannerCopy,
-    build_demo_product_analysis,
     create_banner_overlay,
 )
 from dessert_ad_studio.demo_samples import DEMO_SAMPLES, DemoSample
@@ -92,12 +91,11 @@ def _stretch_image_kwargs() -> dict[str, bool | str]:
 def _save_generation(
     request: GenerationRequest,
     result: dict,
-    analysis: dict[str, str],
 ) -> dict:
     saved_generation = {
         "request": request.model_dump(),
         "result": result,
-        "analysis": analysis,
+        "analysis": result.get("product_analysis", {}),
     }
     st.session_state[LAST_GENERATION_KEY] = saved_generation
     return saved_generation
@@ -107,7 +105,7 @@ def _render_saved_generation(saved_generation: dict) -> None:
     try:
         request = GenerationRequest(**saved_generation["request"])
         result = saved_generation["result"]
-        analysis = saved_generation["analysis"]
+        analysis = saved_generation.get("analysis") or result.get("product_analysis", {})
     except (KeyError, TypeError, ValidationError) as exc:
         st.session_state.pop(LAST_GENERATION_KEY, None)
         st.warning(f"저장된 생성 결과를 다시 표시할 수 없습니다: {exc}")
@@ -117,14 +115,18 @@ def _render_saved_generation(saved_generation: dict) -> None:
 
 
 def _render_result(result: dict, request: GenerationRequest, analysis: dict[str, str]) -> None:
-    st.subheader("Demo product analysis")
+    if not analysis:
+        st.warning("제품 분석 결과가 API 응답에 포함되지 않았습니다.")
+        return
+
+    st.subheader(analysis.get("label", "Product analysis"))
     with st.container(border=True):
-        st.markdown(f"**{analysis['product_context']}**")
-        st.write(analysis["ad_goal"])
-        st.write(analysis["visual_strategy"])
-        st.write(analysis["photo_strategy"])
-        st.write(analysis["copy_focus"])
-        st.caption(analysis["rendering_strategy"])
+        st.markdown(f"**{analysis.get('product_context', '제품 분석 정보 없음')}**")
+        st.write(analysis.get("ad_goal", "광고 목표 정보 없음"))
+        st.write(analysis.get("visual_strategy", "비주얼 전략 정보 없음"))
+        st.write(analysis.get("photo_strategy", "사진 활용 전략 정보 없음"))
+        st.write(analysis.get("copy_focus", "문구 전략 정보 없음"))
+        st.caption(analysis.get("rendering_strategy", "렌더링 전략 정보 없음"))
 
     copy_options = result.get("copy_options", [])
     image_path_value = result.get("image_path")
@@ -316,6 +318,5 @@ with right_column:
                     st.error(f"생성 요청 실패: {exc}")
                 else:
                     result = response.json()
-                    analysis = build_demo_product_analysis(request)
-                    saved_generation = _save_generation(request, result, analysis)
+                    saved_generation = _save_generation(request, result)
                     _render_saved_generation(saved_generation)
