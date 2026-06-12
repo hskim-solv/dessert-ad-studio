@@ -11,6 +11,7 @@ from dessert_ad_studio.banner_overlay import (
     build_demo_product_analysis,
     create_banner_overlay,
 )
+from dessert_ad_studio.demo_samples import DEMO_SAMPLES, DemoSample
 from dessert_ad_studio.schemas import GenerationRequest
 from pydantic import ValidationError
 
@@ -39,6 +40,19 @@ TEMPLATE_OPTIONS = {
     "귀여운 디저트": "cute_dessert",
     "시즌 이벤트": "seasonal_event",
 }
+
+PURPOSE_LABELS_BY_VALUE = {value: label for label, value in PURPOSE_OPTIONS.items()}
+TONE_LABELS_BY_VALUE = {value: label for label, value in TONE_OPTIONS.items()}
+TEMPLATE_LABELS_BY_VALUE = {value: label for label, value in TEMPLATE_OPTIONS.items()}
+CUSTOM_SAMPLE_LABEL = "직접 입력"
+SAMPLE_OPTIONS = (CUSTOM_SAMPLE_LABEL, *(sample.label for sample in DEMO_SAMPLES))
+
+
+def _sample_by_label(label: str) -> DemoSample | None:
+    for sample in DEMO_SAMPLES:
+        if sample.label == label:
+            return sample
+    return None
 
 
 def _encode_uploaded_file(uploaded_file) -> str | None:
@@ -195,6 +209,11 @@ left_column, right_column = st.columns([0.38, 0.62], gap="large")
 
 with left_column:
     st.subheader("Upload Studio")
+    sample_label = st.selectbox("데모 샘플", SAMPLE_OPTIONS)
+    selected_sample = _sample_by_label(sample_label)
+    if selected_sample is not None:
+        st.caption(f"{selected_sample.business_type} · {selected_sample.platform}")
+
     uploaded = st.file_uploader(
         "제품 이미지",
         type=["png", "jpg", "jpeg", "webp"],
@@ -205,15 +224,46 @@ with left_column:
     else:
         st.info("제품 사진을 업로드하면 생성 결과와 오버레이 배너를 함께 확인할 수 있습니다.")
 
+    default_product_name = selected_sample.product_name if selected_sample else "딸기 크림 크루아상"
+    default_campaign_label = (
+        PURPOSE_LABELS_BY_VALUE[selected_sample.campaign_purpose]
+        if selected_sample
+        else "신메뉴 출시"
+    )
+    default_tone_label = TONE_LABELS_BY_VALUE[selected_sample.tone] if selected_sample else "따뜻한"
+    default_template_label = (
+        TEMPLATE_LABELS_BY_VALUE[selected_sample.template_hint]
+        if selected_sample
+        else "코지 카페"
+    )
+    default_price_text = selected_sample.price_text if selected_sample else "6,800원"
+    default_user_constraints = (
+        selected_sample.user_constraints
+        if selected_sample
+        else "봄 시즌 한정 느낌, 따뜻한 카페 조명"
+    )
+
     with st.form("generation_form"):
-        product_name = st.text_input("상품명", value="딸기 크림 크루아상")
-        campaign_label = st.selectbox("캠페인 목적", list(PURPOSE_OPTIONS))
-        tone_label = st.selectbox("톤", list(TONE_OPTIONS))
-        template_label = st.selectbox("시각 템플릿", list(TEMPLATE_OPTIONS))
-        price_text = st.text_input("가격/혜택", value="6,800원")
+        product_name = st.text_input("상품명", value=default_product_name)
+        campaign_label = st.selectbox(
+            "캠페인 목적",
+            list(PURPOSE_OPTIONS),
+            index=list(PURPOSE_OPTIONS).index(default_campaign_label),
+        )
+        tone_label = st.selectbox(
+            "톤",
+            list(TONE_OPTIONS),
+            index=list(TONE_OPTIONS).index(default_tone_label),
+        )
+        template_label = st.selectbox(
+            "시각 템플릿",
+            list(TEMPLATE_OPTIONS),
+            index=list(TEMPLATE_OPTIONS).index(default_template_label),
+        )
+        price_text = st.text_input("가격/혜택", value=default_price_text)
         user_constraints = st.text_area(
             "추가 요청",
-            value="봄 시즌 한정 느낌, 따뜻한 카페 조명",
+            value=default_user_constraints,
         )
         submitted = st.form_submit_button("광고 생성")
 
