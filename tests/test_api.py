@@ -80,6 +80,18 @@ def test_generate_includes_product_analysis(monkeypatch, tmp_path) -> None:
     assert "참고 이미지 없음" in analysis["photo_strategy"]
 
 
+def test_generate_ignores_reference_name_without_image_bytes(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path))
+    payload = {**base_payload(), "reference_image_name": "cake.png"}
+
+    response = client.post("/generate", json=payload)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["used_reference"] is False
+    assert "참고 이미지 없음" in body["product_analysis"]["photo_strategy"]
+
+
 def test_generate_product_analysis_reflects_reference_image(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("OUTPUT_DIR", str(tmp_path))
     payload = {

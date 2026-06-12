@@ -51,7 +51,7 @@ class MockProductAnalyzer:
         template = TEMPLATE_LABELS[request.template_hint]
         promotion = request.price_text.strip() or "별도 가격/혜택 없음"
         constraints = request.user_constraints.strip() or "추가 요청 없음"
-        has_reference = reference_image is not None or bool(request.reference_image_name)
+        has_reference = reference_image is not None
         photo_strategy = (
             "업로드된 제품 사진을 기준으로 상품 형태와 색감을 유지한 배너 구성을 제안합니다."
             if has_reference

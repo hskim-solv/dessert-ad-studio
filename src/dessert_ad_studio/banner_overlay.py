@@ -150,7 +150,8 @@ def create_banner_overlay(
 
 
 def build_demo_product_analysis(request: GenerationRequest) -> dict[str, str]:
-    return MockProductAnalyzer().analyze(request).model_dump()
+    reference_image = b"uploaded" if request.reference_image_name else None
+    return MockProductAnalyzer().analyze(request, reference_image=reference_image).model_dump()
 
 
 def _load_font(

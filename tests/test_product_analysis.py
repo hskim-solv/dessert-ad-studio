@@ -36,6 +36,15 @@ def test_mock_product_analyzer_handles_missing_reference_image() -> None:
     assert "참고 이미지 없음" in analysis.photo_strategy
 
 
+def test_mock_product_analyzer_ignores_reference_name_without_image_bytes() -> None:
+    analysis = MockProductAnalyzer().analyze(
+        _request(reference_image_name="cake.jpg"),
+        reference_image=None,
+    )
+
+    assert "참고 이미지 없음" in analysis.photo_strategy
+
+
 def test_build_demo_product_analysis_uses_mock_analyzer_fields() -> None:
     analysis = build_demo_product_analysis(_request())
 
