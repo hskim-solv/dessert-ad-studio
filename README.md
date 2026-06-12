@@ -1,15 +1,56 @@
 # Dessert Ad Studio
 
-Cafe/dessert ad-generation prototype for small business owners.
+Small-business ad banner studio for cafe, bakery, and local-store owners.
 
-## MVP flow
+The app turns a product photo and a short marketing request into Korean ad copy, a generated visual, and a downloadable banner with deterministic Korean text overlay.
 
-1. User enters campaign purpose, tone, product name, and style preferences in Streamlit.
-2. Streamlit calls FastAPI.
-3. FastAPI renders prompts and calls Triton `template_scorer`.
-4. FastAPI returns three Korean ad-copy candidates and one SNS-ready image path.
+## Problem
 
-## Local setup
+Small business owners often need SNS banners, menu images, and promotion copy, but design tools and prompt engineering add friction. A raw image-generation model also tends to distort Korean text, so the service separates visual generation from Korean text rendering.
+
+## What The Demo Does
+
+1. Choose a demo sample or enter a product manually in Streamlit.
+2. Generate three Korean ad-copy options through FastAPI.
+3. Generate one representative ad visual through the selected image backend.
+4. Render headline, price, and CTA with a PIL overlay.
+5. Download the finished PNG banner.
+
+## Core Features
+
+- Upload-centered Streamlit Studio UI
+- Three reusable demo scenarios
+- Korean copy candidates
+- Mock Product Analysis for the future VLM flow
+- Deterministic Korean banner overlay
+- Downloadable finished banner
+- Backend adapter slots for mock, OpenAI, and FLUX.2
+- JSONL generation logging
+
+## Architecture
+
+```text
+Streamlit Upload Studio
+  -> FastAPI /generate
+  -> template scorer
+  -> copy backend
+  -> image backend
+  -> PIL Korean text overlay
+  -> downloadable banner PNG
+```
+
+Planned AI pipeline:
+
+```text
+Product photo
+  -> VLM product analysis
+  -> RAG marketing guidance
+  -> controlled agent workflow
+  -> product-preserving visual generation
+  -> deterministic Korean overlay
+```
+
+## Quick Start
 
 ```bash
 python3 -m venv .venv
@@ -17,51 +58,47 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
-## Run tests
-
-```bash
-pytest -q
-```
-
-## Run API
+Run the API:
 
 ```bash
 uvicorn api.main:app --reload --port 8000
 ```
 
-## Run Streamlit
+Run Streamlit:
 
 ```bash
 streamlit run app/streamlit_app.py
 ```
 
-## Export Triton model
+Open:
 
-```bash
-python scripts/export_template_scorer_onnx.py
+```text
+http://localhost:8501
 ```
 
-## Triton smoke flow
+The default mock backends work without API keys.
 
-```bash
-docker compose up triton -d
-python scripts/triton_smoke.py
-```
+## Demo Scenarios
 
-The default local Triton image is the smaller full server tag
-`nvcr.io/nvidia/tritonserver:22.12-py3`. Override it on a larger VM if needed:
+The Streamlit `데모 샘플` selector includes:
 
-```bash
-TRITON_IMAGE=nvcr.io/nvidia/tritonserver:24.05-py3 docker compose up triton -d
+| Scenario | Product | Platform | Goal |
+| --- | --- | --- | --- |
+| Dessert cafe | 딸기 크림 크루아상 | Instagram feed | New menu launch |
+| Bakery | 말차 푸딩 | Instagram story | Seasonal event |
+| Flower shop | 봄 플라워 박스 | Smartstore thumbnail | Reservation discount |
+
+Generated assets are written to:
+
+```text
+outputs/
+outputs/streamlit-banners/
+logs/generations.jsonl
 ```
 
 ## Configuration
 
 Copy `.env.example` to `.env` and edit local values. Do not commit `.env`.
-
-### Generation backends
-
-Copy and image generation switch independently:
 
 | Variable | Values | Default |
 | --- | --- | --- |
@@ -71,25 +108,26 @@ Copy and image generation switch independently:
 | `IMAGE_MODEL_ID` | any GPT image model id | `gpt-image-1-mini` |
 | `IMAGE_QUALITY` | `low`, `medium`, `high` | `low` |
 
-Real backends need `OPENAI_API_KEY` in `.env`. Uploading a reference image in
-Streamlit switches the OpenAI image backend from text-to-image to edit mode.
-The `flux2` backend is text-to-image only for now: uploading a reference image
-with it returns a 400 instead of silently ignoring the photo.
-Keep `IMAGE_QUALITY=low` while iterating; raise it only for final demo shots.
+Real OpenAI backends need `OPENAI_API_KEY` in `.env`.
 
-### OpenAI smoke check (manual, costs quota)
+Uploading a reference image in Streamlit switches the OpenAI image backend from text-to-image to edit mode. The `flux2` backend is text-to-image only for now: uploading a reference image with it returns a 400 instead of silently ignoring the photo.
 
-After pulling this branch, re-run `pip install -e ".[dev]"` once (it adds the `openai` dependency).
+## Tests
+
+```bash
+pytest -q
+ruff check .
+```
+
+Manual smoke:
 
 ```bash
 python scripts/openai_smoke.py                      # copy + text-to-image
 python scripts/openai_smoke.py my_product_photo.jpg # copy + reference edit
+python scripts/flux2_smoke.py                       # needs [image] deps
 ```
 
-Run it once after setting a key to confirm the configured model ids exist and
-to record baseline latency/token usage. It is intentionally not part of pytest.
-
-## Docker Compose demo
+## Docker Compose Demo
 
 Generate the ONNX model before starting Triton:
 
@@ -98,40 +136,39 @@ python scripts/export_template_scorer_onnx.py
 docker compose up --build
 ```
 
-To use `openai` backends in the compose demo, put `OPENAI_API_KEY` (and any backend overrides) in `.env` beside `docker-compose.yml`; Compose reads it automatically.
+To use `openai` backends in the compose demo, put `OPENAI_API_KEY` and backend overrides in `.env` beside `docker-compose.yml`.
 
-### GPU demo with the flux2 backend
+Open:
 
-On an NVIDIA GPU machine (e.g. a GCP L4 VM with nvidia-container-toolkit),
-start only the api service with the GPU overlay:
+```text
+Streamlit: http://localhost:8501
+FastAPI:   http://localhost:8080
+Triton:    http://localhost:8001
+```
+
+## Advanced GPU / FLUX.2 Validation
+
+On an NVIDIA GPU machine, start only the API service with the GPU overlay:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build -d --no-deps api
 ```
 
-The overlay installs the `[image]` extras into the image, switches
-`IMAGE_BACKEND` to `flux2`, and sets `REQUIRE_TRITON=0` so template scoring
-falls back to the local scorer without the Triton container. The first
-request downloads the model weights into the `hf-cache` volume (~8GB for
-the default model; set `FLUX2_MODEL_ID` to override).
-To run the backend without Docker instead: `pip install -e ".[image]"` then
-`python scripts/flux2_smoke.py`. Full VM procedure:
-`docs/runbooks/gcp-flux2-validation.md`.
+The overlay installs `[image]` extras, switches `IMAGE_BACKEND=flux2`, and sets `REQUIRE_TRITON=0` so template scoring falls back to the local scorer. The first request downloads model weights into the `hf-cache` volume.
 
-Open Streamlit:
+Full VM procedure:
 
 ```text
-http://localhost:8501
+docs/runbooks/gcp-flux2-validation.md
 ```
 
-FastAPI is exposed on:
+## Roadmap
 
-```text
-http://localhost:8080
-```
+1. Polish sample demo set and README.
+2. Replace Mock Product Analysis with real VLM analysis.
+3. Add product-preserving segmentation and composition.
+4. Add lightweight RAG marketing guidance.
+5. Add revision/evaluation loop.
+6. Package final portfolio with screenshots, architecture diagram, and latency/cost notes.
 
-Triton HTTP is exposed on:
-
-```text
-http://localhost:8001
-```
+FastMCP is intentionally deferred. It can later expose the studio as agent-callable tools such as `generate_dessert_ad`, generation log lookup, result retrieval, and template scoring.
