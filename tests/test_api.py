@@ -68,6 +68,41 @@ def test_generate_with_reference_image_flags_usage() -> None:
     )
 
 
+def test_generate_includes_product_analysis(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path))
+    response = client.post("/generate", json=base_payload())
+
+    assert response.status_code == 200
+    analysis = response.json()["product_analysis"]
+    assert analysis["label"] == "Product analysis"
+    assert analysis["analyzer_backend"] == "mock"
+    assert "말차 푸딩" in analysis["product_context"]
+    assert "참고 이미지 없음" in analysis["photo_strategy"]
+
+
+def test_generate_product_analysis_reflects_reference_image(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path))
+    payload = {
+        **base_payload(),
+        "reference_image_b64": tiny_png_b64(),
+        "reference_image_name": "cake.png",
+    }
+    response = client.post("/generate", json=payload)
+
+    assert response.status_code == 200
+    assert "업로드된 제품 사진" in response.json()["product_analysis"]["photo_strategy"]
+
+
+def test_generate_rejects_unknown_product_analysis_backend(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path))
+    monkeypatch.setenv("PRODUCT_ANALYSIS_BACKEND", "vlm")
+
+    response = client.post("/generate", json=base_payload())
+
+    assert response.status_code == 501
+    assert response.json()["detail"] == "unknown product analysis backend: vlm"
+
+
 def test_generate_rejects_reference_image_for_flux2(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("IMAGE_BACKEND", "flux2")
     payload = {

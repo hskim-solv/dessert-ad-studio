@@ -15,6 +15,7 @@ from dessert_ad_studio.backends.openai_copy import OpenAICopyBackend
 from dessert_ad_studio.backends.openai_image import OpenAIImageBackend
 from dessert_ad_studio.generation_logger import GenerationLogger
 from dessert_ad_studio.prompts import build_image_prompt
+from dessert_ad_studio.product_analysis import MockProductAnalyzer, ProductAnalyzer
 from dessert_ad_studio.reference_image import ReferenceImageError, decode_reference_image
 from dessert_ad_studio.schemas import GenerationRequest, GenerationResponse
 from dessert_ad_studio.triton import LocalTemplateScorer, TritonTemplateScorer
@@ -52,6 +53,12 @@ def _image_backend_for(name: str, output_dir: str) -> ImageBackend | None:
     return None
 
 
+def _product_analyzer_for(name: str) -> ProductAnalyzer | None:
+    if name == "mock":
+        return MockProductAnalyzer()
+    return None
+
+
 def get_copy_backend() -> CopyBackend:
     name = os.getenv("COPY_BACKEND", "mock")
     backend = _copy_backend_for(name, os.getenv("OUTPUT_DIR", "outputs"))
@@ -66,6 +73,17 @@ def get_image_backend() -> ImageBackend:
     if backend is None:
         raise HTTPException(status_code=501, detail=f"unknown image backend: {name}")
     return backend
+
+
+def get_product_analyzer() -> ProductAnalyzer:
+    name = os.getenv("PRODUCT_ANALYSIS_BACKEND", "mock")
+    analyzer = _product_analyzer_for(name)
+    if analyzer is None:
+        raise HTTPException(
+            status_code=501,
+            detail=f"unknown product analysis backend: {name}",
+        )
+    return analyzer
 
 
 @app.get("/health")
@@ -108,6 +126,9 @@ def generate(request: GenerationRequest) -> GenerationResponse:
             ),
         )
 
+    product_analyzer = get_product_analyzer()
+    product_analysis = product_analyzer.analyze(request, reference_image=reference_image)
+
     image_prompt = build_image_prompt(
         request,
         ranked_template=ranking.template_name,
@@ -124,6 +145,7 @@ def generate(request: GenerationRequest) -> GenerationResponse:
         "copy_model_id": getattr(copy_backend, "model_id", None),
         "image_backend": image_backend.name,
         "image_model_id": getattr(image_backend, "model_id", None),
+        "product_analysis_backend": product_analyzer.name,
         "used_reference": reference_image is not None,
         "reference_image_name": request.reference_image_name,
     }
@@ -179,4 +201,5 @@ def generate(request: GenerationRequest) -> GenerationResponse:
         used_reference=reference_image is not None,
         prompt_summary=image_prompt,
         elapsed_ms=elapsed_ms,
+        product_analysis=product_analysis,
     )
