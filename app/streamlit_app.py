@@ -15,6 +15,7 @@ from dessert_ad_studio.schemas import GenerationRequest
 from pydantic import ValidationError
 
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
+LAST_GENERATION_KEY = "last_successful_generation"
 
 PURPOSE_OPTIONS = {
     "신메뉴 출시": "new_menu",
@@ -42,6 +43,33 @@ def _encode_uploaded_file(uploaded_file) -> str | None:
     if uploaded_file is None:
         return None
     return base64.b64encode(uploaded_file.getvalue()).decode("ascii")
+
+
+def _save_generation(
+    request: GenerationRequest,
+    result: dict,
+    analysis: dict[str, str],
+) -> dict:
+    saved_generation = {
+        "request": request.model_dump(),
+        "result": result,
+        "analysis": analysis,
+    }
+    st.session_state[LAST_GENERATION_KEY] = saved_generation
+    return saved_generation
+
+
+def _render_saved_generation(saved_generation: dict) -> None:
+    try:
+        request = GenerationRequest(**saved_generation["request"])
+        result = saved_generation["result"]
+        analysis = saved_generation["analysis"]
+    except (KeyError, TypeError, ValidationError) as exc:
+        st.session_state.pop(LAST_GENERATION_KEY, None)
+        st.warning(f"저장된 생성 결과를 다시 표시할 수 없습니다: {exc}")
+        return
+
+    _render_result(result, request, analysis)
 
 
 def _render_result(result: dict, request: GenerationRequest, analysis: dict[str, str]) -> None:
@@ -94,6 +122,7 @@ def _render_result(result: dict, request: GenerationRequest, analysis: dict[str,
                 data=overlay_path.read_bytes(),
                 file_name=overlay_path.name,
                 mime="image/png",
+                on_click="ignore",
             )
         else:
             st.image(str(image_path), caption="원본 생성 이미지", use_column_width=True)
@@ -161,11 +190,14 @@ with left_column:
     st.caption(f"API: POST {API_BASE_URL}/generate")
 
 with right_column:
-    if not submitted:
+    saved_generation = st.session_state.get(LAST_GENERATION_KEY)
+    if not submitted and saved_generation is None:
         st.info(
             "광고 생성 후 이 영역에서 데모 제품 분석, 대표 완성 배너, 추천 문구, "
             "오버레이 배너 다운로드, 원본 이미지와 기술 정보를 확인할 수 있습니다."
         )
+    elif not submitted:
+        _render_saved_generation(saved_generation)
     else:
         try:
             request = GenerationRequest(
@@ -205,4 +237,5 @@ with right_column:
                 else:
                     result = response.json()
                     analysis = build_demo_product_analysis(request)
-                    _render_result(result, request, analysis)
+                    saved_generation = _save_generation(request, result, analysis)
+                    _render_saved_generation(saved_generation)
