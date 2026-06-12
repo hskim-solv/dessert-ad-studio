@@ -29,8 +29,21 @@ services:
     volumes:
       - ./outputs:/app/outputs
       - ./logs:/app/logs
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/readyz', timeout=3).read()",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
     depends_on:
-      - triton
+      triton:
+        condition: service_started
 
   app:
     build:
@@ -43,4 +56,5 @@ services:
     volumes:
       - ./outputs:/app/outputs
     depends_on:
-      - api
+      api:
+        condition: service_healthy

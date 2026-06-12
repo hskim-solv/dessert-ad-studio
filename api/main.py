@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import os
+from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
+from threading import Lock
 from time import perf_counter
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Response
 
 from dessert_ad_studio.backends.base import AdBackendError, CopyBackend, ImageBackend
 from dessert_ad_studio.backends.flux2 import Flux2Backend
@@ -23,6 +25,52 @@ from dessert_ad_studio.triton import LocalTemplateScorer, TritonTemplateScorer
 load_dotenv()
 
 app = FastAPI(title="Dessert Ad Studio API")
+_METRICS_LOCK = Lock()
+_HTTP_REQUESTS_TOTAL: defaultdict[tuple[str, str, str], int] = defaultdict(int)
+_HTTP_REQUEST_LATENCY_SECONDS_TOTAL: defaultdict[tuple[str, str], float] = defaultdict(float)
+
+
+def _record_http_request(method: str, path: str, status_code: int, elapsed_seconds: float) -> None:
+    method = method.upper()
+    status = str(status_code)
+    with _METRICS_LOCK:
+        _HTTP_REQUESTS_TOTAL[(method, path, status)] += 1
+        _HTTP_REQUEST_LATENCY_SECONDS_TOTAL[(method, path)] += elapsed_seconds
+
+
+def _prometheus_labels(labels: dict[str, str]) -> str:
+    rendered = ",".join(f'{key}="{value}"' for key, value in labels.items())
+    return "{" + rendered + "}" if rendered else ""
+
+
+def _template_scorer_name(scorer) -> str:
+    if isinstance(scorer, TritonTemplateScorer):
+        return "triton-template-scorer"
+    return "local-template-scorer"
+
+
+def _is_triton_ready(url: str) -> bool:
+    import tritonclient.http as httpclient
+
+    client = httpclient.InferenceServerClient(url=url)
+    return bool(client.is_server_live() and client.is_model_ready("template_scorer"))
+
+
+@app.middleware("http")
+async def record_metrics(request: Request, call_next):
+    started = perf_counter()
+    status_code = 500
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+        return response
+    finally:
+        _record_http_request(
+            method=request.method,
+            path=request.url.path,
+            status_code=status_code,
+            elapsed_seconds=perf_counter() - started,
+        )
 
 
 def get_template_scorer():
@@ -89,6 +137,61 @@ def get_product_analyzer() -> ProductAnalyzer:
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/livez")
+def livez() -> dict[str, str]:
+    return {"status": "alive"}
+
+
+@app.get("/readyz")
+def readyz() -> dict[str, str]:
+    try:
+        copy_backend = get_copy_backend()
+        image_backend = get_image_backend()
+        product_analyzer = get_product_analyzer()
+        template_scorer = get_template_scorer()
+        if isinstance(template_scorer, TritonTemplateScorer) and not _is_triton_ready(
+            template_scorer.url
+        ):
+            raise HTTPException(status_code=503, detail="triton template_scorer is not ready")
+    except HTTPException as exc:
+        raise HTTPException(status_code=503, detail=f"not ready: {exc.detail}") from exc
+
+    return {
+        "status": "ready",
+        "copy_backend": copy_backend.name,
+        "image_backend": image_backend.name,
+        "product_analysis_backend": product_analyzer.name,
+        "template_scorer": _template_scorer_name(template_scorer),
+    }
+
+
+@app.get("/metrics")
+def metrics() -> Response:
+    lines = [
+        "# HELP dessert_ad_studio_info Static application info.",
+        "# TYPE dessert_ad_studio_info gauge",
+        'dessert_ad_studio_info{service="api"} 1',
+        "# HELP dessert_ad_studio_http_requests_total Total HTTP requests.",
+        "# TYPE dessert_ad_studio_http_requests_total counter",
+    ]
+    with _METRICS_LOCK:
+        for (method, path, status), count in sorted(_HTTP_REQUESTS_TOTAL.items()):
+            labels = _prometheus_labels({"method": method, "path": path, "status": status})
+            lines.append(f"dessert_ad_studio_http_requests_total{labels} {count}")
+        lines.extend(
+            [
+                "# HELP dessert_ad_studio_http_request_latency_seconds_total "
+                "Total HTTP request latency in seconds.",
+                "# TYPE dessert_ad_studio_http_request_latency_seconds_total counter",
+            ]
+        )
+        for (method, path), total in sorted(_HTTP_REQUEST_LATENCY_SECONDS_TOTAL.items()):
+            labels = _prometheus_labels({"method": method, "path": path})
+            lines.append(f"dessert_ad_studio_http_request_latency_seconds_total{labels} {total:.6f}")
+
+    return Response("\n".join(lines) + "\n", media_type="text/plain; version=0.0.4")
 
 
 @app.post("/rank-templates")

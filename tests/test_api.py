@@ -35,6 +35,56 @@ def test_health() -> None:
     assert response.json()["status"] == "ok"
 
 
+def test_livez() -> None:
+    response = client.get("/livez")
+    assert response.status_code == 200
+    assert response.json() == {"status": "alive"}
+
+
+def test_readyz(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path))
+
+    response = client.get("/readyz")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "ready"
+    assert body["copy_backend"] == "mock"
+    assert body["image_backend"] == "mock"
+    assert body["product_analysis_backend"] == "mock"
+    assert body["template_scorer"] == "local-template-scorer"
+
+
+def test_readyz_rejects_bad_backend(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("COPY_BACKEND", "missing")
+
+    response = client.get("/readyz")
+
+    assert response.status_code == 503
+    assert "unknown copy backend: missing" in response.json()["detail"]
+
+
+def test_readyz_checks_required_triton(monkeypatch: pytest.MonkeyPatch) -> None:
+    import api.main as api_main
+
+    monkeypatch.setenv("REQUIRE_TRITON", "1")
+    monkeypatch.setattr(api_main, "_is_triton_ready", lambda url: False)
+
+    response = client.get("/readyz")
+
+    assert response.status_code == 503
+    assert "triton template_scorer is not ready" in response.json()["detail"]
+
+
+def test_metrics_exposes_prometheus_text() -> None:
+    response = client.get("/metrics")
+
+    assert response.status_code == 200
+    assert "text/plain" in response.headers["content-type"]
+    assert 'dessert_ad_studio_info{service="api"} 1' in response.text
+    assert "dessert_ad_studio_http_requests_total" in response.text
+
+
 def test_generate_uses_template_ranking_and_returns_copy() -> None:
     response = client.post("/generate", json=base_payload())
 
