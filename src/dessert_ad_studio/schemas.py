@@ -33,6 +33,17 @@ class TemplateRanking(BaseModel):
     latency_ms: float
 
 
+class ProductAnalysis(BaseModel):
+    label: str
+    product_context: str
+    ad_goal: str
+    visual_strategy: str
+    photo_strategy: str
+    copy_focus: str
+    rendering_strategy: str
+    analyzer_backend: str
+
+
 class GenerationResponse(BaseModel):
     copy_options: list[CopyOption]
     selected_template: TemplateRanking
@@ -42,3 +53,4 @@ class GenerationResponse(BaseModel):
     used_reference: bool
     prompt_summary: str
     elapsed_ms: float
+    product_analysis: ProductAnalysis

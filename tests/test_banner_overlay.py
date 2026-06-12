@@ -128,7 +128,8 @@ def test_create_banner_overlay_handles_small_image(tmp_path: Path) -> None:
 def test_build_demo_product_analysis_with_reference_image() -> None:
     analysis = build_demo_product_analysis(_request(reference_image_name="cake.jpg"))
 
-    assert analysis["label"] == "Demo product analysis"
+    assert analysis["label"] == "Product analysis"
+    assert analysis["analyzer_backend"] == "mock"
     assert analysis["product_context"] == "딸기 생크림 케이크 / 디저트 카페 상품"
     assert "할인/프로모션" in analysis["ad_goal"]
     assert "따뜻한" in analysis["visual_strategy"]
