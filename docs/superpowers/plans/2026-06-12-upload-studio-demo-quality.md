@@ -32,7 +32,7 @@ The implementation followed the task sequence below with these review-driven ame
 - Add a small-image regression test and clamp overlay geometry so valid tiny images do not raise inverted-coordinate errors.
 - Persist the last successful Streamlit generation in `st.session_state` so download clicks and other reruns keep the result visible.
 - Pass `on_click="ignore"` to `st.download_button` only for Streamlit versions that support it; older allowed versions fall back to rerun-safe session-state rendering.
-- Use `use_container_width=True` for Streamlit images to avoid visible deprecation alerts in Streamlit 1.58.
+- Use `width="stretch"` for Streamlit images to avoid visible sizing deprecation alerts in Streamlit 1.58.
 
 ## Task 1: Add Banner Overlay Helper Tests
 
@@ -482,7 +482,7 @@ with left:
             help="OpenAI image backend에서는 참고 이미지로 사용됩니다. Flux2 backend는 참고 이미지를 지원하지 않습니다.",
         )
         if uploaded is not None:
-            st.image(uploaded, caption="업로드한 제품 사진", use_container_width=True)
+            st.image(uploaded, caption="업로드한 제품 사진", width="stretch")
 
         product_name = st.text_input("상품명", value="딸기 크림 크루아상")
         campaign_label = st.selectbox("캠페인 목적", list(PURPOSE_OPTIONS))
@@ -494,7 +494,7 @@ with left:
             value="봄 시즌 한정 느낌, 따뜻한 카페 조명",
             height=96,
         )
-        submitted = st.form_submit_button("광고 배너 만들기", use_container_width=True)
+        submitted = st.form_submit_button("광고 배너 만들기")
 
     st.caption(f"API: {API_BASE_URL}")
 
@@ -594,16 +594,16 @@ def _render_result(
 
     st.markdown("#### 대표 완성 배너")
     if banner_path is not None and banner_path.exists():
-        st.image(str(banner_path), caption="한글 오버레이 적용 배너", use_container_width=True)
+        st.image(str(banner_path), caption="한글 오버레이 적용 배너", width="stretch")
         st.download_button(
             "완성 배너 다운로드",
             data=banner_path.read_bytes(),
             file_name=banner_path.name,
             mime="image/png",
-            use_container_width=True,
+            width="stretch",
         )
     elif image_path.exists():
-        st.image(str(image_path), caption="원본 생성 이미지", use_container_width=True)
+        st.image(str(image_path), caption="원본 생성 이미지", width="stretch")
 
     st.markdown("#### 추천 광고 문구")
     copy_cols = st.columns(3)
