@@ -32,7 +32,8 @@ The implementation followed the task sequence below with these review-driven ame
 - Add a small-image regression test and clamp overlay geometry so valid tiny images do not raise inverted-coordinate errors.
 - Persist the last successful Streamlit generation in `st.session_state` so download clicks and other reruns keep the result visible.
 - Pass `on_click="ignore"` to `st.download_button` only for Streamlit versions that support it; older allowed versions fall back to rerun-safe session-state rendering.
-- Use `width="stretch"` for Streamlit images to avoid visible sizing deprecation alerts in Streamlit 1.58.
+- Use a Streamlit image-sizing compatibility helper: current Streamlit receives `width="stretch"`, while older allowed versions fall back to `use_column_width=True`.
+- Install `fonts-noto-cjk` in the Streamlit Docker image so Korean banner overlays render with readable glyphs in container demos.
 
 ## Task 1: Add Banner Overlay Helper Tests
 

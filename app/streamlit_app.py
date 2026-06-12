@@ -17,6 +17,7 @@ from pydantic import ValidationError
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 LAST_GENERATION_KEY = "last_successful_generation"
 DOWNLOAD_IGNORE_MIN_VERSION = (1, 43, 0)
+IMAGE_STRETCH_MIN_VERSION = (1, 58, 0)
 
 PURPOSE_OPTIONS = {
     "신메뉴 출시": "new_menu",
@@ -66,6 +67,12 @@ def _download_button_rerun_kwargs() -> dict[str, str]:
     if _parse_version_prefix(st.__version__) >= DOWNLOAD_IGNORE_MIN_VERSION:
         return {"on_click": "ignore"}
     return {}
+
+
+def _stretch_image_kwargs() -> dict[str, bool | str]:
+    if _parse_version_prefix(st.__version__) >= IMAGE_STRETCH_MIN_VERSION:
+        return {"width": "stretch"}
+    return {"use_column_width": True}
 
 
 def _save_generation(
@@ -139,7 +146,7 @@ def _render_result(result: dict, request: GenerationRequest, analysis: dict[str,
             st.warning("배너 오버레이에 사용할 광고 문구를 찾지 못했습니다.")
 
         if overlay_path is not None and overlay_path.exists():
-            st.image(str(overlay_path), caption="대표 완성 배너", width="stretch")
+            st.image(str(overlay_path), caption="대표 완성 배너", **_stretch_image_kwargs())
             st.download_button(
                 "오버레이 배너 다운로드",
                 data=overlay_path.read_bytes(),
@@ -148,7 +155,7 @@ def _render_result(result: dict, request: GenerationRequest, analysis: dict[str,
                 **_download_button_rerun_kwargs(),
             )
         else:
-            st.image(str(image_path), caption="원본 생성 이미지", width="stretch")
+            st.image(str(image_path), caption="원본 생성 이미지", **_stretch_image_kwargs())
 
     st.subheader("추천 광고 문구")
     if copy_options:
@@ -165,7 +172,7 @@ def _render_result(result: dict, request: GenerationRequest, analysis: dict[str,
             st.image(
                 str(image_path),
                 caption=f"backend={result.get('image_backend', 'unknown')}",
-                width="stretch",
+                **_stretch_image_kwargs(),
             )
 
     with st.expander("기술 정보"):
@@ -194,7 +201,7 @@ with left_column:
         help="업로드하면 사진을 바탕으로 광고 이미지를 생성합니다.",
     )
     if uploaded is not None:
-        st.image(uploaded, caption=uploaded.name, width="stretch")
+        st.image(uploaded, caption=uploaded.name, **_stretch_image_kwargs())
     else:
         st.info("제품 사진을 업로드하면 생성 결과와 오버레이 배너를 함께 확인할 수 있습니다.")
 
