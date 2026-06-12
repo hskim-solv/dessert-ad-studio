@@ -104,6 +104,27 @@ def test_create_banner_overlay_handles_long_korean_text(tmp_path: Path) -> None:
         )
 
 
+def test_create_banner_overlay_handles_small_image(tmp_path: Path) -> None:
+    source = tmp_path / "small.png"
+    Image.new("RGB", (48, 48), color=(240, 220, 210)).save(source)
+    copy = BannerCopy(
+        headline="케이크",
+        body="오늘 할인",
+        call_to_action="예약",
+    )
+
+    output = create_banner_overlay(
+        image_path=source,
+        copy=copy,
+        price_text="10%",
+        output_dir=tmp_path / "banners",
+    )
+
+    assert output.exists()
+    with Image.open(output) as image:
+        assert image.size == (48, 48)
+
+
 def test_build_demo_product_analysis_with_reference_image() -> None:
     analysis = build_demo_product_analysis(_request(reference_image_name="cake.jpg"))
 

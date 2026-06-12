@@ -66,18 +66,25 @@ def create_banner_overlay(
         image = source.convert("RGBA")
 
     width, height = image.size
-    margin = max(28, width // 24)
+    min_dimension = max(1, min(width, height))
+    preferred_margin = max(28, min_dimension // 24)
+    small_image_margin = max(1, min_dimension // 8)
+    max_margin = max(0, (min_dimension - 1) // 2)
+    margin = min(preferred_margin, small_image_margin, max_margin)
     panel_height = min(height - (margin * 2), max(height // 3, 260))
     panel_left = margin
     panel_top = height - panel_height - margin
     panel_right = width - margin
     panel_bottom = height - margin
+    panel_width = max(1, panel_right - panel_left)
+    panel_height = max(1, panel_bottom - panel_top)
+    panel_radius = min(max(18, width // 45), panel_width // 2, panel_height // 2)
 
     overlay = Image.new("RGBA", image.size, (0, 0, 0, 0))
     overlay_draw = ImageDraw.Draw(overlay, "RGBA")
     overlay_draw.rounded_rectangle(
         (panel_left, panel_top, panel_right, panel_bottom),
-        radius=max(18, width // 45),
+        radius=panel_radius,
         fill=(18, 18, 18, 178),
     )
     image = Image.alpha_composite(image, overlay)
@@ -88,7 +95,7 @@ def create_banner_overlay(
     meta_font = _load_font(max(18, width // 38), font_paths)
     cta_font = _load_font(max(20, width // 32), font_paths)
 
-    inset = max(22, width // 36)
+    inset = min(max(22, width // 36), max(1, panel_width // 4))
     text_left = panel_left + inset
     text_right = panel_right - inset
     max_text_width = max(1, text_right - text_left)
@@ -301,4 +308,3 @@ def _draw_text(
 
 def _ascii_fallback_text(text: str) -> str:
     return "".join(character if ord(character) < 128 else "?" for character in text)
-
