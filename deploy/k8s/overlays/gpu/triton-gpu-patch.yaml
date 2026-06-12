@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: triton
+spec:
+  template:
+    spec:
+      containers:
+        - name: triton
+          resources:
+            limits:
+              nvidia.com/gpu: "1"

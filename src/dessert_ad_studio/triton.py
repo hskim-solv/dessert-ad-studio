@@ -41,7 +41,7 @@ class LocalTemplateScorer:
 
 
 class TritonTemplateScorer:
-    def __init__(self, url: str = "localhost:8001") -> None:
+    def __init__(self, url: str = "localhost:8000") -> None:
         self.url = url
 
     def rank(self, request: GenerationRequest) -> TemplateRanking:

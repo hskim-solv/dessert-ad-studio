@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  API_BASE_URL: http://api:8000
+  TRITON_URL: triton:8000
+  REQUIRE_TRITON: "1"
+  COPY_BACKEND: mock
+  COPY_MODEL_ID: gpt-5.4-mini
+  IMAGE_BACKEND: mock
+  IMAGE_MODEL_ID: gpt-image-1-mini
+  IMAGE_QUALITY: low
+  PRODUCT_ANALYSIS_BACKEND: mock
+  OUTPUT_DIR: /app/outputs
+  GENERATION_LOG_PATH: /app/logs/generations.jsonl

@@ -14,7 +14,7 @@ services:
       context: .
       dockerfile: Dockerfile.api
     environment:
-      TRITON_URL: triton:8001
+      TRITON_URL: triton:8000
       REQUIRE_TRITON: "1"
       COPY_BACKEND: ${COPY_BACKEND:-mock}
       COPY_MODEL_ID: ${COPY_MODEL_ID:-gpt-5.4-mini}

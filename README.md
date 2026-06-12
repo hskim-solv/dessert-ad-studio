@@ -143,7 +143,7 @@ Open:
 ```text
 Streamlit: http://localhost:8501
 FastAPI:   http://localhost:8080
-Triton:    http://localhost:8001
+Triton:    http://localhost:8000
 ```
 
 ## Advanced GPU / FLUX.2 Validation

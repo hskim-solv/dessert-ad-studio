@@ -75,7 +75,7 @@ async def record_metrics(request: Request, call_next):
 
 def get_template_scorer():
     require_triton = os.getenv("REQUIRE_TRITON", "0") == "1"
-    triton_url = os.getenv("TRITON_URL", "localhost:8001")
+    triton_url = os.getenv("TRITON_URL", "localhost:8000")
     if require_triton:
         return TritonTemplateScorer(url=triton_url)
     return LocalTemplateScorer()

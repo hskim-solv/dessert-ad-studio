@@ -7,7 +7,7 @@ import tritonclient.http as httpclient
 
 
 def main() -> None:
-    url = os.getenv("TRITON_URL", "localhost:8001")
+    url = os.getenv("TRITON_URL", "localhost:8000")
     client = httpclient.InferenceServerClient(url=url)
     assert client.is_server_ready(), "Triton server is not ready"
     assert client.is_model_ready("template_scorer"), "template_scorer is not ready"

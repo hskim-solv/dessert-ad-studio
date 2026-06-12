@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: triton
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: triton
+  template:
+    metadata:
+      labels:
+        app: triton
+    spec:
+      containers:
+        - name: triton
+          image: nvcr.io/nvidia/tritonserver:22.12-py3
+          args:
+            - tritonserver
+            - --model-repository=/models
+          ports:
+            - name: http
+              containerPort: 8000
+            - name: grpc
+              containerPort: 8001
+            - name: metrics
+              containerPort: 8002
+          readinessProbe:
+            httpGet:
+              path: /v2/health/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /v2/health/live
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          volumeMounts:
+            - name: triton-models
+              mountPath: /models
+      volumes:
+        - name: triton-models
+          persistentVolumeClaim:
+            claimName: triton-models
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: triton
+spec:
+  selector:
+    app: triton
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+    - name: grpc
+      port: 8001
+      targetPort: grpc
+    - name: metrics
+      port: 8002
+      targetPort: metrics
