@@ -172,10 +172,11 @@ Emit local OpenTelemetry/OpenInference workflow spans while running the API:
 WORKFLOW_TRACING=otel uvicorn api.main:app --port 8000
 ```
 
-This evidence path is local-first: the eval harness uses mock backends and the tracing
-path can emit spans without requiring a hosted AgentOps service. Phoenix or Langfuse can
-be connected later through the OpenTelemetry OTLP/export path. FastMCP remains a
-separate future tool-server layer, not a requirement for the local eval or span evidence.
+This evidence path is local-first: the eval harness uses mock backends and the current
+tracing implementation emits local console spans without requiring a hosted AgentOps
+service. Phoenix or Langfuse integration is future work and would require adding an
+OTLP exporter or a dedicated integration. FastMCP remains a separate future tool-server
+layer, not a requirement for the local eval or span evidence.
 
 ## Docker Compose Demo
 
