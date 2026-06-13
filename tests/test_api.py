@@ -205,6 +205,18 @@ def test_generate_rejects_invalid_reference_encoding() -> None:
     assert "base64" in response.json()["detail"]
 
 
+def test_generate_reports_missing_copy_backend_before_invalid_reference(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("COPY_BACKEND", "missing")
+    payload = {**base_payload(), "reference_image_b64": "not-base64!!!"}
+
+    response = client.post("/generate", json=payload)
+
+    assert response.status_code == 501
+    assert response.json()["detail"] == "unknown copy backend: missing"
+
+
 def test_generate_maps_missing_openai_key_to_503(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("COPY_BACKEND", "openai")
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
@@ -417,3 +429,140 @@ def test_template_scorer_uses_triton_when_required(monkeypatch: pytest.MonkeyPat
     monkeypatch.setenv("REQUIRE_TRITON", "1")
 
     assert isinstance(api_main.get_template_scorer(), TritonTemplateScorer)
+
+
+def test_a2a_agent_card() -> None:
+    response = client.get("/.well-known/agent-card.json")
+
+    assert response.status_code == 200
+    card = response.json()
+    assert card["name"] == "Dessert Ad Studio Agent"
+    assert card["skills"][0]["id"] == "generate_ad_banner"
+    assert card["supportedInterfaces"][0]["protocolBinding"] == "HTTP+JSON"
+
+
+def test_a2a_send_message_generates_completed_task(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path))
+    request = {
+        "message": {
+            "role": "ROLE_USER",
+            "messageId": "msg-1",
+            "parts": [{"data": base_payload()}],
+        }
+    }
+
+    response = client.post(
+        "/message:send",
+        json=request,
+        headers={"content-type": "application/a2a+json"},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    task = body["task"]
+    assert task["status"]["state"] == "TASK_STATE_COMPLETED"
+    artifact_payload = task["artifacts"][0]["parts"][0]["data"]
+    assert artifact_payload["copy_backend"] == "mock"
+    assert artifact_payload["image_backend"] == "mock"
+
+    task_response = client.get(f"/tasks/{task['id']}")
+    assert task_response.status_code == 200
+    assert task_response.json()["id"] == task["id"]
+
+
+def test_a2a_send_message_rejects_missing_data_part() -> None:
+    response = client.post(
+        "/message:send",
+        json={
+            "message": {
+                "role": "ROLE_USER",
+                "messageId": "msg-2",
+                "parts": [{"text": "make me an ad"}],
+            }
+        },
+        headers={"content-type": "application/a2a+json"},
+    )
+
+    assert response.status_code == 400
+    assert "data part" in response.json()["detail"]
+
+
+def test_a2a_send_message_preserves_backend_error_status_code(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from dessert_ad_studio.backends.base import AdBackendError
+    from dessert_ad_studio.backends.mock import MockAdBackend
+
+    def fail_with_validation_error(self, request):
+        raise AdBackendError("bad input", status_code=422)
+
+    monkeypatch.setattr(MockAdBackend, "generate_copy", fail_with_validation_error)
+
+    response = client.post(
+        "/message:send",
+        json={
+            "message": {
+                "role": "ROLE_USER",
+                "messageId": "msg-3",
+                "parts": [{"data": base_payload()}],
+            }
+        },
+        headers={"content-type": "application/a2a+json"},
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "bad input"
+
+
+def test_a2a_send_message_rejects_invalid_reference_encoding() -> None:
+    payload = {**base_payload(), "reference_image_b64": "not-base64!!!"}
+
+    response = client.post(
+        "/message:send",
+        json={
+            "message": {
+                "role": "ROLE_USER",
+                "messageId": "msg-4",
+                "parts": [{"data": payload}],
+            }
+        },
+        headers={"content-type": "application/a2a+json"},
+    )
+
+    assert response.status_code == 400
+    assert "base64" in response.json()["detail"]
+
+
+def test_a2a_send_message_rejects_unsupported_reference_before_copy(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from dessert_ad_studio.backends.mock import MockAdBackend
+
+    def fail_if_called(self, request):
+        raise AssertionError("copy backend must not be called when the reference is rejected")
+
+    monkeypatch.setattr(MockAdBackend, "generate_copy", fail_if_called)
+    monkeypatch.setenv("IMAGE_BACKEND", "flux2")
+    payload = {**base_payload(), "reference_image_b64": tiny_png_b64()}
+
+    response = client.post(
+        "/message:send",
+        json={
+            "message": {
+                "role": "ROLE_USER",
+                "messageId": "msg-5",
+                "parts": [{"data": payload}],
+            }
+        },
+        headers={"content-type": "application/a2a+json"},
+    )
+
+    assert response.status_code == 400
+    assert "참고 이미지" in response.json()["detail"]
+
+
+def test_a2a_get_missing_task_returns_404() -> None:
+    response = client.get("/tasks/task-missing")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "A2A task not found"

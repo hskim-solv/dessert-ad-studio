@@ -6,11 +6,19 @@ from functools import lru_cache
 from pathlib import Path
 from threading import Lock
 from time import perf_counter
+from typing import Any
 
 import dessert_ad_studio.workflow as workflow_module
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request, Response
 
+from dessert_ad_studio.a2a import (
+    A2AInputError,
+    A2ATaskStore,
+    build_agent_card,
+    completed_generation_task,
+    extract_generation_request,
+)
 from dessert_ad_studio.backends.base import AdBackendError, CopyBackend, ImageBackend
 from dessert_ad_studio.backends.flux2 import Flux2Backend
 from dessert_ad_studio.backends.mock import MockAdBackend
@@ -31,6 +39,7 @@ app = FastAPI(title="Dessert Ad Studio API")
 _METRICS_LOCK = Lock()
 _HTTP_REQUESTS_TOTAL: defaultdict[tuple[str, str, str], int] = defaultdict(int)
 _HTTP_REQUEST_LATENCY_SECONDS_TOTAL: defaultdict[tuple[str, str], float] = defaultdict(float)
+_A2A_TASKS = A2ATaskStore()
 
 
 class _BestEffortGenerationLogger:
@@ -264,6 +273,38 @@ def get_product_analyzer() -> ProductAnalyzer:
     return analyzer
 
 
+def build_workflow_dependencies(request: GenerationRequest) -> GenerationWorkflowDependencies:
+    telemetry = _WorkflowGenerationTelemetry()
+    copy_backend = _RecordingCopyBackend(get_copy_backend(), telemetry)
+    image_backend = get_image_backend()
+
+    reference_image = decode_reference_image(request.reference_image_b64)
+    if reference_image is not None and not image_backend.supports_reference_image:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"{image_backend.name} 이미지 백엔드는 아직 참고 이미지를 지원하지 않습니다. "
+                "참고 이미지 없이 다시 시도하거나 IMAGE_BACKEND=openai로 전환해주세요."
+            ),
+        )
+
+    product_analyzer = get_product_analyzer()
+    log_path = Path(os.getenv("GENERATION_LOG_PATH", "logs/generations.jsonl"))
+    return GenerationWorkflowDependencies(
+        template_scorer=_ApiTemplateRankingScorer(telemetry),
+        copy_backend=copy_backend,
+        image_backend=_FailureLoggingImageBackend(
+            image_backend,
+            telemetry=telemetry,
+            copy_backend=copy_backend,
+            product_analysis_backend=product_analyzer.name,
+            log_path=log_path,
+        ),
+        product_analyzer=product_analyzer,
+        log_path=log_path,
+    )
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
@@ -340,44 +381,49 @@ def rank_templates(request: GenerationRequest):
 
 @app.post("/generate", response_model=GenerationResponse)
 def generate(request: GenerationRequest) -> GenerationResponse:
-    telemetry = _WorkflowGenerationTelemetry()
-    template_scorer = _ApiTemplateRankingScorer(telemetry)
-    copy_backend = _RecordingCopyBackend(get_copy_backend(), telemetry)
-    image_backend = get_image_backend()
-
     try:
-        reference_image = decode_reference_image(request.reference_image_b64)
-    except ReferenceImageError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-    if reference_image is not None and not image_backend.supports_reference_image:
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                f"{image_backend.name} 이미지 백엔드는 아직 참고 이미지를 지원하지 않습니다. "
-                "참고 이미지 없이 다시 시도하거나 IMAGE_BACKEND=openai로 전환해주세요."
-            ),
-        )
-
-    product_analyzer = get_product_analyzer()
-    log_path = Path(os.getenv("GENERATION_LOG_PATH", "logs/generations.jsonl"))
-    dependencies = GenerationWorkflowDependencies(
-        template_scorer=template_scorer,
-        copy_backend=copy_backend,
-        image_backend=_FailureLoggingImageBackend(
-            image_backend,
-            telemetry=telemetry,
-            copy_backend=copy_backend,
-            product_analysis_backend=product_analyzer.name,
-            log_path=log_path,
-        ),
-        product_analyzer=product_analyzer,
-        log_path=log_path,
-    )
-
-    try:
+        dependencies = build_workflow_dependencies(request)
         return run_generation_workflow(request, dependencies).response
     except ReferenceImageError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except AdBackendError as exc:
         raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+
+
+@app.get("/.well-known/agent-card.json")
+def a2a_agent_card(request: Request) -> dict[str, Any]:
+    return build_agent_card(base_url=str(request.base_url).rstrip("/"))
+
+
+@app.post("/message:send")
+def a2a_send_message(payload: dict[str, Any]) -> dict[str, Any]:
+    message = payload.get("message")
+    if not isinstance(message, dict):
+        raise HTTPException(status_code=400, detail="A2A request must include message")
+
+    try:
+        generation_request = extract_generation_request(message)
+        dependencies = build_workflow_dependencies(generation_request)
+        output = run_generation_workflow(generation_request, dependencies)
+    except A2AInputError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except ReferenceImageError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except AdBackendError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+
+    task = completed_generation_task(
+        output.response,
+        message_id=message.get("messageId"),
+        context_id=message.get("contextId"),
+    )
+    _A2A_TASKS.save(task)
+    return {"task": task}
+
+
+@app.get("/tasks/{task_id}")
+def a2a_get_task(task_id: str) -> dict[str, Any]:
+    task = _A2A_TASKS.get(task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail="A2A task not found")
+    return task
