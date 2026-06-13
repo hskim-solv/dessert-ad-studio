@@ -64,6 +64,37 @@ Run the API:
 uvicorn api.main:app --reload --port 8000
 ```
 
+## A2A Interoperability Spike
+
+The API exposes a narrow A2A-compatible surface for portfolio interoperability evidence.
+It does not replace the normal REST API or the Streamlit UI.
+
+Discovery:
+
+```text
+GET /.well-known/agent-card.json
+```
+
+Task execution:
+
+```text
+POST /message:send
+Content-Type: application/a2a+json
+```
+
+The supported skill is `generate_ad_banner`. The first message part must contain a JSON
+`data` object using the same fields as `POST /generate`.
+
+Run a local smoke test after starting the API:
+
+```bash
+python scripts/a2a_smoke.py --base-url http://127.0.0.1:8000
+```
+
+Use A2A when another agent needs to discover and call Dessert Ad Studio as a remote
+agent capability. Use the normal REST API for app/frontend calls. FastMCP remains a
+future tool-server layer for exposing lower-level typed tools.
+
 Run Streamlit:
 
 ```bash
