@@ -51,6 +51,7 @@ The next decisions should improve the story:
 | Storage | local outputs/logs | SQLite, PostgreSQL, S3, MinIO, Redis | Add Redis for jobs; keep local files for MVP artifacts; add S3/MinIO or PostgreSQL only when history/user state is built | Avoid premature database work. Storage should support generated assets and reproducible history when needed. |
 | Security/guardrails | basic schemas | prompt injection checks, tool allowlist, ad policy checker, audit log, secrets hygiene, container scanning | Add small policy checker + allowlisted tools + audit trail | Strong AI-agent engineering signal with low scope if kept schema-driven. |
 | Tool protocol | FastMCP deferred | FastMCP, MCP, OpenAI MCP tools | Add later after workflow/eval/queue | FastMCP is useful as an agent-callable facade, but should wrap stable functions rather than precede them. |
+| Agent interoperability | not implemented | A2A, ADK A2A bridge, custom webhook facade | Add narrow A2A spike after the workflow contract is stable | A2A is worth trying as portfolio evidence for agent-to-agent interoperability, but it should expose one finished service capability rather than reshape the core architecture. |
 | UI/UX | upload studio and demo samples | brand kit, multi-size export, rating loop, platform presets, creative scoring | Add platform presets + rating feedback loop before complex brand kit | These features make the service feel real and help evaluation/presentation. |
 
 ## Recommended Build Order
@@ -151,11 +152,32 @@ Expected evidence:
 - dashboard screenshot or exported dashboard JSON
 - rollback/redeploy notes
 
+### Phase 6: A2A Interoperability Spike
+
+Add a thin A2A-compatible facade around one stable service capability:
+
+```text
+A2A AgentCard
+  -> generate_ad_banner task
+  -> existing FastAPI/workflow path
+  -> job status or final artifact URL
+```
+
+This is not a replacement for FastAPI, Streamlit, FastMCP, or the internal workflow. It is a narrow interoperability proof that another agent can discover the studio's capability and request an ad-generation task through an A2A-compatible surface.
+
+Expected evidence:
+
+- AgentCard or equivalent capability metadata
+- one happy-path client smoke test
+- failure response for invalid inputs
+- short README section explaining when to use A2A versus FastMCP
+
 ## Deferred or Rejected Choices
 
 | Technology | Decision | Re-evaluation trigger |
 | --- | --- | --- |
 | FastMCP | Defer | Workflow functions are stable and worth exposing as tools. |
+| A2A | Narrow spike | The workflow exposes one stable service-level capability that can be wrapped as an interoperable agent task. |
 | vLLM | Defer | Self-hosted LLM/VLM lane is needed for copy/eval or API dependency reduction. |
 | SGLang | Defer | Structured-generation serving becomes a measurable bottleneck or research focus. |
 | TensorRT/TensorRT-LLM | Benchmark only | A GPU benchmark can show latency/cost improvement over baseline. |
@@ -173,6 +195,9 @@ Research signals used for this decision:
 - LangGraph durable workflow, state, persistence, and production-oriented agent orchestration: https://docs.langchain.com/oss/python/langgraph/overview
 - OpenAI Agents SDK orchestration and guardrails as a simpler alternative: https://openai.github.io/openai-agents-python/agents/
 - MCP/FastMCP tool-layer fit: https://modelcontextprotocol.io/docs/learn/server-concepts
+- A2A official protocol documentation: https://a2a-protocol.org/latest/
+- Google ADK with A2A documentation: https://adk.dev/a2a/
+- Google MCP, ADK, and A2A codelab: https://codelabs.developers.google.com/codelabs/currency-agent
 - Qdrant hybrid retrieval and reranking: https://qdrant.tech/documentation/advanced-tutorials/reranking-hybrid-search/
 - Ragas evaluation concepts: https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/
 - DeepEval RAG and CI-oriented evaluation: https://deepeval.com/docs/getting-started-rag
@@ -193,7 +218,7 @@ Research signals used for this decision:
 
 - The next implementation plan starts with workflow/eval/async service evidence, not another model-serving migration.
 - FastMCP remains explicitly preserved as a later tool-server layer.
+- A2A is included as a narrow interoperability spike, not a core rewrite or replacement for FastAPI/FastMCP.
 - Triton/ONNX remains the concrete serving proof unless a benchmark justifies change.
 - RAG is scoped to marketing guidance and policy grounding, not a broad knowledge platform.
 - Deployment work emphasizes visible operator evidence: Ingress, Helm/Kustomize, metrics, dashboard, and runbook.
-
