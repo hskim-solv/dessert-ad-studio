@@ -175,7 +175,15 @@ WORKFLOW_TRACING=otel WORKFLOW_TRACE_EXPORT=console python scripts/otel_trace_sm
 Run Phoenix locally through the optional compose override:
 
 ```bash
+python scripts/export_template_scorer_onnx.py
 docker compose -f docker-compose.yml -f docker-compose.agentops.yml up --build
+```
+
+In another shell, trigger a workflow span through the API smoke. Keep the
+default generate step enabled for Phoenix evidence:
+
+```bash
+python scripts/api_smoke.py --base-url http://127.0.0.1:8080
 ```
 
 Open:
@@ -185,8 +193,9 @@ Phoenix: http://localhost:6006
 ```
 
 The override sends API workflow spans to Phoenix through OTLP HTTP at
-`http://phoenix:6006/v1/traces`. Phoenix remains optional; normal local evals,
-REST calls, and Streamlit usage do not require it.
+`http://phoenix:6006/v1/traces`; look for `dessert-ad-studio-api` spans after
+the smoke request. Phoenix remains optional; normal local evals, REST calls, and
+Streamlit usage do not require it.
 
 ## Docker Compose Demo
 
