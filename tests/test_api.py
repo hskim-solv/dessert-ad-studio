@@ -85,6 +85,34 @@ def test_metrics_exposes_prometheus_text() -> None:
     assert "dessert_ad_studio_http_requests_total" in response.text
 
 
+def test_metrics_uses_route_template_for_a2a_task_paths(monkeypatch, tmp_path) -> None:
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path))
+    request = {
+        "message": {
+            "role": "ROLE_USER",
+            "messageId": "msg-metrics-task",
+            "parts": [{"data": base_payload()}],
+        }
+    }
+
+    task_response = client.post(
+        "/message:send",
+        json=request,
+        headers={"content-type": "application/a2a+json"},
+    )
+    assert task_response.status_code == 200
+    task_id = task_response.json()["task"]["id"]
+
+    get_response = client.get(f"/tasks/{task_id}")
+    assert get_response.status_code == 200
+
+    metrics_response = client.get("/metrics")
+
+    assert metrics_response.status_code == 200
+    assert 'path="/tasks/{task_id}"' in metrics_response.text
+    assert f'path="/tasks/{task_id}"' not in metrics_response.text
+
+
 def test_generate_uses_template_ranking_and_returns_copy() -> None:
     response = client.post("/generate", json=base_payload())
 

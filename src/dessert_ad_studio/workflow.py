@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from time import perf_counter
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
 
 from dessert_ad_studio.backends.base import CopyBackend, ImageBackend
 from dessert_ad_studio.generation_logger import GenerationLogger
@@ -15,6 +15,13 @@ from dessert_ad_studio.schemas import GenerationRequest, GenerationResponse, Tem
 
 class TemplateScorer(Protocol):
     def rank(self, request: GenerationRequest) -> TemplateRanking: ...
+
+
+class WorkflowLogger(Protocol):
+    def write(self, record: dict[str, Any]) -> None: ...
+
+
+LoggerFactory = Callable[[str | Path], WorkflowLogger]
 
 
 @dataclass(frozen=True)
@@ -31,6 +38,7 @@ class GenerationWorkflowDependencies:
     image_backend: ImageBackend
     product_analyzer: ProductAnalyzer
     log_path: str | Path
+    logger_factory: LoggerFactory = GenerationLogger
 
 
 @dataclass(frozen=True)
@@ -184,7 +192,7 @@ def run_generation_workflow(
         "workflow_trace": _trace_payload(trace),
     }
     step_started = perf_counter()
-    GenerationLogger(dependencies.log_path).write(log_record)
+    dependencies.logger_factory(dependencies.log_path).write(log_record)
     trace.append(
         WorkflowTraceEntry(
             step="write_log",

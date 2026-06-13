@@ -8,7 +8,6 @@ from threading import Lock
 from time import perf_counter
 from typing import Any
 
-import dessert_ad_studio.workflow as workflow_module
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request, Response
 
@@ -48,14 +47,11 @@ class _BestEffortGenerationLogger:
 
         self._logger = GenerationLogger(log_path)
 
-    def write(self, record: dict[str, object]) -> None:
+    def write(self, record: dict[str, Any]) -> None:
         try:
             self._logger.write(record)
         except OSError:
             pass
-
-
-workflow_module.GenerationLogger = _BestEffortGenerationLogger
 
 
 class _WorkflowGenerationTelemetry:
@@ -177,6 +173,14 @@ def _record_http_request(method: str, path: str, status_code: int, elapsed_secon
         _HTTP_REQUEST_LATENCY_SECONDS_TOTAL[(method, path)] += elapsed_seconds
 
 
+def _request_metric_path(request: Request) -> str:
+    route = request.scope.get("route")
+    route_path = getattr(route, "path", None)
+    if isinstance(route_path, str) and route_path:
+        return route_path
+    return request.url.path
+
+
 def _prometheus_labels(labels: dict[str, str]) -> str:
     rendered = ",".join(f'{key}="{value}"' for key, value in labels.items())
     return "{" + rendered + "}" if rendered else ""
@@ -206,7 +210,7 @@ async def record_metrics(request: Request, call_next):
     finally:
         _record_http_request(
             method=request.method,
-            path=request.url.path,
+            path=_request_metric_path(request),
             status_code=status_code,
             elapsed_seconds=perf_counter() - started,
         )
@@ -302,6 +306,7 @@ def build_workflow_dependencies(request: GenerationRequest) -> GenerationWorkflo
         ),
         product_analyzer=product_analyzer,
         log_path=log_path,
+        logger_factory=_BestEffortGenerationLogger,
     )
 
 

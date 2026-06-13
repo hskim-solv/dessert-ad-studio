@@ -131,3 +131,36 @@ def test_workflow_log_persists_completed_steps_before_write_log(tmp_path: Path) 
     assert log_record["image_backend"] == "fake-image"
     assert log_record["product_analysis_backend"] == "fake-analyzer"
     assert log_record["used_reference"] is False
+
+
+def test_workflow_uses_injected_logger_factory(tmp_path: Path) -> None:
+    log_path = tmp_path / "custom-generations.jsonl"
+    captured: dict[str, object] = {}
+
+    class CapturingLogger:
+        def __init__(self, path: str | Path) -> None:
+            captured["path"] = path
+
+        def write(self, record: dict[str, object]) -> None:
+            captured["record"] = record
+
+    def logger_factory(path: str | Path) -> CapturingLogger:
+        captured["factory_path"] = path
+        return CapturingLogger(path)
+
+    deps = GenerationWorkflowDependencies(
+        template_scorer=FakeTemplateScorer(),
+        copy_backend=FakeCopyBackend(),
+        image_backend=FakeImageBackend(),
+        product_analyzer=FakeProductAnalyzer(),
+        log_path=log_path,
+        logger_factory=logger_factory,
+    )
+
+    output = run_generation_workflow(request_payload(), deps)
+
+    assert captured["factory_path"] == log_path
+    assert captured["path"] == log_path
+    assert captured["record"]["copy_backend"] == "fake-copy"
+    assert output.trace[-1].step == "write_log"
+    assert not log_path.exists()
