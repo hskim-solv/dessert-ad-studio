@@ -8,5 +8,6 @@ resources:
   - triton-models-pvc.yaml
   - triton-deployment.yaml
   - api-deployment.yaml
+  - api-hpa.yaml
   - app-deployment.yaml
   - ingress.yaml

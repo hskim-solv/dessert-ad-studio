@@ -216,6 +216,26 @@ FastAPI:   http://localhost:8080
 Triton:    http://localhost:8000
 ```
 
+## Kubernetes Deployment Evidence
+
+Kubernetes manifests live under `deploy/k8s`:
+
+```bash
+kubectl kustomize deploy/k8s/base
+kubectl kustomize deploy/k8s/overlays/gpu
+kubectl kustomize deploy/k8s/overlays/agentops
+```
+
+The base stack includes FastAPI, Streamlit, Triton, PVCs, NGINX Ingress, health
+probes, resource requests/limits, and API HPA. The AgentOps overlay routes API
+workflow traces through OpenTelemetry Collector to Phoenix.
+
+Evidence:
+
+```text
+docs/evidence/k8s-deployment.md
+```
+
 ## Advanced GPU / FLUX.2 Validation
 
 On an NVIDIA GPU machine, start only the API service with the GPU overlay:

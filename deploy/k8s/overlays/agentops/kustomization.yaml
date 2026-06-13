@@ -3,5 +3,7 @@ kind: Kustomization
 namespace: dessert-ad-studio
 resources:
   - ../../base
+  - phoenix.yaml
+  - otel-collector.yaml
 patches:
-  - path: triton-gpu-patch.yaml
+  - path: api-otel-patch.yaml

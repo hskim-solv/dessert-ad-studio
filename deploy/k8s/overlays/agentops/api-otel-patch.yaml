@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  template:
+    spec:
+      containers:
+        - name: api
+          env:
+            - name: WORKFLOW_TRACING
+              value: otel
+            - name: WORKFLOW_TRACE_EXPORT
+              value: otlp
+            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+              value: http://otel-collector:4318/v1/traces
+            - name: OTEL_SERVICE_NAME
+              value: dessert-ad-studio-api
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: deployment.environment=local-k8s,service.namespace=dessert-ad-studio

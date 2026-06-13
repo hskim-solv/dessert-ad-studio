@@ -12,6 +12,7 @@ spec:
       labels:
         app: api
     spec:
+      terminationGracePeriodSeconds: 30
       containers:
         - name: api
           image: dessert-ad-studio-api:latest
@@ -19,6 +20,13 @@ spec:
           ports:
             - name: http
               containerPort: 8000
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
           envFrom:
             - configMapRef:
                 name: app-config
@@ -35,12 +43,22 @@ spec:
               port: http
             initialDelaySeconds: 5
             periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
           livenessProbe:
             httpGet:
               path: /livez
               port: http
             initialDelaySeconds: 10
             periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /livez
+              port: http
+            periodSeconds: 5
+            failureThreshold: 24
           volumeMounts:
             - name: outputs
               mountPath: /app/outputs

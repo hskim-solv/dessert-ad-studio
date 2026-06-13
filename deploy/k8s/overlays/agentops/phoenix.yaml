@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phoenix
+  namespace: dessert-ad-studio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: phoenix
+  template:
+    metadata:
+      labels:
+        app: phoenix
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: phoenix
+          image: arizephoenix/phoenix:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 6006
+            - name: otlp-grpc
+              containerPort: 4317
+          env:
+            - name: PHOENIX_WORKING_DIR
+              value: /phoenix_data
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 3
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+            failureThreshold: 30
+          volumeMounts:
+            - name: phoenix-data
+              mountPath: /phoenix_data
+      volumes:
+        - name: phoenix-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: phoenix
+  namespace: dessert-ad-studio
+spec:
+  selector:
+    app: phoenix
+  ports:
+    - name: http
+      port: 6006
+      targetPort: http
+    - name: otlp-grpc
+      port: 4317
+      targetPort: otlp-grpc
