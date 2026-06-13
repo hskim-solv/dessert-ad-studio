@@ -64,43 +64,88 @@ Summary:
 eval_passed=True sample_count=3 average_score=1.0
 ```
 
-## Phoenix Live UI Attempt
+## Phoenix Live UI Verification
 
-Intended command:
+Phoenix was started through the optional AgentOps compose override:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.agentops.yml up -d phoenix
 ```
 
-Observed result:
+Container state:
+
+```text
+part4-phoenix-1   arizephoenix/phoenix:latest   Up   0.0.0.0:4317->4317/tcp, 0.0.0.0:6006->6006/tcp
+```
+
+HTTP readiness:
+
+```text
+phoenix_http=ready
+HTTP/1.1 200 OK
+x-phoenix-server-version: 17.5.0
+```
+
+One workflow trace was exported to Phoenix through OTLP HTTP:
+
+```bash
+WORKFLOW_TRACING=otel \
+WORKFLOW_TRACE_EXPORT=otlp \
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:6006/v1/traces \
+.venv/bin/python scripts/otel_trace_smoke.py
+```
+
+Result:
+
+```text
+trace_smoke=passed export=otlp endpoint=http://localhost:6006/v1/traces steps=7 image_path=outputs/otel-smoke/말차_푸딩_mock_ad.png
+```
+
+Phoenix GraphQL verification:
+
+```text
+project=default traceCount=2
+latest_root_span=generation_workflow spanKind=agent latencyMs=80.0 trace.numSpans=8
+latest_trace_id=6bafdf5027405443eecb0fb0cf518d78
+descendants=rank_templates, decode_reference, analyze_product, build_image_prompt, generate_copy, generate_image, write_log
+```
+
+Captured UI evidence:
+
+- `docs/evidence/assets/phoenix-workflow-trace.png` shows the Phoenix project
+  list after the first successful OTLP smoke request.
+- `docs/evidence/assets/phoenix-trace-detail.png` shows the trace detail panel
+  with the `generation_workflow` root span and workflow child spans.
+
+## Previous Blocker Resolved
+
+The first Phoenix run was blocked by local Docker/host disk capacity:
 
 ```text
 failed to register layer: write /phoenix/.venv/lib/python3.13/site-packages/uvloop/loop.cpython-313-aarch64-linux-gnu.so: input/output error
 ```
 
-Host disk state at the time of the attempt:
+Host disk state at the time of the failed attempt:
 
 ```text
 Filesystem      Size    Used   Avail Capacity
 /dev/disk3s5   228Gi   190Gi   116Mi   100%
 ```
 
-Docker follow-up commands reported:
+After freeing disk space, the same compose and OTLP path verified successfully.
 
-```text
-Error response from daemon: Docker Desktop is unable to start
-```
+## Phoenix Evidence Reproduction
 
-Conclusion: live Phoenix UI capture is blocked by local Docker/host disk
-capacity, not by the application code or compose syntax.
-
-## Phoenix Evidence Procedure After Disk Cleanup
-
-1. Free enough disk space for Docker Desktop and the Phoenix image.
-2. Start Phoenix through the optional compose override:
+1. Start Phoenix:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.agentops.yml up -d phoenix
+```
+
+2. Open Phoenix:
+
+```text
+http://localhost:6006
 ```
 
 3. Send one workflow trace directly to local Phoenix:
@@ -110,25 +155,6 @@ WORKFLOW_TRACING=otel \
 WORKFLOW_TRACE_EXPORT=otlp \
 OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:6006/v1/traces \
 .venv/bin/python scripts/otel_trace_smoke.py
-```
-
-Expected success line:
-
-```text
-trace_smoke=passed export=otlp endpoint=http://localhost:6006/v1/traces steps=7 ...
-```
-
-4. Open Phoenix:
-
-```text
-http://localhost:6006
-```
-
-5. Capture a screenshot showing workflow spans for the local smoke request.
-   Save it under:
-
-```text
-docs/evidence/assets/phoenix-workflow-trace.png
 ```
 
 ## Full Compose Evidence Procedure
