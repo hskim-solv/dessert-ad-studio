@@ -113,6 +113,21 @@ def test_metrics_uses_route_template_for_a2a_task_paths(monkeypatch, tmp_path) -
     assert f'path="/tasks/{task_id}"' not in metrics_response.text
 
 
+def test_metrics_uses_sentinel_for_unmatched_paths() -> None:
+    response_a = client.get("/missing-a-review-1")
+    response_b = client.get("/missing-b-review-2")
+
+    assert response_a.status_code == 404
+    assert response_b.status_code == 404
+
+    metrics_response = client.get("/metrics")
+
+    assert metrics_response.status_code == 200
+    assert 'path="__unmatched__"' in metrics_response.text
+    assert "/missing-a-review-1" not in metrics_response.text
+    assert "/missing-b-review-2" not in metrics_response.text
+
+
 def test_generate_uses_template_ranking_and_returns_copy() -> None:
     response = client.post("/generate", json=base_payload())
 

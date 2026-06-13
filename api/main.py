@@ -178,7 +178,7 @@ def _request_metric_path(request: Request) -> str:
     route_path = getattr(route, "path", None)
     if isinstance(route_path, str) and route_path:
         return route_path
-    return request.url.path
+    return "__unmatched__"
 
 
 def _prometheus_labels(labels: dict[str, str]) -> str:
