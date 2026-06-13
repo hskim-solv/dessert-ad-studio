@@ -99,6 +99,8 @@ def test_generate_uses_template_ranking_and_returns_copy() -> None:
     assert payload["image_backend"] == "mock"
     assert payload["used_reference"] is False
     assert payload["image_path"].endswith(".png")
+    assert payload["product_analysis"]["analyzer_backend"] == "mock"
+    assert payload["elapsed_ms"] >= 0
 
 
 def test_generate_with_reference_image_flags_usage() -> None:
@@ -211,6 +213,39 @@ def test_generate_maps_missing_openai_key_to_503(monkeypatch: pytest.MonkeyPatch
 
     assert response.status_code == 503
     assert "OPENAI_API_KEY" in response.json()["detail"]
+
+
+def test_generate_preserves_backend_error_status_code(monkeypatch: pytest.MonkeyPatch) -> None:
+    from dessert_ad_studio.backends.base import AdBackendError
+    from dessert_ad_studio.backends.mock import MockAdBackend
+
+    def fail_with_validation_error(self, request):
+        raise AdBackendError("bad input", status_code=422)
+
+    monkeypatch.setattr(MockAdBackend, "generate_copy", fail_with_validation_error)
+
+    response = client.post("/generate", json=base_payload())
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "bad input"
+
+
+def test_generate_maps_required_triton_template_failure_to_503(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import api.main as api_main
+
+    class FailingTemplateScorer:
+        def rank(self, request):
+            raise RuntimeError("template scoring unavailable")
+
+    monkeypatch.setenv("REQUIRE_TRITON", "1")
+    monkeypatch.setattr(api_main, "get_template_scorer", lambda: FailingTemplateScorer())
+
+    response = client.post("/generate", json=base_payload())
+
+    assert response.status_code == 503
+    assert "Triton template scoring failed" in response.json()["detail"]
 
 
 def test_generate_rejects_unknown_backend(monkeypatch: pytest.MonkeyPatch) -> None:

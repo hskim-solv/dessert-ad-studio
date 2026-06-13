@@ -7,6 +7,7 @@ from pathlib import Path
 from threading import Lock
 from time import perf_counter
 
+import dessert_ad_studio.workflow as workflow_module
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request, Response
 
@@ -15,12 +16,14 @@ from dessert_ad_studio.backends.flux2 import Flux2Backend
 from dessert_ad_studio.backends.mock import MockAdBackend
 from dessert_ad_studio.backends.openai_copy import OpenAICopyBackend
 from dessert_ad_studio.backends.openai_image import OpenAIImageBackend
-from dessert_ad_studio.generation_logger import GenerationLogger
-from dessert_ad_studio.prompts import build_image_prompt
 from dessert_ad_studio.product_analysis import MockProductAnalyzer, ProductAnalyzer
 from dessert_ad_studio.reference_image import ReferenceImageError, decode_reference_image
 from dessert_ad_studio.schemas import GenerationRequest, GenerationResponse
 from dessert_ad_studio.triton import LocalTemplateScorer, TritonTemplateScorer
+from dessert_ad_studio.workflow import (
+    GenerationWorkflowDependencies,
+    run_generation_workflow,
+)
 
 load_dotenv()
 
@@ -28,6 +31,133 @@ app = FastAPI(title="Dessert Ad Studio API")
 _METRICS_LOCK = Lock()
 _HTTP_REQUESTS_TOTAL: defaultdict[tuple[str, str, str], int] = defaultdict(int)
 _HTTP_REQUEST_LATENCY_SECONDS_TOTAL: defaultdict[tuple[str, str], float] = defaultdict(float)
+
+
+class _BestEffortGenerationLogger:
+    def __init__(self, log_path: str | Path) -> None:
+        from dessert_ad_studio.generation_logger import GenerationLogger
+
+        self._logger = GenerationLogger(log_path)
+
+    def write(self, record: dict[str, object]) -> None:
+        try:
+            self._logger.write(record)
+        except OSError:
+            pass
+
+
+workflow_module.GenerationLogger = _BestEffortGenerationLogger
+
+
+class _WorkflowGenerationTelemetry:
+    def __init__(self) -> None:
+        self.started = perf_counter()
+        self.ranking = None
+        self.copy_result = None
+
+
+class _ApiTemplateRankingScorer:
+    def __init__(self, telemetry: _WorkflowGenerationTelemetry) -> None:
+        self._telemetry = telemetry
+
+    def rank(self, request: GenerationRequest):
+        ranking = rank_templates(request)
+        self._telemetry.ranking = ranking
+        return ranking
+
+
+class _RecordingCopyBackend:
+    def __init__(self, backend: CopyBackend, telemetry: _WorkflowGenerationTelemetry) -> None:
+        self._backend = backend
+        self._telemetry = telemetry
+
+    @property
+    def name(self) -> str:
+        return self._backend.name
+
+    @property
+    def model_id(self) -> str | None:
+        return getattr(self._backend, "model_id", None)
+
+    def generate_copy(self, request: GenerationRequest):
+        result = self._backend.generate_copy(request)
+        self._telemetry.copy_result = result
+        return result
+
+
+class _FailureLoggingImageBackend:
+    def __init__(
+        self,
+        backend: ImageBackend,
+        telemetry: _WorkflowGenerationTelemetry,
+        copy_backend: _RecordingCopyBackend,
+        product_analysis_backend: str,
+        log_path: Path,
+    ) -> None:
+        self._backend = backend
+        self._telemetry = telemetry
+        self._copy_backend = copy_backend
+        self._product_analysis_backend = product_analysis_backend
+        self._log_path = log_path
+
+    @property
+    def name(self) -> str:
+        return self._backend.name
+
+    @property
+    def model_id(self) -> str | None:
+        return getattr(self._backend, "model_id", None)
+
+    @property
+    def supports_reference_image(self) -> bool:
+        return self._backend.supports_reference_image
+
+    def generate_image(
+        self,
+        request: GenerationRequest,
+        image_prompt: str,
+        reference_image: bytes | None = None,
+    ):
+        try:
+            return self._backend.generate_image(
+                request,
+                image_prompt=image_prompt,
+                reference_image=reference_image,
+            )
+        except AdBackendError as exc:
+            self._write_failure_log(request, reference_image=reference_image, exc=exc)
+            raise
+
+    def _write_failure_log(
+        self,
+        request: GenerationRequest,
+        reference_image: bytes | None,
+        exc: AdBackendError,
+    ) -> None:
+        copy_result = self._telemetry.copy_result
+        if copy_result is None:
+            return
+
+        ranking = self._telemetry.ranking
+        record = {
+            "campaign_purpose": request.campaign_purpose,
+            "template": getattr(ranking, "template_name", None),
+            "template_scorer": getattr(ranking, "scorer", None),
+            "triton_latency_ms": getattr(ranking, "latency_ms", None),
+            "copy_backend": self._copy_backend.name,
+            "copy_model_id": self._copy_backend.model_id,
+            "image_backend": self.name,
+            "image_model_id": self.model_id,
+            "product_analysis_backend": self._product_analysis_backend,
+            "used_reference": reference_image is not None,
+            "reference_image_name": request.reference_image_name,
+            "copy_usage": copy_result.usage,
+            "image_usage": None,
+            "image_path": None,
+            "error": exc.detail,
+            "elapsed_ms": (perf_counter() - self._telemetry.started) * 1000,
+        }
+        _BestEffortGenerationLogger(self._log_path).write(record)
 
 
 def _record_http_request(method: str, path: str, status_code: int, elapsed_seconds: float) -> None:
@@ -210,9 +340,9 @@ def rank_templates(request: GenerationRequest):
 
 @app.post("/generate", response_model=GenerationResponse)
 def generate(request: GenerationRequest) -> GenerationResponse:
-    started = perf_counter()
-    ranking = rank_templates(request)
-    copy_backend = get_copy_backend()
+    telemetry = _WorkflowGenerationTelemetry()
+    template_scorer = _ApiTemplateRankingScorer(telemetry)
+    copy_backend = _RecordingCopyBackend(get_copy_backend(), telemetry)
     image_backend = get_image_backend()
 
     try:
@@ -230,79 +360,24 @@ def generate(request: GenerationRequest) -> GenerationResponse:
         )
 
     product_analyzer = get_product_analyzer()
-    product_analysis = product_analyzer.analyze(request, reference_image=reference_image)
-
-    image_prompt = build_image_prompt(
-        request,
-        ranked_template=ranking.template_name,
-        has_reference=reference_image is not None,
+    log_path = Path(os.getenv("GENERATION_LOG_PATH", "logs/generations.jsonl"))
+    dependencies = GenerationWorkflowDependencies(
+        template_scorer=template_scorer,
+        copy_backend=copy_backend,
+        image_backend=_FailureLoggingImageBackend(
+            image_backend,
+            telemetry=telemetry,
+            copy_backend=copy_backend,
+            product_analysis_backend=product_analyzer.name,
+            log_path=log_path,
+        ),
+        product_analyzer=product_analyzer,
+        log_path=log_path,
     )
 
-    logger = GenerationLogger(Path(os.getenv("GENERATION_LOG_PATH", "logs/generations.jsonl")))
-    log_record = {
-        "campaign_purpose": request.campaign_purpose,
-        "template": ranking.template_name,
-        "template_scorer": ranking.scorer,
-        "triton_latency_ms": ranking.latency_ms,
-        "copy_backend": copy_backend.name,
-        "copy_model_id": getattr(copy_backend, "model_id", None),
-        "image_backend": image_backend.name,
-        "image_model_id": getattr(image_backend, "model_id", None),
-        "product_analysis_backend": product_analyzer.name,
-        "used_reference": reference_image is not None,
-        "reference_image_name": request.reference_image_name,
-    }
-
-    copy_result = None
     try:
-        copy_result = copy_backend.generate_copy(request)
-        image_result = image_backend.generate_image(
-            request,
-            image_prompt=image_prompt,
-            reference_image=reference_image,
-        )
+        return run_generation_workflow(request, dependencies).response
+    except ReferenceImageError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except AdBackendError as exc:
-        if copy_result is not None:
-            # The copy call already spent tokens; keep them in the quota log
-            # even though the request itself fails.
-            try:
-                logger.write(
-                    {
-                        **log_record,
-                        "copy_usage": copy_result.usage,
-                        "image_usage": None,
-                        "image_path": None,
-                        "error": exc.detail,
-                        "elapsed_ms": (perf_counter() - started) * 1000,
-                    }
-                )
-            except OSError:
-                pass
-        raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
-
-    elapsed_ms = (perf_counter() - started) * 1000
-
-    try:
-        logger.write(
-            {
-                **log_record,
-                "copy_usage": copy_result.usage,
-                "image_usage": image_result.usage,
-                "elapsed_ms": elapsed_ms,
-                "image_path": image_result.path,
-            }
-        )
-    except OSError:
-        pass  # best-effort cost log; never fail a completed generation on it
-
-    return GenerationResponse(
-        copy_options=copy_result.options,
-        selected_template=ranking,
-        image_path=image_result.path,
-        image_backend=image_backend.name,
-        copy_backend=copy_backend.name,
-        used_reference=reference_image is not None,
-        prompt_summary=image_prompt,
-        elapsed_ms=elapsed_ms,
-        product_analysis=product_analysis,
-    )
+        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
