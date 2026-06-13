@@ -23,6 +23,7 @@ from dessert_ad_studio.backends.flux2 import Flux2Backend
 from dessert_ad_studio.backends.mock import MockAdBackend
 from dessert_ad_studio.backends.openai_copy import OpenAICopyBackend
 from dessert_ad_studio.backends.openai_image import OpenAIImageBackend
+from dessert_ad_studio.observability import build_workflow_tracer
 from dessert_ad_studio.product_analysis import MockProductAnalyzer, ProductAnalyzer
 from dessert_ad_studio.reference_image import ReferenceImageError, decode_reference_image
 from dessert_ad_studio.schemas import GenerationRequest, GenerationResponse
@@ -307,6 +308,7 @@ def build_workflow_dependencies(request: GenerationRequest) -> GenerationWorkflo
         product_analyzer=product_analyzer,
         log_path=log_path,
         logger_factory=_BestEffortGenerationLogger,
+        workflow_tracer=build_workflow_tracer(),
     )
 
 

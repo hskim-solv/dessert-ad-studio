@@ -3,6 +3,7 @@ from pathlib import Path
 
 from dessert_ad_studio.backends.base import CopyResult, ImageResult
 from dessert_ad_studio.backends.mock import MockAdBackend
+from dessert_ad_studio.observability import InMemoryWorkflowTracer
 from dessert_ad_studio.product_analysis import MockProductAnalyzer
 from dessert_ad_studio.schemas import CopyOption, GenerationRequest, ProductAnalysis, TemplateRanking
 from dessert_ad_studio.triton import LocalTemplateScorer
@@ -164,3 +165,54 @@ def test_workflow_uses_injected_logger_factory(tmp_path: Path) -> None:
     assert captured["record"]["copy_backend"] == "fake-copy"
     assert output.trace[-1].step == "write_log"
     assert not log_path.exists()
+
+
+def test_workflow_emits_openinference_spans(tmp_path: Path) -> None:
+    tracer = InMemoryWorkflowTracer()
+    deps = GenerationWorkflowDependencies(
+        template_scorer=FakeTemplateScorer(),
+        copy_backend=FakeCopyBackend(),
+        image_backend=FakeImageBackend(),
+        product_analyzer=FakeProductAnalyzer(),
+        log_path=tmp_path / "generations.jsonl",
+        workflow_tracer=tracer,
+    )
+
+    run_generation_workflow(request_payload(), deps)
+
+    records = tracer.records()
+    assert [record.name for record in records] == [
+        "generation_workflow",
+        "rank_templates",
+        "decode_reference",
+        "analyze_product",
+        "build_image_prompt",
+        "generate_copy",
+        "generate_image",
+        "write_log",
+    ]
+    assert [record.kind for record in records] == [
+        "AGENT",
+        "RERANKER",
+        "TOOL",
+        "LLM",
+        "PROMPT",
+        "LLM",
+        "TOOL",
+        "TOOL",
+    ]
+    assert [
+        record.attributes["openinference.span.kind"] for record in records
+    ] == [
+        "AGENT",
+        "RERANKER",
+        "TOOL",
+        "LLM",
+        "PROMPT",
+        "LLM",
+        "TOOL",
+        "TOOL",
+    ]
+    assert records[5].attributes["copy_backend"] == "fake-copy"
+    assert records[6].attributes["image_backend"] == "fake-image"
+    assert records[-1].attributes["log_path"].endswith("generations.jsonl")
