@@ -158,6 +158,25 @@ python scripts/openai_smoke.py my_product_photo.jpg # copy + reference edit
 python scripts/flux2_smoke.py                       # needs [image] deps
 ```
 
+## AgentOps Evidence
+
+Run deterministic local evals over the bundled demo samples:
+
+```bash
+python scripts/eval_demo_samples.py
+```
+
+Emit local OpenTelemetry/OpenInference workflow spans while running the API:
+
+```bash
+WORKFLOW_TRACING=otel uvicorn api.main:app --port 8000
+```
+
+This evidence path is local-first: the eval harness uses mock backends and the tracing
+path can emit spans without requiring a hosted AgentOps service. Phoenix or Langfuse can
+be connected later through the OpenTelemetry OTLP/export path. FastMCP remains a
+separate future tool-server layer, not a requirement for the local eval or span evidence.
+
 ## Docker Compose Demo
 
 Generate the ONNX model before starting Triton:
