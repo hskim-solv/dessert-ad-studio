@@ -166,17 +166,27 @@ Run deterministic local evals over the bundled demo samples:
 python scripts/eval_demo_samples.py
 ```
 
-Emit local OpenTelemetry/OpenInference workflow spans while running the API:
+Run a local console trace smoke:
 
 ```bash
-WORKFLOW_TRACING=otel uvicorn api.main:app --port 8000
+WORKFLOW_TRACING=otel WORKFLOW_TRACE_EXPORT=console python scripts/otel_trace_smoke.py
 ```
 
-This evidence path is local-first: the eval harness uses mock backends and the current
-tracing implementation emits local console spans without requiring a hosted AgentOps
-service. Phoenix or Langfuse integration is future work and would require adding an
-OTLP exporter or a dedicated integration. FastMCP remains a separate future tool-server
-layer, not a requirement for the local eval or span evidence.
+Run Phoenix locally through the optional compose override:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.agentops.yml up --build
+```
+
+Open:
+
+```text
+Phoenix: http://localhost:6006
+```
+
+The override sends API workflow spans to Phoenix through OTLP HTTP at
+`http://phoenix:6006/v1/traces`. Phoenix remains optional; normal local evals,
+REST calls, and Streamlit usage do not require it.
 
 ## Docker Compose Demo
 

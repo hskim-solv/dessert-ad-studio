@@ -1,0 +1,23 @@
+services:
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    ports:
+      - "6006:6006"
+      - "4317:4317"
+    environment:
+      PHOENIX_WORKING_DIR: /phoenix_data
+    volumes:
+      - phoenix-data:/phoenix_data
+
+  api:
+    environment:
+      WORKFLOW_TRACING: otel
+      WORKFLOW_TRACE_EXPORT: otlp
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://phoenix:6006/v1/traces
+      OTEL_SERVICE_NAME: dessert-ad-studio-api
+    depends_on:
+      phoenix:
+        condition: service_started
+
+volumes:
+  phoenix-data:
