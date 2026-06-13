@@ -84,7 +84,22 @@ def _normalize_attribute_value(value: Any) -> Any:
     if isinstance(value, Path):
         return str(value)
     if isinstance(value, Mapping | list | tuple):
-        return json.dumps(value, ensure_ascii=False, sort_keys=True)
+        return json.dumps(_normalize_json_value(value), ensure_ascii=False, sort_keys=True)
+    return str(value)
+
+
+def _normalize_json_value(value: Any) -> Any:
+    if value is None or isinstance(value, str | bool | int | float):
+        return value
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, Mapping):
+        return {
+            str(key): _normalize_json_value(nested_value)
+            for key, nested_value in value.items()
+        }
+    if isinstance(value, list | tuple):
+        return [_normalize_json_value(nested_value) for nested_value in value]
     return str(value)
 
 

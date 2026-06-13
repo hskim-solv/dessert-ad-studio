@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 from dessert_ad_studio.observability import (
     InMemoryWorkflowTracer,
     OpenInferenceWorkflowTracer,
@@ -27,6 +30,23 @@ def test_openinference_attribute_builder_uses_stable_keys() -> None:
     assert attributes["openinference.span.kind"] == "TOOL"
     assert attributes["nested"] == '{"a": 1}'
     assert "none" not in attributes
+
+
+def test_openinference_attribute_builder_handles_nested_non_json_values() -> None:
+    attributes = build_openinference_attributes(
+        "tool",
+        {
+            "nested": {
+                1: Path("outputs/example.png"),
+                "items": [Path("assets/reference.png"), {"path": Path("logs/run.jsonl")}],
+            },
+        },
+    )
+
+    assert json.loads(attributes["nested"]) == {
+        "1": "outputs/example.png",
+        "items": ["assets/reference.png", {"path": "logs/run.jsonl"}],
+    }
 
 
 def test_openinference_tracer_exports_to_in_memory_span_exporter() -> None:
