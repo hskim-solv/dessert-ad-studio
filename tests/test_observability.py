@@ -1,10 +1,14 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from dessert_ad_studio.observability import (
     InMemoryWorkflowTracer,
     OpenInferenceWorkflowTracer,
     build_openinference_attributes,
+    build_workflow_tracer,
+    resolve_otlp_trace_endpoint,
 )
 
 
@@ -70,3 +74,46 @@ def test_openinference_tracer_exports_to_in_memory_span_exporter() -> None:
     assert spans[0].attributes["openinference.span.kind"] == "TOOL"
     assert spans[0].attributes["image_backend"] == "mock"
     assert spans[0].attributes["image_path"] == "outputs/example.png"
+
+
+def test_resolve_otlp_trace_endpoint_prefers_trace_endpoint(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://collector:4318/custom")
+    monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://collector:4318")
+
+    assert resolve_otlp_trace_endpoint() == "http://collector:4318/custom"
+
+
+def test_resolve_otlp_trace_endpoint_appends_trace_path_to_base_endpoint(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", raising=False)
+    monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://collector:4318")
+
+    assert resolve_otlp_trace_endpoint() == "http://collector:4318/v1/traces"
+
+
+def test_resolve_otlp_trace_endpoint_defaults_to_local_phoenix(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", raising=False)
+    monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
+
+    assert resolve_otlp_trace_endpoint() == "http://localhost:6006/v1/traces"
+
+
+def test_build_workflow_tracer_supports_otlp_export(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("WORKFLOW_TRACE_EXPORT", "otlp")
+    monkeypatch.setenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://collector:4318/v1/traces")
+
+    tracer = build_workflow_tracer("otel")
+
+    assert isinstance(tracer, OpenInferenceWorkflowTracer)
+
+
+def test_build_workflow_tracer_rejects_unknown_export(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("WORKFLOW_TRACE_EXPORT", "zipkin")
+
+    with pytest.raises(ValueError, match="unsupported workflow trace export"):
+        build_workflow_tracer("otel")

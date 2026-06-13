@@ -33,6 +33,28 @@ _OTEL_MISSING_MESSAGE = (
     "openinference-semantic-conventions. Install project dependencies with "
     "`.venv/bin/pip install -e \".[dev]\"`."
 )
+_OTLP_HTTP_MISSING_MESSAGE = (
+    "WORKFLOW_TRACE_EXPORT=otlp requires opentelemetry-exporter-otlp-proto-http. "
+    "Install project dependencies with `.venv/bin/pip install -e \".[dev]\"`."
+)
+
+
+def resolve_otlp_trace_endpoint() -> str:
+    trace_endpoint = os.getenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "").strip()
+    if trace_endpoint:
+        return trace_endpoint
+
+    base_endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "").strip()
+    if not base_endpoint:
+        return "http://localhost:6006/v1/traces"
+    return _append_otlp_trace_path(base_endpoint)
+
+
+def _append_otlp_trace_path(endpoint: str) -> str:
+    normalized = endpoint.rstrip("/")
+    if normalized.endswith("/v1/traces"):
+        return normalized
+    return f"{normalized}/v1/traces"
 
 
 @dataclass(frozen=True)
@@ -263,9 +285,17 @@ def _build_otel_workflow_tracer() -> OpenInferenceWorkflowTracer:
     trace_export = os.getenv("WORKFLOW_TRACE_EXPORT", "console").strip().lower()
     if trace_export == "console":
         provider.add_span_processor(SimpleSpanProcessor(ConsoleSpanExporter()))
+    elif trace_export == "otlp":
+        try:
+            from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+        except ImportError as exc:
+            raise RuntimeError(_OTLP_HTTP_MISSING_MESSAGE) from exc
+        provider.add_span_processor(
+            SimpleSpanProcessor(OTLPSpanExporter(endpoint=resolve_otlp_trace_endpoint()))
+        )
     elif trace_export not in _DISABLED_MODES:
         raise ValueError(
-            f"unsupported workflow trace export: {trace_export!r}; expected console or none"
+            f"unsupported workflow trace export: {trace_export!r}; expected console, otlp, or none"
         )
     return OpenInferenceWorkflowTracer(provider.get_tracer("dessert_ad_studio.workflow"))
 
