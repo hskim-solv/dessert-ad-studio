@@ -29,6 +29,7 @@ docker compose config -q
 | Async job reliability | [`generation-jobs.md`](generation-jobs.md) | Redis/RQ queue, redacted Postgres history, job status API, Streamlit polling/history UX | See focused test and smoke commands in the evidence note |
 | AgentOps observability | [`agentops-phoenix.md`](agentops-phoenix.md), [`assets/phoenix-workflow-trace.png`](assets/phoenix-workflow-trace.png), [`assets/phoenix-trace-detail.png`](assets/phoenix-trace-detail.png) | OTEL console smoke, Phoenix OTLP trace export, UI screenshots, trace count verification | `WORKFLOW_TRACING=otel WORKFLOW_TRACE_EXPORT=console .venv/bin/python scripts/otel_trace_smoke.py` |
 | Workflow eval and failure report | [`workflow-eval-summary.json`](workflow-eval-summary.json) | 3 demo samples, average score 1.00, failure_count 0, failure_cases present | `.venv/bin/python scripts/eval_demo_samples.py --output docs/evidence/workflow-eval-summary.json` |
+| Demo gallery | [`demo-gallery.md`](demo-gallery.md), [`demo-gallery-manifest.json`](demo-gallery-manifest.json), [`assets/demo-gallery/`](assets/demo-gallery/) | 3 deterministic reviewer-visible banners generated from the local workflow with Korean overlay rendering | `.venv/bin/python scripts/build_demo_gallery.py --date 2026-06-16` |
 | Kubernetes deployability | [`k8s-deployment.md`](k8s-deployment.md) | Base, GPU, and AgentOps overlays render; probes, resources, HPA, ingress, OTEL collector, Phoenix path verified structurally | `kubectl kustomize deploy/k8s/base` and overlay commands in the evidence note |
 | OpenAI product analysis | [`product-analysis-openai.md`](product-analysis-openai.md), [`product-analysis-openai-live-summary.json`](product-analysis-openai-live-summary.json), [`product-analysis-openai-eval-results.json`](product-analysis-openai-eval-results.json) | Live smoke passed; 10-case synthetic reference eval pass rate 1.00, p95 latency 13.15s | `.venv/bin/python scripts/openai_product_analysis_smoke.py --eval --eval-count 10 --output docs/evidence/product-analysis-openai-eval-results.json` |
 
@@ -54,7 +55,5 @@ docker compose config -q
 
 ## Remaining Packaging Work
 
-- Add a small demo gallery with representative input/output screenshots.
 - Add an architecture diagram image suitable for README/GitHub preview.
-- Add one portfolio-oriented README section that links the final target,
-  evidence index, ADRs, and local run commands together.
+- Add a compact README preview block once the architecture image is ready.

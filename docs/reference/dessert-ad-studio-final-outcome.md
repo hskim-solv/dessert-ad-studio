@@ -118,7 +118,7 @@ flowchart LR
 | M3 Service workflow hardening | Make generation observable and resumable enough for real UX. | Complete: Redis/RQ job queue, `/generation-jobs` status API, redacted Postgres history, Korean reference-image async rejection, API tests, Redis/RQ smoke, Postgres history smoke, full containerized API/worker smoke with Triton scorer, and Streamlit polling/history UX. |
 | M4 Real product analysis | Replace mock product analysis with a real VLM-backed analyzer while preserving redaction policy. | Complete first analyzer gate: OpenAI Responses Vision adapter, ADR, no-network tests, env/compose wiring, one redacted live smoke, 10-case synthetic reference eval, pass rate 1.00, p95 latency 13.15s. |
 | M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields. |
-| M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | In progress: evidence index at `docs/evidence/README.md`, README link, reproducible command map. Remaining: demo gallery and README-ready architecture image. |
+| M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | In progress: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, README links, reproducible command map. Remaining: README-ready architecture image. |
 
 ## Failure Conditions
 
@@ -155,7 +155,7 @@ These decisions still need explicit selection before implementation:
 1. `README.md`: project explanation, run commands, architecture, and sample output.
 2. `docs/evidence/`: RAG eval, workflow trace, K8s/Docker validation, evidence index, sample gallery.
 3. `docs/adr/`: keyword retrieval, K8s, backend, and adoption decisions.
-4. `outputs/demo-gallery/`: representative input/output banner set.
+4. `docs/evidence/assets/demo-gallery/`: committed representative banner set, with raw regenerated files ignored under `outputs/demo-gallery/`.
 5. `tests/`: backend contract, workflow, prompt, retrieval, API, and eval coverage.
 6. `deploy/`: Docker Compose and Kubernetes manifests.
 7. Runnable demo: local Streamlit/FastAPI or compose-based execution.
@@ -172,6 +172,6 @@ The project is complete when it can be described accurately as:
 ## Next Milestone
 
 The immediate next milestone is completing M6 portfolio packaging. The evidence
-index now links the main quality, trace, deployment, and product-analysis proof.
-The next proof should add a small demo gallery and README-ready architecture
-image so reviewers can inspect both outcomes and engineering controls quickly.
+index now links the main quality, trace, deployment, product-analysis, and demo
+gallery proof. The next proof should add a README-ready architecture image so
+reviewers can inspect both outcomes and engineering controls quickly.

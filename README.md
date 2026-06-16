@@ -161,7 +161,16 @@ The senior-review path is collected in
 [`docs/evidence/README.md`](docs/evidence/README.md): retrieval evals,
 pgvector comparison, async job/history hardening, OTEL/Phoenix traces,
 workflow failure reports, Kubernetes render evidence, and OpenAI product
-analysis evals.
+analysis evals. The reviewer-visible result gallery is
+[`docs/evidence/demo-gallery.md`](docs/evidence/demo-gallery.md), with
+committed PNG banners under
+[`docs/evidence/assets/demo-gallery/`](docs/evidence/assets/demo-gallery/).
+
+Rebuild the deterministic gallery:
+
+```bash
+python scripts/build_demo_gallery.py --date 2026-06-16
+```
 
 Manual smoke:
 
@@ -267,11 +276,11 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Polish sample demo set and README.
-2. Complete OpenAI product analysis live smoke, preservation eval, and latency evidence.
-3. Add product-preserving segmentation and composition.
-4. Add lightweight RAG marketing guidance.
-5. Add revision/evaluation loop.
-6. Package final portfolio with screenshots, architecture diagram, and latency/cost notes.
+1. Add a README-ready architecture diagram image.
+2. Tighten the demo UX around gallery, download, and revision flows.
+3. Extend product-preservation evals from synthetic references to real samples.
+4. Add product-preserving segmentation/composition only if evals show a real gap.
+5. Add serving optimization benchmarks only when vLLM/TensorRT/SGLang has a measured role.
+6. Keep FastMCP/A2A as thin wrappers after the workflow/API is stable.
 
 FastMCP is intentionally deferred. It can later expose the studio as agent-callable tools such as `generate_dessert_ad`, generation log lookup, result retrieval, and template scoring.
