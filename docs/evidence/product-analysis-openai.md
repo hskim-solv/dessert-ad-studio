@@ -34,6 +34,7 @@ Focused no-network tests:
 ```bash
 .venv/bin/pytest \
   tests/test_product_analysis.py \
+  tests/test_openai_product_analysis_smoke.py \
   tests/test_api.py::test_readyz_accepts_openai_product_analysis_backend_without_calling_api \
   -q
 ```
@@ -44,12 +45,15 @@ Config validation:
 docker compose config -q
 ```
 
-Live smoke, gated by explicit approval because it uses a paid external API:
+Live product-analysis smoke. This uses a paid external API and writes only a
+redacted checklist summary:
 
 ```bash
 PRODUCT_ANALYSIS_BACKEND=openai \
 OPENAI_API_KEY=... \
-.venv/bin/python scripts/openai_smoke.py
+.venv/bin/python scripts/openai_product_analysis_smoke.py \
+  --reference-image outputs/smoke-product-reference.png \
+  --output docs/evidence/product-analysis-openai-live-summary.json
 ```
 
 ## Current Result
@@ -68,10 +72,12 @@ Verified on 2026-06-16:
 | Data URL handling | Unit test verifies `input_image` with `data:image/png;base64,...` and `detail=low`. |
 | Structured output | Unit test verifies `text_format=OpenAIProductAnalysisPayload` and `output_parsed` mapping to `ProductAnalysis`. |
 | Storage opt-out | Unit test verifies `store=False`. |
+| Smoke script | `scripts/openai_product_analysis_smoke.py` writes only redacted checklist evidence: latency, backend/model, reference usage, field counts, and pass/fail booleans. |
+| Live smoke | Blocked on 2026-06-16 because local `.env`/environment has no `OPENAI_API_KEY`. |
 
 ## Remaining M4 Work
 
-- Run a live OpenAI product-analysis smoke only after explicit approval.
+- Set `OPENAI_API_KEY` locally and run the product-analysis smoke command above.
 - Build 10-20 representative product-photo eval cases.
 - Add a product-preservation checklist and report pass rate; target remains
   `>= 80%`.
