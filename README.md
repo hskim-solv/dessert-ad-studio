@@ -153,6 +153,8 @@ analysis evals. The reviewer-visible result gallery is
 [`docs/evidence/demo-gallery.md`](docs/evidence/demo-gallery.md), with
 committed PNG banners under
 [`docs/evidence/assets/demo-gallery/`](docs/evidence/assets/demo-gallery/).
+The Streamlit reviewer flow screenshots are in
+[`docs/evidence/streamlit-reviewer-flow.md`](docs/evidence/streamlit-reviewer-flow.md).
 The README architecture image is
 [`docs/evidence/assets/architecture.svg`](docs/evidence/assets/architecture.svg).
 
@@ -266,10 +268,9 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Add real UI screenshots from the Streamlit reviewer flow.
-2. Extend product-preservation evals from synthetic references to real samples.
-3. Add product-preserving segmentation/composition only if evals show a real gap.
-4. Add serving optimization benchmarks only when vLLM/TensorRT/SGLang has a measured role.
-5. Keep FastMCP/A2A as thin wrappers after the workflow/API is stable.
+1. Extend product-preservation evals from synthetic references to real samples.
+2. Add product-preserving segmentation/composition only if evals show a real gap.
+3. Add serving optimization benchmarks only when vLLM/TensorRT/SGLang has a measured role.
+4. Keep FastMCP/A2A as thin wrappers after the workflow/API is stable.
 
 FastMCP is intentionally deferred. It can later expose the studio as agent-callable tools such as `generate_dessert_ad`, generation log lookup, result retrieval, and template scoring.

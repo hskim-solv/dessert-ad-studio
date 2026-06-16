@@ -118,7 +118,7 @@ flowchart LR
 | M3 Service workflow hardening | Make generation observable and resumable enough for real UX. | Complete: Redis/RQ job queue, `/generation-jobs` status API, redacted Postgres history, Korean reference-image async rejection, API tests, Redis/RQ smoke, Postgres history smoke, full containerized API/worker smoke with Triton scorer, and Streamlit polling/history UX. |
 | M4 Real product analysis | Replace mock product analysis with a real VLM-backed analyzer while preserving redaction policy. | Complete first analyzer gate: OpenAI Responses Vision adapter, ADR, no-network tests, env/compose wiring, one redacted live smoke, 10-case synthetic reference eval, pass rate 1.00, p95 latency 13.15s. |
 | M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields. |
-| M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, README links, reproducible command map. |
+| M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, Streamlit reviewer screenshots at `docs/evidence/streamlit-reviewer-flow.md`, README links, reproducible command map. |
 
 ## Failure Conditions
 
@@ -172,6 +172,6 @@ The project is complete when it can be described accurately as:
 ## Next Milestone
 
 The immediate M6 portfolio-packaging gate is complete. The evidence index now
-links the main quality, trace, deployment, product-analysis, demo gallery, and
-architecture proof. The next milestone should add real Streamlit UI screenshots
-and real-sample product-preservation evidence beyond synthetic references.
+links the main quality, trace, deployment, product-analysis, demo gallery,
+architecture, and Streamlit reviewer-flow proof. The next milestone should add
+real-sample product-preservation evidence beyond synthetic references.
