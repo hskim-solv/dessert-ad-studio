@@ -29,26 +29,12 @@ Small business owners often need SNS banners, menu images, and promotion copy, b
 
 ## Architecture
 
-```text
-Streamlit Upload Studio
-  -> FastAPI /generate
-  -> template scorer
-  -> copy backend
-  -> image backend
-  -> PIL Korean text overlay
-  -> downloadable banner PNG
-```
+![Dessert Ad Studio architecture](docs/evidence/assets/architecture.svg)
 
-Planned AI pipeline:
-
-```text
-Product photo
-  -> VLM product analysis
-  -> RAG marketing guidance
-  -> controlled agent workflow
-  -> product-preserving visual generation
-  -> deterministic Korean overlay
-```
+The core service boundary is FastAPI. Streamlit is the reviewer-facing upload
+studio, while retrieval, product analysis, copy/image generation, deterministic
+Korean overlay, async state, tracing, evals, and deployment evidence are kept as
+separate verifiable layers.
 
 ## Quick Start
 
@@ -165,6 +151,8 @@ analysis evals. The reviewer-visible result gallery is
 [`docs/evidence/demo-gallery.md`](docs/evidence/demo-gallery.md), with
 committed PNG banners under
 [`docs/evidence/assets/demo-gallery/`](docs/evidence/assets/demo-gallery/).
+The README architecture image is
+[`docs/evidence/assets/architecture.svg`](docs/evidence/assets/architecture.svg).
 
 Rebuild the deterministic gallery:
 
@@ -276,11 +264,10 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Add a README-ready architecture diagram image.
-2. Tighten the demo UX around gallery, download, and revision flows.
-3. Extend product-preservation evals from synthetic references to real samples.
-4. Add product-preserving segmentation/composition only if evals show a real gap.
-5. Add serving optimization benchmarks only when vLLM/TensorRT/SGLang has a measured role.
-6. Keep FastMCP/A2A as thin wrappers after the workflow/API is stable.
+1. Tighten the demo UX around gallery, download, and revision flows.
+2. Extend product-preservation evals from synthetic references to real samples.
+3. Add product-preserving segmentation/composition only if evals show a real gap.
+4. Add serving optimization benchmarks only when vLLM/TensorRT/SGLang has a measured role.
+5. Keep FastMCP/A2A as thin wrappers after the workflow/API is stable.
 
 FastMCP is intentionally deferred. It can later expose the studio as agent-callable tools such as `generate_dessert_ad`, generation log lookup, result retrieval, and template scoring.

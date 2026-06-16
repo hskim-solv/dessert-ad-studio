@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="880" viewBox="0 0 1440 880" role="img" aria-labelledby="title desc">
+  <title id="title">Dessert Ad Studio architecture</title>
+  <desc id="desc">Product-photo-preserving AI ad workflow with retrieval, generation, overlay, evaluation, observability, and deployment evidence.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#314155" />
+    </marker>
+    <style>
+      .bg { fill: #f7f4ed; }
+      .panel { fill: #ffffff; stroke: #d6dde6; stroke-width: 2; }
+      .panel-soft { fill: #fbfcfd; stroke: #e3e8ef; stroke-width: 2; }
+      .title { fill: #18212f; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 38px; font-weight: 760; }
+      .subtitle { fill: #526174; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 18px; font-weight: 500; }
+      .section { fill: #314155; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; font-weight: 760; text-transform: uppercase; }
+      .box-title { fill: #142033; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 19px; font-weight: 760; }
+      .box-body { fill: #4b5b6e; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; font-weight: 520; }
+      .small { fill: #5c6b7c; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; font-weight: 520; }
+      .callout-title { fill: #172033; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 17px; font-weight: 760; }
+      .arrow { fill: none; stroke: #314155; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow); }
+      .bus { fill: none; stroke: #314155; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+      .dashed { fill: none; stroke: #64748b; stroke-width: 2.4; stroke-dasharray: 8 8; stroke-linecap: round; marker-end: url(#arrow); }
+      .chip { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; font-weight: 700; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1440" height="880" />
+  <text class="title" x="56" y="64">Dessert Ad Studio</text>
+  <text class="subtitle" x="56" y="96">Product-photo-preserving AI ad workflow with evidence for retrieval, orchestration, observability, and deployment.</text>
+
+  <rect class="panel-soft" x="44" y="128" width="1352" height="396" rx="24" />
+  <text class="section" x="72" y="164">Core user workflow</text>
+
+  <g>
+    <rect x="72" y="190" width="188" height="126" rx="16" fill="#fff7ed" stroke="#f59e0b" stroke-width="2" />
+    <text class="box-title" x="94" y="226">User Input</text>
+    <text class="box-body" x="94" y="254">
+      <tspan x="94" dy="0">Product photo</tspan>
+      <tspan x="94" dy="20">Campaign brief</tspan>
+      <tspan x="94" dy="20">Platform, tone, price</tspan>
+    </text>
+
+    <rect x="305" y="190" width="194" height="126" rx="16" fill="#ecfeff" stroke="#0891b2" stroke-width="2" />
+    <text class="box-title" x="327" y="226">Streamlit Studio</text>
+    <text class="box-body" x="327" y="254">
+      <tspan x="327" dy="0">Upload UX</tspan>
+      <tspan x="327" dy="20">Demo samples</tspan>
+      <tspan x="327" dy="20">Polling, history, download</tspan>
+    </text>
+
+    <rect x="545" y="190" width="188" height="126" rx="16" fill="#eef2ff" stroke="#6366f1" stroke-width="2" />
+    <text class="box-title" x="567" y="226">FastAPI Boundary</text>
+    <text class="box-body" x="567" y="254">
+      <tspan x="567" dy="0">/generate</tspan>
+      <tspan x="567" dy="20">/generation-jobs</tspan>
+      <tspan x="567" dy="20">Typed Korean errors</tspan>
+    </text>
+
+    <rect x="780" y="170" width="230" height="166" rx="18" fill="#f0fdf4" stroke="#16a34a" stroke-width="2" />
+    <text class="box-title" x="804" y="208">Typed Workflow</text>
+    <text class="box-body" x="804" y="238">
+      <tspan x="804" dy="0">rank templates</tspan>
+      <tspan x="804" dy="20">analyze product</tspan>
+      <tspan x="804" dy="20">retrieve context</tspan>
+      <tspan x="804" dy="20">copy, image, overlay, log</tspan>
+    </text>
+
+    <rect x="1070" y="190" width="250" height="126" rx="16" fill="#fff1f2" stroke="#e11d48" stroke-width="2" />
+    <text class="box-title" x="1094" y="226">Reviewer Result</text>
+    <text class="box-body" x="1094" y="254">
+      <tspan x="1094" dy="0">Banner PNG</tspan>
+      <tspan x="1094" dy="20">3 copy options</tspan>
+      <tspan x="1094" dy="20">Gallery + manifest</tspan>
+    </text>
+  </g>
+
+  <path class="arrow" d="M 260 253 H 296" />
+  <path class="arrow" d="M 499 253 H 536" />
+  <path class="arrow" d="M 733 253 H 771" />
+  <path class="arrow" d="M 1010 253 H 1061" />
+
+  <path class="bus" d="M 895 336 V 362 H 192" />
+  <path class="bus" d="M 895 362 H 1202" />
+
+  <g>
+    <rect x="72" y="386" width="224" height="104" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="2" />
+    <text class="callout-title" x="94" y="420">Triton/ONNX Scoring</text>
+    <text class="small" x="94" y="448">
+      <tspan x="94" dy="0">template scorer</tspan>
+      <tspan x="94" dy="18">local fallback + smoke</tspan>
+    </text>
+
+    <rect x="326" y="386" width="224" height="104" rx="14" fill="#ffffff" stroke="#14b8a6" stroke-width="2" />
+    <text class="callout-title" x="348" y="420">VLM Product Analysis</text>
+    <text class="small" x="348" y="448">
+      <tspan x="348" dy="0">mock default</tspan>
+      <tspan x="348" dy="18">OpenAI opt-in eval</tspan>
+    </text>
+
+    <rect x="580" y="386" width="224" height="104" rx="14" fill="#ffffff" stroke="#a855f7" stroke-width="2" />
+    <text class="callout-title" x="602" y="420">Marketing Retrieval</text>
+    <text class="small" x="602" y="448">
+      <tspan x="602" dy="0">keyword default</tspan>
+      <tspan x="602" dy="18">pgvector hybrid lane</tspan>
+    </text>
+
+    <rect x="834" y="386" width="238" height="104" rx="14" fill="#ffffff" stroke="#f97316" stroke-width="2" />
+    <text class="callout-title" x="856" y="420">Copy + Image Backends</text>
+    <text class="small" x="856" y="448">
+      <tspan x="856" dy="0">mock, OpenAI, FLUX.2</tspan>
+      <tspan x="856" dy="18">reference-image contract</tspan>
+    </text>
+
+    <rect x="1102" y="386" width="218" height="104" rx="14" fill="#ffffff" stroke="#db2777" stroke-width="2" />
+    <text class="callout-title" x="1124" y="420">Deterministic KR Overlay</text>
+    <text class="small" x="1124" y="448">
+      <tspan x="1124" dy="0">PIL-rendered text</tspan>
+      <tspan x="1124" dy="18">price, CTA, layout</tspan>
+    </text>
+  </g>
+
+  <path class="arrow" d="M 192 362 V 377" />
+  <path class="arrow" d="M 438 362 V 377" />
+  <path class="arrow" d="M 692 362 V 377" />
+  <path class="arrow" d="M 953 362 V 377" />
+  <path class="arrow" d="M 1211 362 V 377" />
+
+  <rect class="panel" x="44" y="558" width="1352" height="242" rx="24" />
+  <text class="section" x="72" y="594">Evidence, operations, and deployment controls</text>
+  <g>
+    <rect x="72" y="626" width="290" height="126" rx="16" fill="#f8fafc" stroke="#64748b" stroke-width="2" />
+    <text class="box-title" x="96" y="662">Async State</text>
+    <text class="box-body" x="96" y="692">
+      <tspan x="96" dy="0">Redis/RQ queue</tspan>
+      <tspan x="96" dy="20">status API</tspan>
+      <tspan x="96" dy="20">Postgres redacted history</tspan>
+    </text>
+
+    <rect x="405" y="626" width="290" height="126" rx="16" fill="#f8fafc" stroke="#64748b" stroke-width="2" />
+    <text class="box-title" x="429" y="662">Evaluation</text>
+    <text class="box-body" x="429" y="692">
+      <tspan x="429" dy="0">retrieval metrics</tspan>
+      <tspan x="429" dy="20">workflow failure report</tspan>
+      <tspan x="429" dy="20">product-analysis eval</tspan>
+    </text>
+
+    <rect x="738" y="626" width="290" height="126" rx="16" fill="#f8fafc" stroke="#64748b" stroke-width="2" />
+    <text class="box-title" x="762" y="662">Observability</text>
+    <text class="box-body" x="762" y="692">
+      <tspan x="762" dy="0">OTEL + Phoenix traces</tspan>
+      <tspan x="762" dy="20">JSONL summaries</tspan>
+      <tspan x="762" dy="20">latency, cost, failure fields</tspan>
+    </text>
+
+    <rect x="1071" y="626" width="290" height="126" rx="16" fill="#f8fafc" stroke="#64748b" stroke-width="2" />
+    <text class="box-title" x="1095" y="662">Deployment</text>
+    <text class="box-body" x="1095" y="692">
+      <tspan x="1095" dy="0">Docker Compose</tspan>
+      <tspan x="1095" dy="20">Kubernetes overlays</tspan>
+      <tspan x="1095" dy="20">CI + API smoke</tspan>
+    </text>
+  </g>
+
+  <rect x="72" y="818" width="1290" height="38" rx="19" fill="#18212f" />
+  <text class="chip" x="96" y="842" fill="#ffffff">Privacy boundary: durable evidence excludes raw photos, raw prompts, raw model responses, and secrets.</text>
+</svg>
