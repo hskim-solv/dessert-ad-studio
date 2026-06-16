@@ -179,6 +179,21 @@ def test_generate_uses_template_ranking_and_returns_copy() -> None:
     assert payload["elapsed_ms"] >= 0
 
 
+def test_generate_accepts_revision_request(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path))
+    payload = {
+        **base_payload(),
+        "revision_request": "더 프리미엄하고 문구를 짧게 수정",
+    }
+
+    response = client.post("/generate", json=payload)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert "수정 요청: 더 프리미엄하고 문구를 짧게 수정" in body["prompt_summary"]
+    assert "더 프리미엄" in body["copy_options"][0]["body"]
+
+
 def test_generate_can_use_pgvector_hybrid_marketing_context_backend(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

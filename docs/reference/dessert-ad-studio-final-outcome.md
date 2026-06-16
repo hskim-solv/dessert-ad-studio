@@ -81,7 +81,7 @@ flowchart LR
 | Image | Generate or compose a product-preserving ad visual, with explicit reference-image support behavior per backend. |
 | Korean overlay | Do not ask the image model to render Korean text. Render copy, price, CTA, and layout deterministically with PIL, Canvas, or HTML/CSS. |
 | Result UX | Show one representative banner, copy/style candidates, download action, and result gallery. |
-| Revision loop | Support concise revision requests such as more premium, emphasize discount, shorter copy, or warmer tone. |
+| Revision loop | Support concise revision requests such as more premium, emphasize discount, shorter copy, or warmer tone. First gate complete through the optional `revision_request` generation field and Streamlit input. |
 | API/agent surface | FastAPI remains the core service boundary. A2A/FastMCP should be thin wrappers after the workflow stabilizes. |
 
 ## Target Quality And Performance
@@ -173,5 +173,5 @@ The project is complete when it can be described accurately as:
 
 The immediate M6 portfolio-packaging gate is complete. The evidence index now
 links the main quality, trace, deployment, product-analysis, demo gallery, and
-architecture proof. The next milestone should tighten the reviewer-facing demo
-UX and add real-sample product-preservation evidence beyond synthetic references.
+architecture proof. The next milestone should add real Streamlit UI screenshots
+and real-sample product-preservation evidence beyond synthetic references.

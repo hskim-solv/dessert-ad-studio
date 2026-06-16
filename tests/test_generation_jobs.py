@@ -27,6 +27,7 @@ def sample_request() -> GenerationRequest:
         template_hint="minimal_premium",
         price_text="5,500원",
         user_constraints="VIP 고객에게만 보일 문구",
+        revision_request="VIP 할인 강조",
         reference_image_name="secret-cake.png",
     )
 
@@ -74,13 +75,16 @@ def test_redacted_request_summary_excludes_raw_prompt_and_product_text() -> None
     assert "말차 푸딩" not in serialized
     assert "VIP 고객" not in serialized
     assert "secret-cake.png" not in serialized
+    assert "VIP 할인 강조" not in serialized
     assert "reference_image_b64" not in summary
     assert "user_constraints" not in summary
+    assert "revision_request" not in summary
     assert summary["campaign_purpose"] == "new_menu"
     assert summary["tone"] == "clean"
     assert summary["template_hint"] == "minimal_premium"
     assert summary["has_price_text"] is True
     assert summary["has_user_constraints"] is True
+    assert summary["has_revision_request"] is True
     assert summary["has_reference_image"] is False
     assert len(summary["product_name_sha256"]) == 64
 

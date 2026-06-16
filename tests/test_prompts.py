@@ -22,6 +22,17 @@ def test_copy_prompt_contains_required_korean_context() -> None:
     assert "3개" in prompt
 
 
+def test_copy_prompt_includes_revision_request() -> None:
+    request = sample_request().model_copy(
+        update={"revision_request": "더 프리미엄하고 문구를 짧게 수정"}
+    )
+
+    prompt = build_copy_prompt(request)
+
+    assert "수정 요청" in prompt
+    assert "더 프리미엄하고 문구를 짧게 수정" in prompt
+
+
 def test_copy_prompt_can_include_product_analysis_and_marketing_context() -> None:
     product_analysis = ProductAnalysis(
         label="Product analysis",
@@ -66,6 +77,14 @@ def test_image_prompt_contains_template_and_constraints() -> None:
     assert "cozy cafe" in prompt.lower()
     assert "SNS 정사각형 광고 이미지" in prompt
     assert "봄 시즌 한정 느낌" in prompt
+
+
+def test_image_prompt_includes_revision_request() -> None:
+    request = sample_request().model_copy(update={"revision_request": "할인 혜택을 강조"})
+
+    prompt = build_image_prompt(request, ranked_template="cozy_cafe")
+
+    assert "수정 요청: 할인 혜택을 강조" in prompt
 
 
 def test_template_features_are_stable_vector() -> None:

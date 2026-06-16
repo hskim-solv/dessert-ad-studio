@@ -307,6 +307,7 @@ def redacted_request_summary(request: GenerationRequest) -> dict[str, Any]:
         "template_hint": request.template_hint,
         "has_price_text": bool(request.price_text),
         "has_user_constraints": bool(request.user_constraints),
+        "has_revision_request": bool(request.revision_request),
         "has_reference_image": bool(request.reference_image_b64),
         "has_reference_image_name": bool(request.reference_image_name),
         "product_name_sha256": hashlib.sha256(request.product_name.encode("utf-8")).hexdigest(),

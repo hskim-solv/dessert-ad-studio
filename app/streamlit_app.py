@@ -49,6 +49,14 @@ TEMPLATE_OPTIONS = {
     "시즌 이벤트": "seasonal_event",
 }
 
+REVISION_PRESETS = {
+    "없음": "",
+    "더 프리미엄하게": "더 프리미엄하고 고급스럽게 수정",
+    "할인 강조": "할인 혜택을 더 앞에 보이게 수정",
+    "문구 짧게": "문구를 더 짧고 스캔하기 쉽게 수정",
+    "더 따뜻하게": "더 따뜻하고 매장 방문을 유도하는 톤으로 수정",
+}
+
 PURPOSE_LABELS_BY_VALUE = {value: label for label, value in PURPOSE_OPTIONS.items()}
 TONE_LABELS_BY_VALUE = {value: label for label, value in TONE_OPTIONS.items()}
 TEMPLATE_LABELS_BY_VALUE = {value: label for label, value in TEMPLATE_OPTIONS.items()}
@@ -245,6 +253,8 @@ def _render_result(result: dict, request: GenerationRequest, analysis: dict[str,
     image_exists = image_path is not None and image_path.exists()
 
     st.subheader("대표 완성 배너")
+    if request.revision_request:
+        st.caption(f"수정 요청 반영: {request.revision_request}")
     if image_path is None:
         st.warning("생성 이미지 경로가 응답에 포함되지 않았습니다.")
     elif not image_exists:
@@ -375,6 +385,11 @@ with left_column:
             "추가 요청",
             value=default_user_constraints,
         )
+        revision_preset_label = st.selectbox("수정 방향", list(REVISION_PRESETS))
+        custom_revision_request = st.text_input(
+            "수정 요청",
+            placeholder="예: 더 프리미엄하게, 할인 강조, 문구 짧게",
+        )
         submitted = st.form_submit_button("광고 생성")
 
     api_path = "/generate" if uploaded is not None else "/generation-jobs"
@@ -405,6 +420,8 @@ with right_column:
                 template_hint=TEMPLATE_OPTIONS[template_label],
                 price_text=price_text,
                 user_constraints=user_constraints,
+                revision_request=custom_revision_request.strip()
+                or REVISION_PRESETS[revision_preset_label],
                 reference_image_b64=_encode_uploaded_file(uploaded),
                 reference_image_name=uploaded.name if uploaded else None,
             )

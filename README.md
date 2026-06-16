@@ -13,8 +13,9 @@ Small business owners often need SNS banners, menu images, and promotion copy, b
 1. Choose a demo sample or enter a product manually in Streamlit.
 2. Generate three Korean ad-copy options through FastAPI.
 3. Generate one representative ad visual through the selected image backend.
-4. Render headline, price, and CTA with a PIL overlay.
-5. Download the finished PNG banner.
+4. Optionally add a concise revision request such as premium tone, discount emphasis, or shorter copy.
+5. Render headline, price, and CTA with a PIL overlay.
+6. Download the finished PNG banner.
 
 ## Core Features
 
@@ -23,6 +24,7 @@ Small business owners often need SNS banners, menu images, and promotion copy, b
 - Korean copy candidates
 - Mock Product Analysis by default, with an opt-in OpenAI vision analyzer
 - Deterministic Korean banner overlay
+- Concise revision-request field for regenerated variants
 - Downloadable finished banner
 - Backend adapter slots for mock, OpenAI, and FLUX.2
 - JSONL generation logging
@@ -264,7 +266,7 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Tighten the demo UX around gallery, download, and revision flows.
+1. Add real UI screenshots from the Streamlit reviewer flow.
 2. Extend product-preservation evals from synthetic references to real samples.
 3. Add product-preserving segmentation/composition only if evals show a real gap.
 4. Add serving optimization benchmarks only when vLLM/TensorRT/SGLang has a measured role.

@@ -30,10 +30,18 @@ class MockAdBackend:
         marketing_context: MarketingContext | None = None,
     ) -> CopyResult:
         product = request.product_name
+        revision_suffix = (
+            f" 요청 반영: {request.revision_request.strip()}"
+            if request.revision_request.strip()
+            else ""
+        )
         options = [
             CopyOption(
                 headline=f"{product}, 오늘의 달콤한 선택",
-                body=f"{request.price_text or '지금 매장에서'} 만나는 기분 좋은 디저트 타임.",
+                body=(
+                    f"{request.price_text or '지금 매장에서'} 만나는 "
+                    f"기분 좋은 디저트 타임.{revision_suffix}"
+                ),
                 call_to_action="오늘 매장에서 만나보세요.",
             ),
             CopyOption(

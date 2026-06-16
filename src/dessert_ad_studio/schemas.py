@@ -16,6 +16,7 @@ class GenerationRequest(BaseModel):
     template_hint: TemplateHint
     price_text: str = Field(default="", max_length=40)
     user_constraints: str = Field(default="", max_length=300)
+    revision_request: str = Field(default="", max_length=200)
     reference_image_b64: str | None = None
     reference_image_name: str | None = None
 

@@ -41,6 +41,7 @@ def build_copy_prompt(
         if request.user_constraints
         else "- 사용자 제약: 과장 광고 없이 자연스럽게"
     )
+    revision_request = request.revision_request.strip()
     lines = [
         "카페/디저트 소상공인을 위한 한국어 SNS 광고 문구를 작성한다.",
         f"- 목적: {PURPOSE_LABELS[request.campaign_purpose]}",
@@ -50,6 +51,8 @@ def build_copy_prompt(
         price_line,
         constraint_line,
     ]
+    if revision_request:
+        lines.append(f"- 수정 요청: {revision_request}")
     if product_analysis is not None:
         detected_product = product_analysis.detected_product_name or request.product_name
         selling_points = ", ".join(product_analysis.selling_points) or product_analysis.copy_focus
@@ -86,6 +89,7 @@ def build_image_prompt(
     product_analysis: ProductAnalysis | None = None,
 ) -> str:
     lines: list[str] = []
+    revision_request = request.revision_request.strip()
     if has_reference:
         lines.append("업로드된 제품 사진의 피사체와 구도를 보존하면서 광고 이미지로 연출한다.")
     lines.extend(
@@ -100,6 +104,8 @@ def build_image_prompt(
             f"제약: {request.user_constraints or '브랜드 로고나 허위 수상 문구를 추가하지 않는다.'}",
         ]
     )
+    if revision_request:
+        lines.append(f"수정 요청: {revision_request}")
     if product_analysis is not None:
         detected_product = product_analysis.detected_product_name or request.product_name
         selling_points = ", ".join(product_analysis.selling_points) or product_analysis.copy_focus
