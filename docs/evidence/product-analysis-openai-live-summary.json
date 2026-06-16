@@ -1,0 +1,16 @@
+{
+  "product_analysis_smoke": "passed",
+  "analyzer_backend": "openai",
+  "model_id": "gpt-5.4-mini",
+  "elapsed_ms": 10361,
+  "used_reference": true,
+  "detected_product_name_present": true,
+  "expected_product_name_mentioned": true,
+  "dominant_colors_count": 4,
+  "mood_keywords_count": 5,
+  "selling_points_count": 4,
+  "quality_notes_count": 3,
+  "preservation_notes_count": 5,
+  "has_korean_overlay_strategy": true,
+  "checklist_passed": true
+}

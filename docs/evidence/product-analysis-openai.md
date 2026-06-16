@@ -14,8 +14,9 @@ This evidence covers the first M4 real product-analysis slice:
 - Default workflow behavior remains `PRODUCT_ANALYSIS_BACKEND=mock`, so local
   tests and compose demo do not require a paid API call.
 
-This slice does not claim final product-preservation quality yet. The remaining
-M4 proof is a live smoke plus a small evaluation set once API spend is approved.
+This slice does not claim final product-preservation quality yet. It proves the
+real OpenAI analyzer path with one redacted live smoke. The remaining M4 proof
+is a small representative evaluation set.
 
 ## Storage Boundary
 
@@ -63,8 +64,8 @@ Verified on 2026-06-16:
 | Check | Result |
 |---|---|
 | ADR | `docs/adr/0009-openai-vision-product-analysis.md` records OpenAI vs Gemini vs local VLM decision. |
-| Focused no-network tests | `9 passed` |
-| Full test suite | `174 passed, 1 warning` |
+| Focused no-network tests | `11 passed` |
+| Full test suite | `176 passed, 1 warning` |
 | Ruff | pass |
 | Compose config | pass |
 | Diff whitespace | pass |
@@ -73,12 +74,12 @@ Verified on 2026-06-16:
 | Structured output | Unit test verifies `text_format=OpenAIProductAnalysisPayload` and `output_parsed` mapping to `ProductAnalysis`. |
 | Storage opt-out | Unit test verifies `store=False`. |
 | Smoke script | `scripts/openai_product_analysis_smoke.py` writes only redacted checklist evidence: latency, backend/model, reference usage, field counts, and pass/fail booleans. |
-| Live smoke | Blocked on 2026-06-16 because local `.env`/environment has no `OPENAI_API_KEY`. |
+| Live smoke | Passed with `gpt-5.4-mini`, reference image enabled, elapsed `10,361 ms`, checklist passed. Summary: `docs/evidence/product-analysis-openai-live-summary.json`. |
 
 ## Remaining M4 Work
 
-- Set `OPENAI_API_KEY` locally and run the product-analysis smoke command above.
 - Build 10-20 representative product-photo eval cases.
 - Add a product-preservation checklist and report pass rate; target remains
   `>= 80%`.
-- Measure OpenAI path latency and compare against the `p95 <= 30s` target.
+- Measure OpenAI path latency across the eval set and compare against the
+  `p95 <= 30s` target.
