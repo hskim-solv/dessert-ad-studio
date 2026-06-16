@@ -116,7 +116,7 @@ flowchart LR
 | M1 RAG baseline eval | Prove the current keyword retriever is useful before adding vector DB. | Complete: `docs/evidence/rag-baseline.md`, eval JSON, category hit rate 1.00, prohibited-claims hit rate 1.00. |
 | M2 Hybrid retrieval | Compare Qdrant/pgvector/Chroma or a no-adoption baseline before choosing. | Complete: `docs/adr/0007-pgvector-marketing-context-retrieval.md`, `docs/evidence/pgvector-retrieval.md`, pgvector hybrid precision 1.00 vs keyword baseline precision 0.75 on the current 10-sample eval set. |
 | M3 Service workflow hardening | Make generation observable and resumable enough for real UX. | Complete: Redis/RQ job queue, `/generation-jobs` status API, redacted Postgres history, Korean reference-image async rejection, API tests, Redis/RQ smoke, Postgres history smoke, full containerized API/worker smoke with Triton scorer, and Streamlit polling/history UX. |
-| M4 Real product analysis | Replace mock product analysis with a real VLM-backed analyzer while preserving redaction policy. | Partial: OpenAI Responses Vision adapter, ADR, no-network tests, env/compose wiring, and one redacted live smoke. Remaining: eval samples, product-preservation checklist pass rate >= 80%, and p95 latency measurement. |
+| M4 Real product analysis | Replace mock product analysis with a real VLM-backed analyzer while preserving redaction policy. | Complete first analyzer gate: OpenAI Responses Vision adapter, ADR, no-network tests, env/compose wiring, one redacted live smoke, 10-case synthetic reference eval, pass rate 1.00, p95 latency 13.15s. |
 | M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Phoenix/OTEL trace screenshots, JSONL logs, workflow eval summary, failure-case report. |
 | M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | README, architecture diagram, demo gallery, reproducible run commands, evidence index. |
 
@@ -171,8 +171,8 @@ The project is complete when it can be described accurately as:
 
 ## Next Milestone
 
-The immediate next milestone is completing M4 Real product analysis evidence.
-The first OpenAI analyzer adapter is now wired behind
-`PRODUCT_ANALYSIS_BACKEND=openai` with no-network tests and ADR evidence. The
-remaining proof is a live smoke, representative eval samples, preservation
-checklist score, and OpenAI-path latency measurement.
+The immediate next milestone is M5 Observability and eval packaging. The first
+OpenAI analyzer gate is complete behind `PRODUCT_ANALYSIS_BACKEND=openai`; the
+next proof should make the end-to-end workflow reviewable with trace evidence,
+JSONL eval summaries, failure-case reporting, and a small real-photo/banner
+quality set.

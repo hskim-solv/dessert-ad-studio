@@ -14,9 +14,9 @@ This evidence covers the first M4 real product-analysis slice:
 - Default workflow behavior remains `PRODUCT_ANALYSIS_BACKEND=mock`, so local
   tests and compose demo do not require a paid API call.
 
-This slice does not claim final product-preservation quality yet. It proves the
-real OpenAI analyzer path with one redacted live smoke. The remaining M4 proof
-is a small representative evaluation set.
+This slice does not claim final image-generation product-preservation quality
+yet. It proves the real OpenAI analyzer path with one redacted live smoke and a
+fixed 10-case synthetic reference-image eval gate.
 
 ## Storage Boundary
 
@@ -57,6 +57,17 @@ OPENAI_API_KEY=... \
   --output docs/evidence/product-analysis-openai-live-summary.json
 ```
 
+Live 10-case eval. This also uses a paid external API and writes only redacted
+per-case checklist counts and booleans:
+
+```bash
+.venv/bin/python scripts/openai_product_analysis_smoke.py \
+  --eval \
+  --eval-count 10 \
+  --output docs/evidence/product-analysis-openai-eval-results.json \
+  --image-dir outputs/product-analysis-eval
+```
+
 ## Current Result
 
 Verified on 2026-06-16:
@@ -64,8 +75,8 @@ Verified on 2026-06-16:
 | Check | Result |
 |---|---|
 | ADR | `docs/adr/0009-openai-vision-product-analysis.md` records OpenAI vs Gemini vs local VLM decision. |
-| Focused no-network tests | `11 passed` |
-| Full test suite | `176 passed, 1 warning` |
+| Focused no-network tests | `15 passed` |
+| Full test suite | `180 passed, 1 warning` |
 | Ruff | pass |
 | Compose config | pass |
 | Diff whitespace | pass |
@@ -75,11 +86,12 @@ Verified on 2026-06-16:
 | Storage opt-out | Unit test verifies `store=False`. |
 | Smoke script | `scripts/openai_product_analysis_smoke.py` writes only redacted checklist evidence: latency, backend/model, reference usage, field counts, and pass/fail booleans. |
 | Live smoke | Passed with `gpt-5.4-mini`, reference image enabled, elapsed `10,361 ms`, checklist passed. Summary: `docs/evidence/product-analysis-openai-live-summary.json`. |
+| Live eval | Passed with `gpt-5.4-mini`, 10/10 cases passed, pass rate `1.00`, p95 latency `13,150 ms`, below the `30,000 ms` target. Summary: `docs/evidence/product-analysis-openai-eval-results.json`. |
 
 ## Remaining M4 Work
 
-- Build 10-20 representative product-photo eval cases.
-- Add a product-preservation checklist and report pass rate; target remains
-  `>= 80%`.
-- Measure OpenAI path latency across the eval set and compare against the
-  `p95 <= 30s` target.
+- The first OpenAI analyzer eval gate is complete for fixed synthetic
+  reference-image cases: pass rate `1.00` against the `>= 0.80` threshold and
+  p95 latency `13,150 ms` against the `<= 30s` target.
+- Remaining product-quality proof should move to real uploaded product photos
+  and final banner/image preservation, not raw analyzer output.
