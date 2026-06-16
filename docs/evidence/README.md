@@ -1,0 +1,60 @@
+# Dessert Ad Studio Evidence Index
+
+Date: 2026-06-16
+
+This index maps the repository evidence to the senior portfolio signals behind
+Dessert Ad Studio: retrieval quality, workflow reliability, observability,
+deployment readiness, privacy boundaries, and model-backed product analysis.
+
+## Quick Reviewer Path
+
+1. Start with the final target:
+   [`docs/reference/dessert-ad-studio-final-outcome.md`](../reference/dessert-ad-studio-final-outcome.md)
+2. Check the measured evidence in this file.
+3. Run the regression gate:
+
+```bash
+.venv/bin/ruff check .
+.venv/bin/ruff format --check .
+.venv/bin/pytest -q
+docker compose config -q
+```
+
+## Evidence Map
+
+| Signal | Evidence | Current result | Reproduce |
+|---|---|---|---|
+| Retrieval baseline | [`rag-baseline.md`](rag-baseline.md), [`rag-baseline-results.json`](rag-baseline-results.json) | 10 samples, category hit rate 1.00, prohibited-claims hit rate 1.00, precision 0.75 | `.venv/bin/python scripts/eval_marketing_context.py --output docs/evidence/rag-baseline-results.json` |
+| Hybrid vector retrieval | [`pgvector-retrieval.md`](pgvector-retrieval.md), [`pgvector-baseline-results.json`](pgvector-baseline-results.json), [`pgvector-db-smoke-results.json`](pgvector-db-smoke-results.json) | pgvector hybrid preserves hit rate 1.00 and improves precision to 1.00 on the current 10-sample set | `.venv/bin/python scripts/eval_pgvector_marketing_context.py --output docs/evidence/pgvector-baseline-results.json` |
+| Async job reliability | [`generation-jobs.md`](generation-jobs.md) | Redis/RQ queue, redacted Postgres history, job status API, Streamlit polling/history UX | See focused test and smoke commands in the evidence note |
+| AgentOps observability | [`agentops-phoenix.md`](agentops-phoenix.md), [`assets/phoenix-workflow-trace.png`](assets/phoenix-workflow-trace.png), [`assets/phoenix-trace-detail.png`](assets/phoenix-trace-detail.png) | OTEL console smoke, Phoenix OTLP trace export, UI screenshots, trace count verification | `WORKFLOW_TRACING=otel WORKFLOW_TRACE_EXPORT=console .venv/bin/python scripts/otel_trace_smoke.py` |
+| Workflow eval and failure report | [`workflow-eval-summary.json`](workflow-eval-summary.json) | 3 demo samples, average score 1.00, failure_count 0, failure_cases present | `.venv/bin/python scripts/eval_demo_samples.py --output docs/evidence/workflow-eval-summary.json` |
+| Kubernetes deployability | [`k8s-deployment.md`](k8s-deployment.md) | Base, GPU, and AgentOps overlays render; probes, resources, HPA, ingress, OTEL collector, Phoenix path verified structurally | `kubectl kustomize deploy/k8s/base` and overlay commands in the evidence note |
+| OpenAI product analysis | [`product-analysis-openai.md`](product-analysis-openai.md), [`product-analysis-openai-live-summary.json`](product-analysis-openai-live-summary.json), [`product-analysis-openai-eval-results.json`](product-analysis-openai-eval-results.json) | Live smoke passed; 10-case synthetic reference eval pass rate 1.00, p95 latency 13.15s | `.venv/bin/python scripts/openai_product_analysis_smoke.py --eval --eval-count 10 --output docs/evidence/product-analysis-openai-eval-results.json` |
+
+## Decision Records
+
+| Area | ADR |
+|---|---|
+| Kubernetes evidence path | [`docs/adr/0005-kubernetes-deployment-evidence.md`](../adr/0005-kubernetes-deployment-evidence.md) |
+| Keyword retrieval baseline | [`docs/adr/0006-keyword-marketing-context-retrieval.md`](../adr/0006-keyword-marketing-context-retrieval.md) |
+| pgvector hybrid retrieval | [`docs/adr/0007-pgvector-marketing-context-retrieval.md`](../adr/0007-pgvector-marketing-context-retrieval.md) |
+| Redis/RQ and Postgres history | [`docs/adr/0008-redis-rq-generation-jobs-history.md`](../adr/0008-redis-rq-generation-jobs-history.md) |
+| OpenAI vision product analysis | [`docs/adr/0009-openai-vision-product-analysis.md`](../adr/0009-openai-vision-product-analysis.md) |
+
+## Privacy And Storage Boundary
+
+- Raw customer photos are excluded from durable evidence artifacts.
+- Raw prompts, raw model responses, generated copy text, and secrets are not
+  stored in job history or eval summaries.
+- OpenAI product-analysis evidence stores only redacted checklist counts,
+  booleans, latency, backend/model id, and pass/fail fields.
+- AgentOps/Phoenix evidence is scoped to local/demo workflows. Production use
+  would require another trace-attribute review before storing customer inputs.
+
+## Remaining Packaging Work
+
+- Add a small demo gallery with representative input/output screenshots.
+- Add an architecture diagram image suitable for README/GitHub preview.
+- Add one portfolio-oriented README section that links the final target,
+  evidence index, ADRs, and local run commands together.

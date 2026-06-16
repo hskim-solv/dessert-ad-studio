@@ -155,6 +155,14 @@ pytest -q
 ruff check .
 ```
 
+## Portfolio Evidence
+
+The senior-review path is collected in
+[`docs/evidence/README.md`](docs/evidence/README.md): retrieval evals,
+pgvector comparison, async job/history hardening, OTEL/Phoenix traces,
+workflow failure reports, Kubernetes render evidence, and OpenAI product
+analysis evals.
+
 Manual smoke:
 
 ```bash
