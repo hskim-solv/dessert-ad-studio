@@ -168,7 +168,7 @@ python scripts/flux2_smoke.py                       # needs [image] deps
 Run deterministic local evals over the bundled demo samples:
 
 ```bash
-python scripts/eval_demo_samples.py
+python scripts/eval_demo_samples.py --output docs/evidence/workflow-eval-summary.json
 ```
 
 Run a local console trace smoke:

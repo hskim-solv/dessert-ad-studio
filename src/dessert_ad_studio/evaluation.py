@@ -45,6 +45,8 @@ class EvalSummary:
     average_score: float
     passed: bool
     threshold: float
+    failure_count: int
+    failure_cases: list[dict[str, Any]]
     results: list[GenerationEvalResult]
 
     def to_dict(self) -> dict[str, Any]:
@@ -145,6 +147,7 @@ def summarize_eval_results(
 ) -> EvalSummary:
     sample_count = len(results)
     average_score = sum(result.score for result in results) / sample_count if sample_count else 0.0
+    failure_cases = [_failure_case(result) for result in results if not result.passed]
     return EvalSummary(
         sample_count=sample_count,
         average_score=average_score,
@@ -152,8 +155,18 @@ def summarize_eval_results(
         and average_score >= threshold
         and all(result.passed for result in results),
         threshold=threshold,
+        failure_count=len(failure_cases),
+        failure_cases=failure_cases,
         results=results,
     )
+
+
+def _failure_case(result: GenerationEvalResult) -> dict[str, Any]:
+    return {
+        "sample_label": result.sample_label,
+        "score": result.score,
+        "failed_checks": [check.name for check in result.checks if not check.passed],
+    }
 
 
 def evaluate_marketing_context_retrieval(

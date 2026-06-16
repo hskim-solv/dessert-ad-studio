@@ -1,0 +1,157 @@
+{
+  "sample_count": 3,
+  "average_score": 1.0,
+  "passed": true,
+  "threshold": 0.8,
+  "failure_count": 0,
+  "failure_cases": [],
+  "results": [
+    {
+      "sample_label": "디저트 카페 - 딸기 크림 크루아상",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "베이커리 - 말차 푸딩",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "꽃집 - 플라워 박스",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    }
+  ]
+}

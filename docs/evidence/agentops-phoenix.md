@@ -55,14 +55,20 @@ trace_smoke=passed export=console endpoint=local-console steps=7 image_path=outp
 Command:
 
 ```bash
-.venv/bin/python scripts/eval_demo_samples.py
+.venv/bin/python scripts/eval_demo_samples.py \
+  --output docs/evidence/workflow-eval-summary.json
 ```
 
 Summary:
 
 ```text
-eval_passed=True sample_count=3 average_score=1.0
+eval_passed=True sample_count=3 average_score=1.0 failure_count=0
 ```
+
+The durable summary is stored at
+`docs/evidence/workflow-eval-summary.json`. It includes per-sample checks plus
+`failure_count` and `failure_cases` fields, so failing workflow evals produce a
+reviewable failure-case report without reading raw generation logs.
 
 ## Phoenix Live UI Verification
 

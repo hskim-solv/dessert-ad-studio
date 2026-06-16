@@ -26,10 +26,14 @@ def request_from_sample(sample: DemoSample) -> GenerationRequest:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Run deterministic evals for demo samples.")
+    parser = argparse.ArgumentParser(
+        description="Run deterministic evals for demo samples.",
+        allow_abbrev=False,
+    )
     parser.add_argument("--threshold", type=float, default=0.8)
     parser.add_argument("--output-dir", default="outputs/eval")
     parser.add_argument("--log-path", default="logs/eval-generations.jsonl")
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir)
@@ -59,7 +63,11 @@ def main() -> int:
         )
 
     summary = summarize_eval_results(results, threshold=args.threshold)
-    print(json.dumps(summary.to_dict(), ensure_ascii=False, indent=2))
+    payload = json.dumps(summary.to_dict(), ensure_ascii=False, indent=2)
+    print(payload)
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(payload + "\n", encoding="utf-8")
     return 0 if summary.passed else 1
 
 

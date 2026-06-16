@@ -75,4 +75,24 @@ def test_summarize_eval_results_aggregates_scores(tmp_path: Path) -> None:
     assert summary.passed is True
     assert summary.sample_count == 1
     assert summary.average_score == result.score
+    assert summary.failure_count == 0
+    assert summary.failure_cases == []
     assert summary.to_dict()["results"][0]["sample_label"] == "sample"
+
+
+def test_summarize_eval_results_reports_failure_cases(tmp_path: Path) -> None:
+    output = mock_output(tmp_path)
+    output.trace.pop()
+    result = evaluate_generation_output("broken-sample", sample_request(), output)
+
+    summary = summarize_eval_results([result], threshold=0.8)
+
+    assert summary.passed is False
+    assert summary.failure_count == 1
+    assert summary.failure_cases == [
+        {
+            "sample_label": "broken-sample",
+            "score": result.score,
+            "failed_checks": ["workflow.required_steps"],
+        }
+    ]
