@@ -4,7 +4,12 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
-from dessert_ad_studio.schemas import CopyOption, GenerationRequest, MarketingContext, ProductAnalysis
+from dessert_ad_studio.schemas import (
+    CopyOption,
+    GenerationRequest,
+    MarketingContext,
+    ProductAnalysis,
+)
 
 
 @dataclass(frozen=True)

@@ -228,8 +228,7 @@ def to_pgvector_literal(vector: list[float]) -> str:
 
 def _pgvector_runtime_error(operation: str, exc: Exception) -> RuntimeError:
     return RuntimeError(
-        f"pgvector_hybrid retriever is not ready: {operation} failed "
-        f"({exc.__class__.__name__})"
+        f"pgvector_hybrid retriever is not ready: {operation} failed ({exc.__class__.__name__})"
     )
 
 
@@ -319,14 +318,10 @@ def _marketing_context_from_rows(
     return MarketingContext(
         retriever_backend=retriever_backend,
         guide_categories=_unique(doc.category for doc in docs),
-        copy_guidelines=_unique(
-            guideline for doc in docs for guideline in doc.copy_guidelines
-        ),
+        copy_guidelines=_unique(guideline for doc in docs for guideline in doc.copy_guidelines),
         tone_examples=_unique(example for doc in docs for example in doc.tone_examples),
         platform_notes=_unique(note for doc in docs for note in doc.platform_notes),
-        prohibited_claims=_unique(
-            claim for doc in docs for claim in doc.prohibited_claims
-        ),
+        prohibited_claims=_unique(claim for doc in docs for claim in doc.prohibited_claims),
         cta_examples=_unique(example for doc in docs for example in doc.cta_examples),
         source_doc_ids=[doc.doc_id for doc in docs],
         retrieved_docs_count=len(docs),
@@ -349,11 +344,7 @@ def _keyword_signal_score(query_text: str, row: PgvectorGuideRow) -> int:
             and keyword.lower() in normalized_query
             and keyword.lower() not in _PREMIUM_WEAK_SIGNALS
         )
-    return sum(
-        1
-        for keyword in row.keywords
-        if keyword and keyword.lower() in normalized_query
-    )
+    return sum(1 for keyword in row.keywords if keyword and keyword.lower() in normalized_query)
 
 
 def _tokens(text: str) -> list[str]:

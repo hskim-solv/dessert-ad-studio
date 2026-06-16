@@ -193,8 +193,7 @@ def _render_generation_job_history(jobs: list[dict]) -> None:
         with st.container(border=True):
             st.markdown(f"**{label}**")
             st.caption(
-                f"{job.get('job_id', 'unknown')} · "
-                f"queue={job.get('queue_backend', 'unknown')}"
+                f"{job.get('job_id', 'unknown')} · queue={job.get('queue_backend', 'unknown')}"
             )
             if job.get("poll_error"):
                 st.warning(f"상태 조회 실패: {job['poll_error']}")
@@ -267,8 +266,7 @@ def _render_result(result: dict, request: GenerationRequest, analysis: dict[str,
                 )
             except Exception as exc:
                 st.warning(
-                    "배너 오버레이 생성 중 문제가 발생했습니다. "
-                    f"원본 이미지를 표시합니다: {exc}"
+                    f"배너 오버레이 생성 중 문제가 발생했습니다. 원본 이미지를 표시합니다: {exc}"
                 )
         else:
             st.warning("배너 오버레이에 사용할 광고 문구를 찾지 못했습니다.")
@@ -346,9 +344,7 @@ with left_column:
     )
     default_tone_label = TONE_LABELS_BY_VALUE[selected_sample.tone] if selected_sample else "따뜻한"
     default_template_label = (
-        TEMPLATE_LABELS_BY_VALUE[selected_sample.template_hint]
-        if selected_sample
-        else "코지 카페"
+        TEMPLATE_LABELS_BY_VALUE[selected_sample.template_hint] if selected_sample else "코지 카페"
     )
     default_price_text = selected_sample.price_text if selected_sample else "6,800원"
     default_user_constraints = (

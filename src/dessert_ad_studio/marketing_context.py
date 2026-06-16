@@ -72,9 +72,7 @@ _GUIDE_DOCS = (
         doc_id="guide-premium-tone-v1",
         category="premium",
         keywords=("프리미엄", "premium", "고급", "선물", "minimal_premium"),
-        copy_guidelines=(
-            "프리미엄 톤은 과한 감탄사보다 재료, 정성, 선물 맥락을 강조한다.",
-        ),
+        copy_guidelines=("프리미엄 톤은 과한 감탄사보다 재료, 정성, 선물 맥락을 강조한다.",),
         tone_examples=("프리미엄 톤은 짧은 문장과 절제된 수식어를 우선한다.",),
     ),
     _GuideDoc(

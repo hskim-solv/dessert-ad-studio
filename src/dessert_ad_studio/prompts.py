@@ -105,8 +105,7 @@ def build_image_prompt(
         selling_points = ", ".join(product_analysis.selling_points) or product_analysis.copy_focus
         dominant_colors = ", ".join(product_analysis.dominant_colors) or "분석값 없음"
         preservation_notes = (
-            ", ".join(product_analysis.preservation_notes)
-            or product_analysis.photo_strategy
+            ", ".join(product_analysis.preservation_notes) or product_analysis.photo_strategy
         )
         recommended_background = (
             product_analysis.recommended_background or product_analysis.visual_strategy

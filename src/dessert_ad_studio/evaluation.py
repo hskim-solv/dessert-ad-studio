@@ -144,9 +144,7 @@ def summarize_eval_results(
     threshold: float = 0.8,
 ) -> EvalSummary:
     sample_count = len(results)
-    average_score = (
-        sum(result.score for result in results) / sample_count if sample_count else 0.0
-    )
+    average_score = sum(result.score for result in results) / sample_count if sample_count else 0.0
     return EvalSummary(
         sample_count=sample_count,
         average_score=average_score,
@@ -182,9 +180,7 @@ def evaluate_marketing_context_retrieval(
         len(matched_categories) / len(retrieved_categories) if retrieved_categories else 0.0
     )
     required_category_hit_rate = (
-        (len(required) - len(missing_required_categories)) / len(required)
-        if required
-        else 1.0
+        (len(required) - len(missing_required_categories)) / len(required) if required else 1.0
     )
     checks = [
         _check(
@@ -235,14 +231,10 @@ def summarize_marketing_context_eval_results(
 ) -> MarketingContextEvalSummary:
     sample_count = len(results)
     average_category_hit_rate = (
-        sum(result.category_hit_rate for result in results) / sample_count
-        if sample_count
-        else 0.0
+        sum(result.category_hit_rate for result in results) / sample_count if sample_count else 0.0
     )
     average_category_precision = (
-        sum(result.category_precision for result in results) / sample_count
-        if sample_count
-        else 0.0
+        sum(result.category_precision for result in results) / sample_count if sample_count else 0.0
     )
     required_category_hit_rate = (
         sum(result.required_category_hit_rate for result in results) / sample_count

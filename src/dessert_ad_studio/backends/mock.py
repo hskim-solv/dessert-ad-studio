@@ -7,7 +7,12 @@ from PIL import Image, ImageDraw, ImageFont
 
 from dessert_ad_studio.backends.base import CopyResult, ImageResult
 from dessert_ad_studio.backends.naming import safe_filename_stem
-from dessert_ad_studio.schemas import CopyOption, GenerationRequest, MarketingContext, ProductAnalysis
+from dessert_ad_studio.schemas import (
+    CopyOption,
+    GenerationRequest,
+    MarketingContext,
+    ProductAnalysis,
+)
 
 
 class MockAdBackend:

@@ -309,9 +309,7 @@ def redacted_request_summary(request: GenerationRequest) -> dict[str, Any]:
         "has_user_constraints": bool(request.user_constraints),
         "has_reference_image": bool(request.reference_image_b64),
         "has_reference_image_name": bool(request.reference_image_name),
-        "product_name_sha256": hashlib.sha256(
-            request.product_name.encode("utf-8")
-        ).hexdigest(),
+        "product_name_sha256": hashlib.sha256(request.product_name.encode("utf-8")).hexdigest(),
     }
 
 
@@ -321,9 +319,7 @@ def redacted_response_summary(response: GenerationResponse) -> dict[str, Any]:
         "selected_template": response.selected_template.template_name,
         "template_scorer": response.selected_template.scorer,
         "has_image_path": bool(response.image_path),
-        "image_path_sha256": hashlib.sha256(
-            response.image_path.encode("utf-8")
-        ).hexdigest()
+        "image_path_sha256": hashlib.sha256(response.image_path.encode("utf-8")).hexdigest()
         if response.image_path
         else None,
         "image_backend": response.image_backend,

@@ -46,9 +46,7 @@ def test_to_pgvector_literal_preserves_dimensions() -> None:
 
 
 def test_offline_pgvector_candidate_hits_required_categories() -> None:
-    summary = summarize_marketing_context_eval_results(
-        evaluate_offline_pgvector_candidate()
-    )
+    summary = summarize_marketing_context_eval_results(evaluate_offline_pgvector_candidate())
 
     assert summary.sample_count >= 10
     assert summary.average_category_hit_rate >= 0.8
@@ -58,18 +56,13 @@ def test_offline_pgvector_candidate_hits_required_categories() -> None:
 
 
 def test_hybrid_reranker_does_not_promote_premium_from_gift_word_only() -> None:
-    results = {
-        result.sample_label: result
-        for result in evaluate_offline_pgvector_candidate()
-    }
+    results = {result.sample_label: result for result in evaluate_offline_pgvector_candidate()}
 
     assert results["discount-promotion"].unexpected_categories == []
 
 
 def test_pgvector_hybrid_retriever_returns_guidance_without_extra_categories() -> None:
-    case = next(
-        item for item in MARKETING_CONTEXT_EVAL_CASES if item.label == "discount-promotion"
-    )
+    case = next(item for item in MARKETING_CONTEXT_EVAL_CASES if item.label == "discount-promotion")
     analysis = MockProductAnalyzer().analyze(case.request)
 
     context = PgvectorHybridMarketingContextRetriever().retrieve(case.request, analysis)

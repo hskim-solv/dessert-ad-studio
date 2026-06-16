@@ -25,7 +25,9 @@ def _wait_for_api(client: httpx.Client, timeout_seconds: float) -> None:
 
 def _assert_json_status(response: httpx.Response, expected: int = 200) -> dict[str, Any]:
     if response.status_code != expected:
-        raise RuntimeError(f"{response.request.method} {response.request.url} -> {response.status_code}")
+        raise RuntimeError(
+            f"{response.request.method} {response.request.url} -> {response.status_code}"
+        )
     payload = response.json()
     if not isinstance(payload, dict):
         raise RuntimeError(f"{response.request.url} did not return a JSON object")
@@ -45,7 +47,10 @@ def run_smoke(base_url: str, timeout_seconds: float, skip_generate: bool) -> Non
             raise RuntimeError(f"unexpected readyz payload: {readyz}")
 
         metrics = client.get("/metrics")
-        if metrics.status_code != 200 or "dessert_ad_studio_http_requests_total" not in metrics.text:
+        if (
+            metrics.status_code != 200
+            or "dessert_ad_studio_http_requests_total" not in metrics.text
+        ):
             raise RuntimeError("metrics endpoint did not expose Prometheus text")
 
         if not skip_generate:

@@ -229,9 +229,7 @@ def test_workflow_feeds_product_analysis_into_image_prompt_and_trace(
     )
 
     output = run_generation_workflow(request_payload(), deps)
-    build_prompt_trace = next(
-        entry for entry in output.trace if entry.step == "build_image_prompt"
-    )
+    build_prompt_trace = next(entry for entry in output.trace if entry.step == "build_image_prompt")
 
     assert output.response.product_analysis.selling_points == ["선물용", "진한 말차맛"]
     assert image_backend.last_prompt is not None
@@ -313,9 +311,7 @@ def test_workflow_emits_openinference_spans(tmp_path: Path) -> None:
         "TOOL",
         "TOOL",
     ]
-    assert [
-        record.attributes["openinference.span.kind"] for record in records
-    ] == [
+    assert [record.attributes["openinference.span.kind"] for record in records] == [
         "AGENT",
         "RERANKER",
         "TOOL",

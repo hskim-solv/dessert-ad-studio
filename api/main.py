@@ -486,7 +486,9 @@ def metrics() -> Response:
         )
         for (method, path), total in sorted(_HTTP_REQUEST_LATENCY_SECONDS_TOTAL.items()):
             labels = _prometheus_labels({"method": method, "path": path})
-            lines.append(f"dessert_ad_studio_http_request_latency_seconds_total{labels} {total:.6f}")
+            lines.append(
+                f"dessert_ad_studio_http_request_latency_seconds_total{labels} {total:.6f}"
+            )
 
     return Response("\n".join(lines) + "\n", media_type="text/plain; version=0.0.4")
 

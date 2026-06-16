@@ -125,9 +125,7 @@ def test_generation_worker_adds_repo_root_to_python_path(monkeypatch) -> None:
     repo_root = Path(__file__).resolve().parents[1]
     script_path = repo_root / "scripts" / "run_generation_worker.py"
     original_path = [
-        path
-        for path in sys.path
-        if path not in {str(repo_root), "", str(script_path.parent)}
+        path for path in sys.path if path not in {str(repo_root), "", str(script_path.parent)}
     ]
     monkeypatch.setattr(sys, "path", [str(script_path.parent), *original_path])
 

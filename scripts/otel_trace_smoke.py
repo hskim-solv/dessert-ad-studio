@@ -44,12 +44,7 @@ def main() -> int:
         try:
             _preflight_otlp_endpoint(endpoint)
         except Exception as exc:
-            print(
-                "trace_smoke=failed "
-                f"export=otlp "
-                f"endpoint={endpoint} "
-                f"error={type(exc).__name__}"
-            )
+            print(f"trace_smoke=failed export=otlp endpoint={endpoint} error={type(exc).__name__}")
             return 1
     else:
         endpoint = "local-console"

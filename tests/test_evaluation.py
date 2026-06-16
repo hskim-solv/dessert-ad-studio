@@ -53,7 +53,9 @@ def test_evaluate_generation_output_reports_missing_workflow_step(tmp_path: Path
     result = evaluate_generation_output("sample", sample_request(), output)
 
     assert result.passed is False
-    assert any(check.name == "workflow.required_steps" and not check.passed for check in result.checks)
+    assert any(
+        check.name == "workflow.required_steps" and not check.passed for check in result.checks
+    )
     assert REQUIRED_WORKFLOW_STEPS == (
         "rank_templates",
         "decode_reference",

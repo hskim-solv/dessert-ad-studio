@@ -31,11 +31,11 @@ _DISABLED_MODES = {"none", "off", "false", "0"}
 _OTEL_MISSING_MESSAGE = (
     "WORKFLOW_TRACING=otel requires opentelemetry-api, opentelemetry-sdk, and "
     "openinference-semantic-conventions. Install project dependencies with "
-    "`.venv/bin/pip install -e \".[dev]\"`."
+    '`.venv/bin/pip install -e ".[dev]"`.'
 )
 _OTLP_HTTP_MISSING_MESSAGE = (
     "WORKFLOW_TRACE_EXPORT=otlp requires opentelemetry-exporter-otlp-proto-http. "
-    "Install project dependencies with `.venv/bin/pip install -e \".[dev]\"`."
+    'Install project dependencies with `.venv/bin/pip install -e ".[dev]"`.'
 )
 
 
@@ -117,8 +117,7 @@ def _normalize_json_value(value: Any) -> Any:
         return str(value)
     if isinstance(value, Mapping):
         return {
-            str(key): _normalize_json_value(nested_value)
-            for key, nested_value in value.items()
+            str(key): _normalize_json_value(nested_value) for key, nested_value in value.items()
         }
     if isinstance(value, list | tuple):
         return [_normalize_json_value(nested_value) for nested_value in value]

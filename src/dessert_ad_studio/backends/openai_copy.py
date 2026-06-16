@@ -17,7 +17,12 @@ from pydantic import BaseModel
 
 from dessert_ad_studio.backends.base import AdBackendError, CopyResult
 from dessert_ad_studio.prompts import COPY_OPTION_COUNT, build_copy_prompt
-from dessert_ad_studio.schemas import CopyOption, GenerationRequest, MarketingContext, ProductAnalysis
+from dessert_ad_studio.schemas import (
+    CopyOption,
+    GenerationRequest,
+    MarketingContext,
+    ProductAnalysis,
+)
 
 COPY_SYSTEM_PROMPT = (
     "너는 카페/디저트 소상공인을 돕는 한국어 광고 카피라이터다. "

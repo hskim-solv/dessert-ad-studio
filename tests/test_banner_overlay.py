@@ -39,8 +39,7 @@ def _count_changed_pixels_in_lower_overlay(
         for x in range(width):
             pixel = rgba.getpixel((x, y))
             if any(
-                abs(pixel[channel] - expected[channel]) > channel_tolerance
-                for channel in range(4)
+                abs(pixel[channel] - expected[channel]) > channel_tolerance for channel in range(4)
             ):
                 changed_pixels += 1
 
@@ -71,10 +70,7 @@ def test_create_banner_overlay_writes_png(tmp_path: Path) -> None:
     with Image.open(output) as image:
         assert image.size == (900, 900)
         assert image.mode == "RGBA"
-        assert (
-            _count_changed_pixels_in_lower_overlay(image, source_color)
-            > 900 * 900 * 0.05
-        )
+        assert _count_changed_pixels_in_lower_overlay(image, source_color) > 900 * 900 * 0.05
 
 
 def test_create_banner_overlay_handles_long_korean_text(tmp_path: Path) -> None:
@@ -98,10 +94,7 @@ def test_create_banner_overlay_handles_long_korean_text(tmp_path: Path) -> None:
     assert output.exists()
     with Image.open(output) as image:
         assert image.size == (720, 720)
-        assert (
-            _count_changed_pixels_in_lower_overlay(image, source_color)
-            > 720 * 720 * 0.05
-        )
+        assert _count_changed_pixels_in_lower_overlay(image, source_color) > 720 * 720 * 0.05
 
 
 def test_create_banner_overlay_handles_small_image(tmp_path: Path) -> None:
