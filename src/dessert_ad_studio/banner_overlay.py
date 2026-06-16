@@ -149,7 +149,7 @@ def create_banner_overlay(
     return destination
 
 
-def build_demo_product_analysis(request: GenerationRequest) -> dict[str, str]:
+def build_demo_product_analysis(request: GenerationRequest) -> dict[str, object]:
     reference_image = b"uploaded" if request.reference_image_name else None
     return MockProductAnalyzer().analyze(request, reference_image=reference_image).model_dump()
 

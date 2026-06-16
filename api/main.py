@@ -7,6 +7,7 @@ from pathlib import Path
 from threading import Lock
 from time import perf_counter
 from typing import Any
+from uuid import uuid4
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -23,10 +24,34 @@ from dessert_ad_studio.backends.flux2 import Flux2Backend
 from dessert_ad_studio.backends.mock import MockAdBackend
 from dessert_ad_studio.backends.openai_copy import OpenAICopyBackend
 from dessert_ad_studio.backends.openai_image import OpenAIImageBackend
+from dessert_ad_studio.generation_jobs import (
+    GenerationJobQueueError,
+    GenerationJobStore,
+    InMemoryGenerationJobStore,
+    PostgresGenerationJobStore,
+    enqueue_generation_job,
+    redacted_request_summary,
+)
+from dessert_ad_studio.marketing_context import (
+    KeywordMarketingContextRetriever,
+    MarketingContextRetriever,
+)
+from dessert_ad_studio.marketing_context_pgvector import (
+    PgvectorHybridMarketingContextRetriever,
+)
 from dessert_ad_studio.observability import build_workflow_tracer
-from dessert_ad_studio.product_analysis import MockProductAnalyzer, ProductAnalyzer
+from dessert_ad_studio.product_analysis import (
+    MockProductAnalyzer,
+    OpenAIProductAnalyzer,
+    ProductAnalyzer,
+)
 from dessert_ad_studio.reference_image import ReferenceImageError, decode_reference_image
-from dessert_ad_studio.schemas import GenerationRequest, GenerationResponse
+from dessert_ad_studio.schemas import (
+    GenerationRequest,
+    GenerationResponse,
+    MarketingContext,
+    ProductAnalysis,
+)
 from dessert_ad_studio.triton import LocalTemplateScorer, TritonTemplateScorer
 from dessert_ad_studio.workflow import (
     GenerationWorkflowDependencies,
@@ -60,6 +85,7 @@ class _WorkflowGenerationTelemetry:
         self.started = perf_counter()
         self.ranking = None
         self.copy_result = None
+        self.marketing_context: MarketingContext | None = None
 
 
 class _ApiTemplateRankingScorer:
@@ -85,9 +111,20 @@ class _RecordingCopyBackend:
     def model_id(self) -> str | None:
         return getattr(self._backend, "model_id", None)
 
-    def generate_copy(self, request: GenerationRequest):
-        result = self._backend.generate_copy(request)
+    def generate_copy(
+        self,
+        request: GenerationRequest,
+        *,
+        product_analysis: ProductAnalysis | None = None,
+        marketing_context: MarketingContext | None = None,
+    ):
+        result = self._backend.generate_copy(
+            request,
+            product_analysis=product_analysis,
+            marketing_context=marketing_context,
+        )
         self._telemetry.copy_result = result
+        self._telemetry.marketing_context = marketing_context
         return result
 
 
@@ -145,6 +182,7 @@ class _FailureLoggingImageBackend:
             return
 
         ranking = self._telemetry.ranking
+        marketing_context = self._telemetry.marketing_context
         record = {
             "campaign_purpose": request.campaign_purpose,
             "template": getattr(ranking, "template_name", None),
@@ -155,6 +193,15 @@ class _FailureLoggingImageBackend:
             "image_backend": self.name,
             "image_model_id": self.model_id,
             "product_analysis_backend": self._product_analysis_backend,
+            "marketing_context_backend": (
+                marketing_context.retriever_backend if marketing_context is not None else None
+            ),
+            "marketing_context_retrieved_docs_count": (
+                marketing_context.retrieved_docs_count if marketing_context is not None else None
+            ),
+            "marketing_context_categories": (
+                list(marketing_context.guide_categories) if marketing_context is not None else []
+            ),
             "used_reference": reference_image is not None,
             "reference_image_name": request.reference_image_name,
             "copy_usage": copy_result.usage,
@@ -198,6 +245,13 @@ def _is_triton_ready(url: str) -> bool:
 
     client = httpclient.InferenceServerClient(url=url)
     return bool(client.is_server_live() and client.is_model_ready("template_scorer"))
+
+
+def _int_env(name: str, default: int) -> int:
+    try:
+        return int(os.getenv(name, str(default)))
+    except ValueError:
+        return default
 
 
 @app.middleware("http")
@@ -248,6 +302,20 @@ def _image_backend_for(name: str, output_dir: str) -> ImageBackend | None:
 def _product_analyzer_for(name: str) -> ProductAnalyzer | None:
     if name == "mock":
         return MockProductAnalyzer()
+    if name == "openai":
+        return OpenAIProductAnalyzer()
+    return None
+
+
+@lru_cache(maxsize=None)
+def _marketing_context_retriever_for(
+    name: str,
+    pgvector_dsn: str,
+) -> MarketingContextRetriever | None:
+    if name == "keyword":
+        return KeywordMarketingContextRetriever()
+    if name == "pgvector_hybrid":
+        return PgvectorHybridMarketingContextRetriever(dsn=pgvector_dsn or None)
     return None
 
 
@@ -278,6 +346,50 @@ def get_product_analyzer() -> ProductAnalyzer:
     return analyzer
 
 
+def get_marketing_context_retriever() -> MarketingContextRetriever:
+    name = os.getenv("MARKETING_CONTEXT_BACKEND", "keyword")
+    try:
+        retriever = _marketing_context_retriever_for(name, os.getenv("PGVECTOR_DSN", ""))
+    except RuntimeError as exc:
+        if not _is_marketing_context_dependency_error(exc):
+            raise
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    if retriever is None:
+        raise HTTPException(
+            status_code=501,
+            detail=f"unknown marketing context backend: {name}",
+        )
+    return retriever
+
+
+def _is_marketing_context_dependency_error(exc: RuntimeError) -> bool:
+    detail = str(exc)
+    return detail.startswith(
+        (
+            "pgvector_hybrid retriever is not ready",
+            "psycopg is required for pgvector_hybrid retriever",
+        )
+    )
+
+
+@lru_cache(maxsize=None)
+def get_generation_job_store() -> GenerationJobStore:
+    backend = os.getenv("GENERATION_HISTORY_BACKEND", "").strip().lower()
+    dsn = os.getenv("GENERATION_HISTORY_DSN", "")
+    if not backend:
+        backend = "postgres" if dsn else "memory"
+
+    try:
+        if backend == "memory":
+            return InMemoryGenerationJobStore()
+        if backend == "postgres":
+            return PostgresGenerationJobStore(dsn)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    raise HTTPException(status_code=501, detail=f"unknown generation history backend: {backend}")
+
+
 def build_workflow_dependencies(request: GenerationRequest) -> GenerationWorkflowDependencies:
     telemetry = _WorkflowGenerationTelemetry()
     copy_backend = _RecordingCopyBackend(get_copy_backend(), telemetry)
@@ -306,6 +418,7 @@ def build_workflow_dependencies(request: GenerationRequest) -> GenerationWorkflo
             log_path=log_path,
         ),
         product_analyzer=product_analyzer,
+        marketing_context_retriever=get_marketing_context_retriever(),
         log_path=log_path,
         logger_factory=_BestEffortGenerationLogger,
         workflow_tracer=build_workflow_tracer(),
@@ -328,19 +441,25 @@ def readyz() -> dict[str, str]:
         copy_backend = get_copy_backend()
         image_backend = get_image_backend()
         product_analyzer = get_product_analyzer()
+        marketing_context_retriever = get_marketing_context_retriever()
+        generation_job_store = get_generation_job_store()
         template_scorer = get_template_scorer()
         if isinstance(template_scorer, TritonTemplateScorer) and not _is_triton_ready(
             template_scorer.url
         ):
             raise HTTPException(status_code=503, detail="triton template_scorer is not ready")
-    except HTTPException as exc:
-        raise HTTPException(status_code=503, detail=f"not ready: {exc.detail}") from exc
+    except (HTTPException, AdBackendError) as exc:
+        detail = getattr(exc, "detail", str(exc))
+        raise HTTPException(status_code=503, detail=f"not ready: {detail}") from exc
 
     return {
         "status": "ready",
         "copy_backend": copy_backend.name,
         "image_backend": image_backend.name,
         "product_analysis_backend": product_analyzer.name,
+        "marketing_context_backend": marketing_context_retriever.name,
+        "generation_history_backend": generation_job_store.name,
+        "generation_queue_backend": os.getenv("GENERATION_QUEUE_BACKEND", "inline"),
         "template_scorer": _template_scorer_name(template_scorer),
     }
 
@@ -395,6 +514,64 @@ def generate(request: GenerationRequest) -> GenerationResponse:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except AdBackendError as exc:
         raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        if not _is_marketing_context_dependency_error(exc):
+            raise
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.post("/generation-jobs", status_code=202)
+def create_generation_job(request: GenerationRequest) -> dict[str, Any]:
+    if request.reference_image_b64:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "비동기 생성 작업은 아직 참고 이미지를 지원하지 않습니다. "
+                "참고 이미지는 동기 /generate 경로를 사용해주세요."
+            ),
+        )
+
+    queue_backend = os.getenv("GENERATION_QUEUE_BACKEND", "inline").strip().lower()
+    store = get_generation_job_store()
+    job_id = f"gen-{uuid4()}"
+    store.create_job(
+        job_id,
+        redacted_request_summary(request),
+        queue_backend=queue_backend,
+    )
+
+    try:
+        queue_job_id = enqueue_generation_job(
+            job_id=job_id,
+            request=request,
+            queue_backend=queue_backend,
+            redis_url=os.getenv("REDIS_URL", "redis://localhost:6379/0"),
+            queue_name=os.getenv("GENERATION_QUEUE_NAME", "ad-generation"),
+            result_ttl_seconds=_int_env("GENERATION_JOB_RESULT_TTL_SECONDS", 3600),
+            failure_ttl_seconds=_int_env("GENERATION_JOB_FAILURE_TTL_SECONDS", 86400),
+        )
+    except GenerationJobQueueError as exc:
+        store.mark_failed(job_id, str(exc))
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    if queue_job_id:
+        store.set_queue_job_id(job_id, queue_job_id)
+    record = store.get_job(job_id)
+    status = record.status if record is not None else "queued"
+    return {
+        "job_id": job_id,
+        "status": status,
+        "status_url": f"/generation-jobs/{job_id}",
+        "queue_backend": queue_backend,
+    }
+
+
+@app.get("/generation-jobs/{job_id}")
+def get_generation_job(job_id: str) -> dict[str, Any]:
+    record = get_generation_job_store().get_job(job_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="generation job not found")
+    return record.to_status_response()
 
 
 @app.get("/.well-known/agent-card.json")
@@ -418,6 +595,10 @@ def a2a_send_message(payload: dict[str, Any]) -> dict[str, Any]:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except AdBackendError as exc:
         raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        if not _is_marketing_context_dependency_error(exc):
+            raise
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     task = completed_generation_task(
         output.response,

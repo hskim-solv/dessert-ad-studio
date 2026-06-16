@@ -1,0 +1,612 @@
+{
+  "sample_count": 10,
+  "average_category_hit_rate": 1.0,
+  "average_category_precision": 1.0,
+  "required_category_hit_rate": 1.0,
+  "passed": true,
+  "threshold": 0.8,
+  "results": [
+    {
+      "sample_label": "instagram-cafe-new-menu",
+      "category_hit_rate": 1.0,
+      "category_precision": 1.0,
+      "required_category_hit_rate": 1.0,
+      "passed": true,
+      "threshold": 0.8,
+      "expected_categories": [
+        "cafe",
+        "instagram",
+        "prohibited_claims"
+      ],
+      "retrieved_categories": [
+        "cafe",
+        "instagram",
+        "prohibited_claims"
+      ],
+      "matched_categories": [
+        "cafe",
+        "instagram",
+        "prohibited_claims"
+      ],
+      "missing_categories": [],
+      "unexpected_categories": [],
+      "required_categories": [
+        "prohibited_claims"
+      ],
+      "missing_required_categories": [],
+      "retrieved_docs_count": 3,
+      "source_doc_ids": [
+        "guide-cafe-dessert-core-v1",
+        "guide-instagram-sns-v1",
+        "guide-ad-claims-safety-v1"
+      ],
+      "checks": [
+        {
+          "name": "retrieval.docs_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "retrieved 3 guide docs"
+        },
+        {
+          "name": "retrieval.category_hit_rate",
+          "passed": true,
+          "score": 1.0,
+          "detail": "matched 3 of 3 expected categories"
+        },
+        {
+          "name": "retrieval.required_categories",
+          "passed": true,
+          "score": 1.0,
+          "detail": "missing required categories: none"
+        },
+        {
+          "name": "retrieval.source_doc_ids",
+          "passed": true,
+          "score": 1.0,
+          "detail": "source doc IDs are present and unique"
+        }
+      ]
+    },
+    {
+      "sample_label": "premium-seasonal-dessert",
+      "category_hit_rate": 1.0,
+      "category_precision": 1.0,
+      "required_category_hit_rate": 1.0,
+      "passed": true,
+      "threshold": 0.8,
+      "expected_categories": [
+        "cafe",
+        "instagram",
+        "premium",
+        "prohibited_claims"
+      ],
+      "retrieved_categories": [
+        "premium",
+        "cafe",
+        "instagram",
+        "prohibited_claims"
+      ],
+      "matched_categories": [
+        "cafe",
+        "instagram",
+        "premium",
+        "prohibited_claims"
+      ],
+      "missing_categories": [],
+      "unexpected_categories": [],
+      "required_categories": [
+        "prohibited_claims"
+      ],
+      "missing_required_categories": [],
+      "retrieved_docs_count": 4,
+      "source_doc_ids": [
+        "guide-premium-tone-v1",
+        "guide-cafe-dessert-core-v1",
+        "guide-instagram-sns-v1",
+        "guide-ad-claims-safety-v1"
+      ],
+      "checks": [
+        {
+          "name": "retrieval.docs_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "retrieved 4 guide docs"
+        },
+        {
+          "name": "retrieval.category_hit_rate",
+          "passed": true,
+          "score": 1.0,
+          "detail": "matched 4 of 4 expected categories"
+        },
+        {
+          "name": "retrieval.required_categories",
+          "passed": true,
+          "score": 1.0,
+          "detail": "missing required categories: none"
+        },
+        {
+          "name": "retrieval.source_doc_ids",
+          "passed": true,
+          "score": 1.0,
+          "detail": "source doc IDs are present and unique"
+        }
+      ]
+    },
+    {
+      "sample_label": "discount-promotion",
+      "category_hit_rate": 1.0,
+      "category_precision": 1.0,
+      "required_category_hit_rate": 1.0,
+      "passed": true,
+      "threshold": 0.8,
+      "expected_categories": [
+        "discount",
+        "prohibited_claims"
+      ],
+      "retrieved_categories": [
+        "discount",
+        "prohibited_claims"
+      ],
+      "matched_categories": [
+        "discount",
+        "prohibited_claims"
+      ],
+      "missing_categories": [],
+      "unexpected_categories": [],
+      "required_categories": [
+        "prohibited_claims"
+      ],
+      "missing_required_categories": [],
+      "retrieved_docs_count": 2,
+      "source_doc_ids": [
+        "guide-discount-clarity-v1",
+        "guide-ad-claims-safety-v1"
+      ],
+      "checks": [
+        {
+          "name": "retrieval.docs_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "retrieved 2 guide docs"
+        },
+        {
+          "name": "retrieval.category_hit_rate",
+          "passed": true,
+          "score": 1.0,
+          "detail": "matched 2 of 2 expected categories"
+        },
+        {
+          "name": "retrieval.required_categories",
+          "passed": true,
+          "score": 1.0,
+          "detail": "missing required categories: none"
+        },
+        {
+          "name": "retrieval.source_doc_ids",
+          "passed": true,
+          "score": 1.0,
+          "detail": "source doc IDs are present and unique"
+        }
+      ]
+    },
+    {
+      "sample_label": "premium-cake-gift",
+      "category_hit_rate": 1.0,
+      "category_precision": 1.0,
+      "required_category_hit_rate": 1.0,
+      "passed": true,
+      "threshold": 0.8,
+      "expected_categories": [
+        "cafe",
+        "premium",
+        "prohibited_claims"
+      ],
+      "retrieved_categories": [
+        "premium",
+        "cafe",
+        "prohibited_claims"
+      ],
+      "matched_categories": [
+        "cafe",
+        "premium",
+        "prohibited_claims"
+      ],
+      "missing_categories": [],
+      "unexpected_categories": [],
+      "required_categories": [
+        "prohibited_claims"
+      ],
+      "missing_required_categories": [],
+      "retrieved_docs_count": 3,
+      "source_doc_ids": [
+        "guide-premium-tone-v1",
+        "guide-cafe-dessert-core-v1",
+        "guide-ad-claims-safety-v1"
+      ],
+      "checks": [
+        {
+          "name": "retrieval.docs_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "retrieved 3 guide docs"
+        },
+        {
+          "name": "retrieval.category_hit_rate",
+          "passed": true,
+          "score": 1.0,
+          "detail": "matched 3 of 3 expected categories"
+        },
+        {
+          "name": "retrieval.required_categories",
+          "passed": true,
+          "score": 1.0,
+          "detail": "missing required categories: none"
+        },
+        {
+          "name": "retrieval.source_doc_ids",
+          "passed": true,
+          "score": 1.0,
+          "detail": "source doc IDs are present and unique"
+        }
+      ]
+    },
+    {
+      "sample_label": "sns-reels-madeleine",
+      "category_hit_rate": 1.0,
+      "category_precision": 1.0,
+      "required_category_hit_rate": 1.0,
+      "passed": true,
+      "threshold": 0.8,
+      "expected_categories": [
+        "cafe",
+        "instagram",
+        "prohibited_claims"
+      ],
+      "retrieved_categories": [
+        "instagram",
+        "cafe",
+        "prohibited_claims"
+      ],
+      "matched_categories": [
+        "cafe",
+        "instagram",
+        "prohibited_claims"
+      ],
+      "missing_categories": [],
+      "unexpected_categories": [],
+      "required_categories": [
+        "prohibited_claims"
+      ],
+      "missing_required_categories": [],
+      "retrieved_docs_count": 3,
+      "source_doc_ids": [
+        "guide-instagram-sns-v1",
+        "guide-cafe-dessert-core-v1",
+        "guide-ad-claims-safety-v1"
+      ],
+      "checks": [
+        {
+          "name": "retrieval.docs_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "retrieved 3 guide docs"
+        },
+        {
+          "name": "retrieval.category_hit_rate",
+          "passed": true,
+          "score": 1.0,
+          "detail": "matched 3 of 3 expected categories"
+        },
+        {
+          "name": "retrieval.required_categories",
+          "passed": true,
+          "score": 1.0,
+          "detail": "missing required categories: none"
+        },
+        {
+          "name": "retrieval.source_doc_ids",
+          "passed": true,
+          "score": 1.0,
+          "detail": "source doc IDs are present and unique"
+        }
+      ]
+    },
+    {
+      "sample_label": "coupon-cheesecake",
+      "category_hit_rate": 1.0,
+      "category_precision": 1.0,
+      "required_category_hit_rate": 1.0,
+      "passed": true,
+      "threshold": 0.8,
+      "expected_categories": [
+        "cafe",
+        "discount",
+        "prohibited_claims"
+      ],
+      "retrieved_categories": [
+        "discount",
+        "cafe",
+        "prohibited_claims"
+      ],
+      "matched_categories": [
+        "cafe",
+        "discount",
+        "prohibited_claims"
+      ],
+      "missing_categories": [],
+      "unexpected_categories": [],
+      "required_categories": [
+        "prohibited_claims"
+      ],
+      "missing_required_categories": [],
+      "retrieved_docs_count": 3,
+      "source_doc_ids": [
+        "guide-discount-clarity-v1",
+        "guide-cafe-dessert-core-v1",
+        "guide-ad-claims-safety-v1"
+      ],
+      "checks": [
+        {
+          "name": "retrieval.docs_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "retrieved 3 guide docs"
+        },
+        {
+          "name": "retrieval.category_hit_rate",
+          "passed": true,
+          "score": 1.0,
+          "detail": "matched 3 of 3 expected categories"
+        },
+        {
+          "name": "retrieval.required_categories",
+          "passed": true,
+          "score": 1.0,
+          "detail": "missing required categories: none"
+        },
+        {
+          "name": "retrieval.source_doc_ids",
+          "passed": true,
+          "score": 1.0,
+          "detail": "source doc IDs are present and unique"
+        }
+      ]
+    },
+    {
+      "sample_label": "signature-cafe-brand",
+      "category_hit_rate": 1.0,
+      "category_precision": 1.0,
+      "required_category_hit_rate": 1.0,
+      "passed": true,
+      "threshold": 0.8,
+      "expected_categories": [
+        "cafe",
+        "prohibited_claims"
+      ],
+      "retrieved_categories": [
+        "cafe",
+        "prohibited_claims"
+      ],
+      "matched_categories": [
+        "cafe",
+        "prohibited_claims"
+      ],
+      "missing_categories": [],
+      "unexpected_categories": [],
+      "required_categories": [
+        "prohibited_claims"
+      ],
+      "missing_required_categories": [],
+      "retrieved_docs_count": 2,
+      "source_doc_ids": [
+        "guide-cafe-dessert-core-v1",
+        "guide-ad-claims-safety-v1"
+      ],
+      "checks": [
+        {
+          "name": "retrieval.docs_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "retrieved 2 guide docs"
+        },
+        {
+          "name": "retrieval.category_hit_rate",
+          "passed": true,
+          "score": 1.0,
+          "detail": "matched 2 of 2 expected categories"
+        },
+        {
+          "name": "retrieval.required_categories",
+          "passed": true,
+          "score": 1.0,
+          "detail": "missing required categories: none"
+        },
+        {
+          "name": "retrieval.source_doc_ids",
+          "passed": true,
+          "score": 1.0,
+          "detail": "source doc IDs are present and unique"
+        }
+      ]
+    },
+    {
+      "sample_label": "premium-flower-gift",
+      "category_hit_rate": 1.0,
+      "category_precision": 1.0,
+      "required_category_hit_rate": 1.0,
+      "passed": true,
+      "threshold": 0.8,
+      "expected_categories": [
+        "premium",
+        "prohibited_claims"
+      ],
+      "retrieved_categories": [
+        "premium",
+        "prohibited_claims"
+      ],
+      "matched_categories": [
+        "premium",
+        "prohibited_claims"
+      ],
+      "missing_categories": [],
+      "unexpected_categories": [],
+      "required_categories": [
+        "prohibited_claims"
+      ],
+      "missing_required_categories": [],
+      "retrieved_docs_count": 2,
+      "source_doc_ids": [
+        "guide-premium-tone-v1",
+        "guide-ad-claims-safety-v1"
+      ],
+      "checks": [
+        {
+          "name": "retrieval.docs_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "retrieved 2 guide docs"
+        },
+        {
+          "name": "retrieval.category_hit_rate",
+          "passed": true,
+          "score": 1.0,
+          "detail": "matched 2 of 2 expected categories"
+        },
+        {
+          "name": "retrieval.required_categories",
+          "passed": true,
+          "score": 1.0,
+          "detail": "missing required categories: none"
+        },
+        {
+          "name": "retrieval.source_doc_ids",
+          "passed": true,
+          "score": 1.0,
+          "detail": "source doc IDs are present and unique"
+        }
+      ]
+    },
+    {
+      "sample_label": "instagram-hashtag-cake",
+      "category_hit_rate": 1.0,
+      "category_precision": 1.0,
+      "required_category_hit_rate": 1.0,
+      "passed": true,
+      "threshold": 0.8,
+      "expected_categories": [
+        "cafe",
+        "instagram",
+        "prohibited_claims"
+      ],
+      "retrieved_categories": [
+        "instagram",
+        "cafe",
+        "prohibited_claims"
+      ],
+      "matched_categories": [
+        "cafe",
+        "instagram",
+        "prohibited_claims"
+      ],
+      "missing_categories": [],
+      "unexpected_categories": [],
+      "required_categories": [
+        "prohibited_claims"
+      ],
+      "missing_required_categories": [],
+      "retrieved_docs_count": 3,
+      "source_doc_ids": [
+        "guide-instagram-sns-v1",
+        "guide-cafe-dessert-core-v1",
+        "guide-ad-claims-safety-v1"
+      ],
+      "checks": [
+        {
+          "name": "retrieval.docs_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "retrieved 3 guide docs"
+        },
+        {
+          "name": "retrieval.category_hit_rate",
+          "passed": true,
+          "score": 1.0,
+          "detail": "matched 3 of 3 expected categories"
+        },
+        {
+          "name": "retrieval.required_categories",
+          "passed": true,
+          "score": 1.0,
+          "detail": "missing required categories: none"
+        },
+        {
+          "name": "retrieval.source_doc_ids",
+          "passed": true,
+          "score": 1.0,
+          "detail": "source doc IDs are present and unique"
+        }
+      ]
+    },
+    {
+      "sample_label": "benefit-pudding-set",
+      "category_hit_rate": 1.0,
+      "category_precision": 1.0,
+      "required_category_hit_rate": 1.0,
+      "passed": true,
+      "threshold": 0.8,
+      "expected_categories": [
+        "cafe",
+        "discount",
+        "prohibited_claims"
+      ],
+      "retrieved_categories": [
+        "discount",
+        "cafe",
+        "prohibited_claims"
+      ],
+      "matched_categories": [
+        "cafe",
+        "discount",
+        "prohibited_claims"
+      ],
+      "missing_categories": [],
+      "unexpected_categories": [],
+      "required_categories": [
+        "prohibited_claims"
+      ],
+      "missing_required_categories": [],
+      "retrieved_docs_count": 3,
+      "source_doc_ids": [
+        "guide-discount-clarity-v1",
+        "guide-cafe-dessert-core-v1",
+        "guide-ad-claims-safety-v1"
+      ],
+      "checks": [
+        {
+          "name": "retrieval.docs_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "retrieved 3 guide docs"
+        },
+        {
+          "name": "retrieval.category_hit_rate",
+          "passed": true,
+          "score": 1.0,
+          "detail": "matched 3 of 3 expected categories"
+        },
+        {
+          "name": "retrieval.required_categories",
+          "passed": true,
+          "score": 1.0,
+          "detail": "missing required categories: none"
+        },
+        {
+          "name": "retrieval.source_doc_ids",
+          "passed": true,
+          "score": 1.0,
+          "detail": "source doc IDs are present and unique"
+        }
+      ]
+    }
+  ]
+}

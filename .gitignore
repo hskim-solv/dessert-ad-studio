@@ -5,7 +5,15 @@ __pycache__/
 .ruff_cache/
 *.pyc
 outputs/
+output/
 logs/
+graphify-out/
+.agents/
+.codex/
+.playwright-cli/
+.serena/
+.superpowers/
+\[AI\]*.md
 models/**/1/model.onnx
 models/**/1/*.plan
 models/**/1/*.engine

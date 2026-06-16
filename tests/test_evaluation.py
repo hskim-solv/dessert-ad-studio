@@ -58,6 +58,7 @@ def test_evaluate_generation_output_reports_missing_workflow_step(tmp_path: Path
         "rank_templates",
         "decode_reference",
         "analyze_product",
+        "retrieve_marketing_context",
         "build_image_prompt",
         "generate_copy",
         "generate_image",

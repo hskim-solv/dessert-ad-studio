@@ -1,4 +1,38 @@
 services:
+  redis:
+    image: ${REDIS_IMAGE:-redis:7-alpine}
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      start_period: 5s
+      retries: 5
+
+  pgvector:
+    image: ${PGVECTOR_IMAGE:-pgvector/pgvector:pg16}
+    environment:
+      POSTGRES_DB: ${PGVECTOR_DB:-dessert_ad_studio}
+      POSTGRES_USER: ${PGVECTOR_USER:-dessert}
+      POSTGRES_PASSWORD: ${PGVECTOR_PASSWORD:-dessert_dev_password}
+    ports:
+      - "${PGVECTOR_PORT:-5433}:5432"
+    volumes:
+      - pgvector-data:/var/lib/postgresql/data
+      - ./deploy/pgvector/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}",
+        ]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 5
+
   triton:
     image: ${TRITON_IMAGE:-nvcr.io/nvidia/tritonserver:22.12-py3}
     command: ["tritonserver", "--model-repository=/models"]
@@ -16,8 +50,19 @@ services:
     environment:
       TRITON_URL: triton:8000
       REQUIRE_TRITON: "1"
+      MARKETING_CONTEXT_BACKEND: ${MARKETING_CONTEXT_BACKEND:-keyword}
+      PGVECTOR_DSN: postgresql://${PGVECTOR_USER:-dessert}:${PGVECTOR_PASSWORD:-dessert_dev_password}@pgvector:5432/${PGVECTOR_DB:-dessert_ad_studio}
+      GENERATION_QUEUE_BACKEND: ${GENERATION_QUEUE_BACKEND:-rq}
+      GENERATION_QUEUE_NAME: ${GENERATION_QUEUE_NAME:-ad-generation}
+      REDIS_URL: redis://redis:6379/0
+      GENERATION_JOB_RESULT_TTL_SECONDS: ${GENERATION_JOB_RESULT_TTL_SECONDS:-3600}
+      GENERATION_JOB_FAILURE_TTL_SECONDS: ${GENERATION_JOB_FAILURE_TTL_SECONDS:-86400}
+      GENERATION_HISTORY_BACKEND: ${GENERATION_HISTORY_BACKEND:-postgres}
+      GENERATION_HISTORY_DSN: postgresql://${PGVECTOR_USER:-dessert}:${PGVECTOR_PASSWORD:-dessert_dev_password}@pgvector:5432/${PGVECTOR_DB:-dessert_ad_studio}
       COPY_BACKEND: ${COPY_BACKEND:-mock}
       COPY_MODEL_ID: ${COPY_MODEL_ID:-gpt-5.4-mini}
+      PRODUCT_ANALYSIS_BACKEND: ${PRODUCT_ANALYSIS_BACKEND:-mock}
+      PRODUCT_ANALYSIS_MODEL_ID: ${PRODUCT_ANALYSIS_MODEL_ID:-gpt-5.4-mini}
       IMAGE_BACKEND: ${IMAGE_BACKEND:-mock}
       IMAGE_MODEL_ID: ${IMAGE_MODEL_ID:-gpt-image-1-mini}
       IMAGE_QUALITY: ${IMAGE_QUALITY:-low}
@@ -42,6 +87,60 @@ services:
       start_period: 10s
       retries: 3
     depends_on:
+      redis:
+        condition: service_healthy
+      pgvector:
+        condition: service_healthy
+      triton:
+        condition: service_started
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    command: ["python", "scripts/run_generation_worker.py"]
+    environment:
+      TRITON_URL: triton:8000
+      REQUIRE_TRITON: "1"
+      MARKETING_CONTEXT_BACKEND: ${MARKETING_CONTEXT_BACKEND:-keyword}
+      PGVECTOR_DSN: postgresql://${PGVECTOR_USER:-dessert}:${PGVECTOR_PASSWORD:-dessert_dev_password}@pgvector:5432/${PGVECTOR_DB:-dessert_ad_studio}
+      GENERATION_QUEUE_BACKEND: ${GENERATION_QUEUE_BACKEND:-rq}
+      GENERATION_QUEUE_NAME: ${GENERATION_QUEUE_NAME:-ad-generation}
+      REDIS_URL: redis://redis:6379/0
+      GENERATION_JOB_RESULT_TTL_SECONDS: ${GENERATION_JOB_RESULT_TTL_SECONDS:-3600}
+      GENERATION_JOB_FAILURE_TTL_SECONDS: ${GENERATION_JOB_FAILURE_TTL_SECONDS:-86400}
+      GENERATION_HISTORY_BACKEND: ${GENERATION_HISTORY_BACKEND:-postgres}
+      GENERATION_HISTORY_DSN: postgresql://${PGVECTOR_USER:-dessert}:${PGVECTOR_PASSWORD:-dessert_dev_password}@pgvector:5432/${PGVECTOR_DB:-dessert_ad_studio}
+      COPY_BACKEND: ${COPY_BACKEND:-mock}
+      COPY_MODEL_ID: ${COPY_MODEL_ID:-gpt-5.4-mini}
+      PRODUCT_ANALYSIS_BACKEND: ${PRODUCT_ANALYSIS_BACKEND:-mock}
+      PRODUCT_ANALYSIS_MODEL_ID: ${PRODUCT_ANALYSIS_MODEL_ID:-gpt-5.4-mini}
+      IMAGE_BACKEND: ${IMAGE_BACKEND:-mock}
+      IMAGE_MODEL_ID: ${IMAGE_MODEL_ID:-gpt-image-1-mini}
+      IMAGE_QUALITY: ${IMAGE_QUALITY:-low}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OUTPUT_DIR: /app/outputs
+      GENERATION_LOG_PATH: /app/logs/generations.jsonl
+    volumes:
+      - ./outputs:/app/outputs
+      - ./logs:/app/logs
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import os; from redis import Redis; Redis.from_url(os.getenv('REDIS_URL', 'redis://redis:6379/0')).ping()",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    depends_on:
+      redis:
+        condition: service_healthy
+      pgvector:
+        condition: service_healthy
       triton:
         condition: service_started
 
@@ -58,3 +157,6 @@ services:
     depends_on:
       api:
         condition: service_healthy
+
+volumes:
+  pgvector-data:

@@ -4,7 +4,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
-from dessert_ad_studio.schemas import CopyOption, GenerationRequest
+from dessert_ad_studio.schemas import CopyOption, GenerationRequest, MarketingContext, ProductAnalysis
 
 
 @dataclass(frozen=True)
@@ -49,7 +49,13 @@ class CopyBackend(Protocol):
 
     name: str
 
-    def generate_copy(self, request: GenerationRequest) -> CopyResult: ...
+    def generate_copy(
+        self,
+        request: GenerationRequest,
+        *,
+        product_analysis: ProductAnalysis | None = None,
+        marketing_context: MarketingContext | None = None,
+    ) -> CopyResult: ...
 
 
 @runtime_checkable

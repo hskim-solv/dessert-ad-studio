@@ -133,10 +133,9 @@ def test_missing_api_key_maps_to_backend_error(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    backend = OpenAIImageBackend(output_dir=tmp_path)
 
     with pytest.raises(AdBackendError, match="OPENAI_API_KEY"):
-        backend.generate_image(sample_request(), image_prompt="지시문")
+        OpenAIImageBackend(output_dir=tmp_path)
 
 
 def test_blank_api_key_maps_to_backend_error_without_calling_api(
@@ -146,10 +145,9 @@ def test_blank_api_key_maps_to_backend_error_without_calling_api(
     # Safety net: if the blank key ever slips past the guard, fail on a local
     # connection error instead of sending a request to the real API.
     monkeypatch.setenv("OPENAI_BASE_URL", "http://127.0.0.1:1")
-    backend = OpenAIImageBackend(output_dir=tmp_path)
 
     with pytest.raises(AdBackendError, match="설정되지"):
-        backend.generate_image(sample_request(), image_prompt="지시문")
+        OpenAIImageBackend(output_dir=tmp_path)
 
 
 # ---------------------------------------------------------------------------

@@ -16,8 +16,17 @@ from pydantic import ValidationError
 
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 LAST_GENERATION_KEY = "last_successful_generation"
+GENERATION_JOBS_KEY = "generation_jobs"
+MAX_GENERATION_JOBS = 5
 DOWNLOAD_IGNORE_MIN_VERSION = (1, 43, 0)
 IMAGE_STRETCH_MIN_VERSION = (1, 58, 0)
+PENDING_JOB_STATUSES = {"queued", "running"}
+JOB_STATUS_LABELS = {
+    "queued": "대기",
+    "running": "생성 중",
+    "succeeded": "완료",
+    "failed": "실패",
+}
 
 PURPOSE_OPTIONS = {
     "신메뉴 출시": "new_menu",
@@ -99,6 +108,109 @@ def _save_generation(
     }
     st.session_state[LAST_GENERATION_KEY] = saved_generation
     return saved_generation
+
+
+def _api_url(path: str) -> str:
+    if path.startswith(("http://", "https://")):
+        return path
+    return f"{API_BASE_URL.rstrip('/')}/{path.lstrip('/')}"
+
+
+def _generation_job_status_label(status: str) -> str:
+    return JOB_STATUS_LABELS.get(status, status)
+
+
+def _is_generation_job_pending(job: dict) -> bool:
+    return job.get("status") in PENDING_JOB_STATUSES
+
+
+def _merge_generation_job_status(job: dict, status: dict) -> dict:
+    updated = dict(job)
+    for key in (
+        "status",
+        "queue_backend",
+        "queue_job_id",
+        "request_summary",
+        "response_summary",
+        "error_detail",
+        "created_at",
+        "updated_at",
+        "started_at",
+        "finished_at",
+    ):
+        if key in status:
+            updated[key] = status[key]
+    updated.pop("poll_error", None)
+    return updated
+
+
+def _upsert_generation_job(
+    jobs: list[dict],
+    request: GenerationRequest,
+    accepted: dict,
+) -> list[dict]:
+    job = {
+        "job_id": accepted["job_id"],
+        "status": accepted.get("status", "queued"),
+        "status_url": accepted["status_url"],
+        "queue_backend": accepted.get("queue_backend", "unknown"),
+        "request": request.model_dump(),
+    }
+    remaining = [existing for existing in jobs if existing.get("job_id") != job["job_id"]]
+    return [job, *remaining][:MAX_GENERATION_JOBS]
+
+
+def _refresh_generation_job(job: dict) -> dict:
+    try:
+        response = httpx.get(_api_url(str(job["status_url"])), timeout=10)
+        response.raise_for_status()
+    except Exception as exc:
+        updated = dict(job)
+        updated["poll_error"] = str(exc)
+        return updated
+    return _merge_generation_job_status(job, response.json())
+
+
+def _refresh_pending_generation_jobs(jobs: list[dict]) -> list[dict]:
+    refreshed: list[dict] = []
+    for job in jobs:
+        if _is_generation_job_pending(job):
+            refreshed.append(_refresh_generation_job(job))
+        else:
+            refreshed.append(job)
+    return refreshed
+
+
+def _render_generation_job_history(jobs: list[dict]) -> None:
+    if not jobs:
+        return
+
+    st.subheader("생성 작업")
+    st.button("작업 상태 새로고침", use_container_width=True)
+    for job in jobs:
+        status = str(job.get("status", "unknown"))
+        label = _generation_job_status_label(status)
+        with st.container(border=True):
+            st.markdown(f"**{label}**")
+            st.caption(
+                f"{job.get('job_id', 'unknown')} · "
+                f"queue={job.get('queue_backend', 'unknown')}"
+            )
+            if job.get("poll_error"):
+                st.warning(f"상태 조회 실패: {job['poll_error']}")
+            if status == "succeeded":
+                summary = job.get("response_summary") or {}
+                st.success(
+                    "생성 완료 · "
+                    f"문구 {summary.get('copy_options_count', 'unknown')}개 · "
+                    f"scorer={summary.get('template_scorer', 'unknown')}"
+                )
+            elif status == "failed":
+                st.error(job.get("error_detail") or "생성 작업이 실패했습니다.")
+            elif status == "running":
+                st.info("생성 중")
+            else:
+                st.info("대기 중")
 
 
 def _render_saved_generation(saved_generation: dict) -> None:
@@ -269,17 +381,25 @@ with left_column:
         )
         submitted = st.form_submit_button("광고 생성")
 
-    st.caption(f"API: POST {API_BASE_URL}/generate")
+    api_path = "/generate" if uploaded is not None else "/generation-jobs"
+    st.caption(f"API: POST {API_BASE_URL}{api_path}")
 
 with right_column:
     saved_generation = st.session_state.get(LAST_GENERATION_KEY)
-    if not submitted and saved_generation is None:
+    generation_jobs = st.session_state.get(GENERATION_JOBS_KEY, [])
+    if generation_jobs:
+        generation_jobs = _refresh_pending_generation_jobs(generation_jobs)
+        st.session_state[GENERATION_JOBS_KEY] = generation_jobs
+
+    if not submitted and saved_generation is None and not generation_jobs:
         st.info(
             "광고 생성 후 이 영역에서 데모 제품 분석, 대표 완성 배너, 추천 문구, "
             "오버레이 배너 다운로드, 원본 이미지와 기술 정보를 확인할 수 있습니다."
         )
     elif not submitted:
-        _render_saved_generation(saved_generation)
+        if saved_generation is not None:
+            _render_saved_generation(saved_generation)
+        _render_generation_job_history(generation_jobs)
     else:
         try:
             request = GenerationRequest(
@@ -296,27 +416,56 @@ with right_column:
             st.error("입력값을 확인해 주세요.")
             st.json(exc.errors())
         else:
-            spinner_text = (
-                "광고 문구와 이미지를 생성하는 중입니다... "
-                "(이미지 생성은 수십 초 걸릴 수 있어요)"
-            )
-            with st.spinner(spinner_text):
-                try:
-                    response = httpx.post(
-                        f"{API_BASE_URL}/generate",
-                        json=request.model_dump(),
-                        timeout=120,
-                    )
-                    response.raise_for_status()
-                except httpx.HTTPStatusError as exc:
+            if request.reference_image_b64:
+                spinner_text = (
+                    "광고 문구와 이미지를 생성하는 중입니다... "
+                    "(이미지 생성은 수십 초 걸릴 수 있어요)"
+                )
+                with st.spinner(spinner_text):
                     try:
-                        detail = exc.response.json().get("detail")
-                    except Exception:
-                        detail = None
-                    st.error(detail or f"생성 요청 실패: {exc}")
-                except Exception as exc:
-                    st.error(f"생성 요청 실패: {exc}")
-                else:
-                    result = response.json()
-                    saved_generation = _save_generation(request, result)
-                    _render_saved_generation(saved_generation)
+                        response = httpx.post(
+                            f"{API_BASE_URL}/generate",
+                            json=request.model_dump(),
+                            timeout=120,
+                        )
+                        response.raise_for_status()
+                    except httpx.HTTPStatusError as exc:
+                        try:
+                            detail = exc.response.json().get("detail")
+                        except Exception:
+                            detail = None
+                        st.error(detail or f"생성 요청 실패: {exc}")
+                    except Exception as exc:
+                        st.error(f"생성 요청 실패: {exc}")
+                    else:
+                        result = response.json()
+                        saved_generation = _save_generation(request, result)
+                        _render_saved_generation(saved_generation)
+                        _render_generation_job_history(generation_jobs)
+            else:
+                with st.spinner("생성 작업을 등록하는 중입니다..."):
+                    try:
+                        response = httpx.post(
+                            f"{API_BASE_URL}/generation-jobs",
+                            json=request.model_dump(),
+                            timeout=20,
+                        )
+                        response.raise_for_status()
+                    except httpx.HTTPStatusError as exc:
+                        try:
+                            detail = exc.response.json().get("detail")
+                        except Exception:
+                            detail = None
+                        st.error(detail or f"작업 등록 실패: {exc}")
+                    except Exception as exc:
+                        st.error(f"작업 등록 실패: {exc}")
+                    else:
+                        accepted = response.json()
+                        generation_jobs = _upsert_generation_job(
+                            generation_jobs,
+                            request,
+                            accepted,
+                        )
+                        generation_jobs = _refresh_pending_generation_jobs(generation_jobs)
+                        st.session_state[GENERATION_JOBS_KEY] = generation_jobs
+                        _render_generation_job_history(generation_jobs)

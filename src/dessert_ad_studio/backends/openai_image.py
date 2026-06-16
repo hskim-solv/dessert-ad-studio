@@ -31,6 +31,10 @@ class OpenAIImageBackend:
         quality: str | None = None,
         client: Any | None = None,
     ) -> None:
+        if client is None and not os.getenv("OPENAI_API_KEY", "").strip():
+            raise AdBackendError(
+                "OpenAI API 키가 설정되지 않았습니다. .env의 OPENAI_API_KEY를 확인해주세요."
+            )
         self.output_dir = Path(output_dir)
         self.model_id = model_id or os.getenv("IMAGE_MODEL_ID", "gpt-image-1-mini")
         self.quality = quality or os.getenv("IMAGE_QUALITY", "low")

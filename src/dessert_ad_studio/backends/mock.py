@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from dessert_ad_studio.backends.base import CopyResult, ImageResult
 from dessert_ad_studio.backends.naming import safe_filename_stem
-from dessert_ad_studio.schemas import CopyOption, GenerationRequest
+from dessert_ad_studio.schemas import CopyOption, GenerationRequest, MarketingContext, ProductAnalysis
 
 
 class MockAdBackend:
@@ -17,7 +17,13 @@ class MockAdBackend:
     def __init__(self, output_dir: str | Path = "outputs") -> None:
         self.output_dir = Path(output_dir)
 
-    def generate_copy(self, request: GenerationRequest) -> CopyResult:
+    def generate_copy(
+        self,
+        request: GenerationRequest,
+        *,
+        product_analysis: ProductAnalysis | None = None,
+        marketing_context: MarketingContext | None = None,
+    ) -> CopyResult:
         product = request.product_name
         options = [
             CopyOption(

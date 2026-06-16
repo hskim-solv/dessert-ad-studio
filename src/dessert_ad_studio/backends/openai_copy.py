@@ -17,7 +17,7 @@ from pydantic import BaseModel
 
 from dessert_ad_studio.backends.base import AdBackendError, CopyResult
 from dessert_ad_studio.prompts import COPY_OPTION_COUNT, build_copy_prompt
-from dessert_ad_studio.schemas import CopyOption, GenerationRequest
+from dessert_ad_studio.schemas import CopyOption, GenerationRequest, MarketingContext, ProductAnalysis
 
 COPY_SYSTEM_PROMPT = (
     "너는 카페/디저트 소상공인을 돕는 한국어 광고 카피라이터다. "
@@ -35,6 +35,10 @@ class OpenAICopyBackend:
     name = "openai"
 
     def __init__(self, model_id: str | None = None, client: Any | None = None) -> None:
+        if client is None and not os.getenv("OPENAI_API_KEY", "").strip():
+            raise AdBackendError(
+                "OpenAI API 키가 설정되지 않았습니다. .env의 OPENAI_API_KEY를 확인해주세요."
+            )
         self.model_id = model_id or os.getenv("COPY_MODEL_ID", "gpt-5.4-mini")
         self._client = client
 
@@ -54,14 +58,27 @@ class OpenAICopyBackend:
                 ) from exc
         return self._client
 
-    def generate_copy(self, request: GenerationRequest) -> CopyResult:
+    def generate_copy(
+        self,
+        request: GenerationRequest,
+        *,
+        product_analysis: ProductAnalysis | None = None,
+        marketing_context: MarketingContext | None = None,
+    ) -> CopyResult:
         client = self._get_client()
         try:
             completion = client.chat.completions.parse(
                 model=self.model_id,
                 messages=[
                     {"role": "system", "content": COPY_SYSTEM_PROMPT},
-                    {"role": "user", "content": build_copy_prompt(request)},
+                    {
+                        "role": "user",
+                        "content": build_copy_prompt(
+                            request,
+                            product_analysis=product_analysis,
+                            marketing_context=marketing_context,
+                        ),
+                    },
                 ],
                 response_format=CopyOptionsPayload,
             )

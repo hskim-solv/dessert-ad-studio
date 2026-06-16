@@ -42,6 +42,25 @@ class ProductAnalysis(BaseModel):
     copy_focus: str
     rendering_strategy: str
     analyzer_backend: str
+    detected_product_name: str = ""
+    dominant_colors: list[str] = Field(default_factory=list)
+    mood_keywords: list[str] = Field(default_factory=list)
+    selling_points: list[str] = Field(default_factory=list)
+    quality_notes: list[str] = Field(default_factory=list)
+    recommended_background: str = ""
+    preservation_notes: list[str] = Field(default_factory=list)
+
+
+class MarketingContext(BaseModel):
+    retriever_backend: str = "none"
+    guide_categories: list[str] = Field(default_factory=list)
+    copy_guidelines: list[str] = Field(default_factory=list)
+    tone_examples: list[str] = Field(default_factory=list)
+    platform_notes: list[str] = Field(default_factory=list)
+    prohibited_claims: list[str] = Field(default_factory=list)
+    cta_examples: list[str] = Field(default_factory=list)
+    source_doc_ids: list[str] = Field(default_factory=list)
+    retrieved_docs_count: int = 0
 
 
 class GenerationResponse(BaseModel):
@@ -54,3 +73,4 @@ class GenerationResponse(BaseModel):
     prompt_summary: str
     elapsed_ms: float
     product_analysis: ProductAnalysis
+    marketing_context: MarketingContext = Field(default_factory=MarketingContext)

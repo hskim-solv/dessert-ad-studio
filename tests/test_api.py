@@ -64,6 +64,37 @@ def test_readyz_rejects_bad_backend(monkeypatch: pytest.MonkeyPatch) -> None:
     assert "unknown copy backend: missing" in response.json()["detail"]
 
 
+def test_readyz_rejects_openai_backend_without_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    import api.main as api_main
+
+    api_main._copy_backend_for.cache_clear()
+    monkeypatch.setenv("COPY_BACKEND", "openai")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+
+    response = client.get("/readyz")
+
+    assert response.status_code == 503
+    assert "OPENAI_API_KEY" in response.json()["detail"]
+
+
+def test_readyz_maps_pgvector_connection_failure_to_503(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import api.main as api_main
+
+    api_main._marketing_context_retriever_for.cache_clear()
+    monkeypatch.setenv("MARKETING_CONTEXT_BACKEND", "pgvector_hybrid")
+    monkeypatch.setenv(
+        "PGVECTOR_DSN",
+        "postgresql://dessert:bad-password@127.0.0.1:1/missing",
+    )
+
+    response = client.get("/readyz")
+
+    assert response.status_code == 503
+    assert "pgvector_hybrid retriever is not ready" in response.json()["detail"]
+
+
 def test_readyz_checks_required_triton(monkeypatch: pytest.MonkeyPatch) -> None:
     import api.main as api_main
 
@@ -143,7 +174,114 @@ def test_generate_uses_template_ranking_and_returns_copy() -> None:
     assert payload["used_reference"] is False
     assert payload["image_path"].endswith(".png")
     assert payload["product_analysis"]["analyzer_backend"] == "mock"
+    assert payload["marketing_context"]["retriever_backend"] == "keyword"
+    assert payload["marketing_context"]["retrieved_docs_count"] >= 1
     assert payload["elapsed_ms"] >= 0
+
+
+def test_generate_can_use_pgvector_hybrid_marketing_context_backend(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import api.main as api_main
+
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path))
+    monkeypatch.setenv("MARKETING_CONTEXT_BACKEND", "pgvector_hybrid")
+    monkeypatch.delenv("PGVECTOR_DSN", raising=False)
+    api_main._marketing_context_retriever_for.cache_clear()
+
+    response = client.post("/generate", json=base_payload())
+
+    assert response.status_code == 200
+    context = response.json()["marketing_context"]
+    assert context["retriever_backend"] == "pgvector_hybrid"
+    assert context["guide_categories"] == ["premium", "cafe", "prohibited_claims"]
+
+
+def test_generate_maps_pgvector_connection_failure_to_503(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import api.main as api_main
+
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path))
+    monkeypatch.setenv("MARKETING_CONTEXT_BACKEND", "pgvector_hybrid")
+    monkeypatch.setenv(
+        "PGVECTOR_DSN",
+        "postgresql://dessert:bad-password@127.0.0.1:1/missing",
+    )
+    api_main._marketing_context_retriever_for.cache_clear()
+
+    response = client.post("/generate", json=base_payload())
+
+    assert response.status_code == 503
+    assert "pgvector_hybrid retriever is not ready" in response.json()["detail"]
+
+
+def test_create_generation_job_runs_inline_and_status_is_redacted(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import api.main as api_main
+
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path))
+    monkeypatch.setenv("GENERATION_QUEUE_BACKEND", "inline")
+    monkeypatch.setenv("GENERATION_HISTORY_BACKEND", "memory")
+    monkeypatch.delenv("GENERATION_HISTORY_DSN", raising=False)
+    api_main.get_generation_job_store.cache_clear()
+
+    response = client.post("/generation-jobs", json=base_payload())
+
+    assert response.status_code == 202
+    accepted = response.json()
+    assert accepted["queue_backend"] == "inline"
+    assert accepted["status_url"].startswith("/generation-jobs/")
+
+    status_response = client.get(accepted["status_url"])
+
+    assert status_response.status_code == 200
+    status = status_response.json()
+    assert status["job_id"] == accepted["job_id"]
+    assert status["status"] == "succeeded"
+    assert status["request_summary"]["campaign_purpose"] == "new_menu"
+    assert status["request_summary"]["has_user_constraints"] is True
+    assert "product_name" not in status["request_summary"]
+    assert "user_constraints" not in status["request_summary"]
+    assert status["response_summary"]["copy_options_count"] == 3
+    assert "copy_options" not in status["response_summary"]
+    assert "prompt_summary" not in status["response_summary"]
+
+
+def test_create_generation_job_rejects_reference_image_payload(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import api.main as api_main
+
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path))
+    monkeypatch.setenv("GENERATION_QUEUE_BACKEND", "inline")
+    monkeypatch.setenv("GENERATION_HISTORY_BACKEND", "memory")
+    api_main.get_generation_job_store.cache_clear()
+    payload = {**base_payload(), "reference_image_b64": tiny_png_b64()}
+
+    response = client.post("/generation-jobs", json=payload)
+
+    assert response.status_code == 400
+    assert "비동기 생성 작업은 아직 참고 이미지를 지원하지 않습니다" in response.json()["detail"]
+
+
+def test_generation_job_status_returns_404_for_unknown_job(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import api.main as api_main
+
+    monkeypatch.setenv("GENERATION_HISTORY_BACKEND", "memory")
+    api_main.get_generation_job_store.cache_clear()
+
+    response = client.get("/generation-jobs/job-missing")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "generation job not found"
 
 
 def test_generate_with_reference_image_flags_usage() -> None:
@@ -210,6 +348,20 @@ def test_generate_rejects_unknown_product_analysis_backend(monkeypatch, tmp_path
     assert response.json()["detail"] == "unknown product analysis backend: vlm"
 
 
+def test_readyz_accepts_openai_product_analysis_backend_without_calling_api(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path))
+    monkeypatch.setenv("PRODUCT_ANALYSIS_BACKEND", "openai")
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+
+    response = client.get("/readyz")
+
+    assert response.status_code == 200
+    assert response.json()["product_analysis_backend"] == "openai"
+
+
 def test_generate_rejects_reference_image_for_flux2(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("IMAGE_BACKEND", "flux2")
     payload = {
@@ -227,7 +379,7 @@ def test_generate_rejects_reference_image_for_flux2(monkeypatch: pytest.MonkeyPa
 def test_flux2_reference_rejection_spends_no_copy_tokens(monkeypatch: pytest.MonkeyPatch) -> None:
     from dessert_ad_studio.backends.mock import MockAdBackend
 
-    def fail_if_called(self, request):
+    def fail_if_called(self, request, **kwargs):
         raise AssertionError("copy backend must not be called when the reference is rejected")
 
     monkeypatch.setattr(MockAdBackend, "generate_copy", fail_if_called)
@@ -274,7 +426,7 @@ def test_generate_preserves_backend_error_status_code(monkeypatch: pytest.Monkey
     from dessert_ad_studio.backends.base import AdBackendError
     from dessert_ad_studio.backends.mock import MockAdBackend
 
-    def fail_with_validation_error(self, request):
+    def fail_with_validation_error(self, request, **kwargs):
         raise AdBackendError("bad input", status_code=422)
 
     monkeypatch.setattr(MockAdBackend, "generate_copy", fail_with_validation_error)
@@ -327,7 +479,7 @@ def test_generate_logs_usage_from_returned_results(
         name = "fake-copy"
         model_id = "fake-copy-model"
 
-        def generate_copy(self, request):
+        def generate_copy(self, request, **kwargs):
             options = [
                 CopyOption(headline=f"헤드라인 {i}", body="본문", call_to_action="행동 유도")
                 for i in range(3)
@@ -378,7 +530,7 @@ def test_image_failure_still_logs_spent_copy_usage(
         name = "fake-copy"
         model_id = "fake-copy-model"
 
-        def generate_copy(self, request):
+        def generate_copy(self, request, **kwargs):
             options = [
                 CopyOption(headline=f"헤드라인 {i}", body="본문", call_to_action="행동 유도")
                 for i in range(3)
@@ -427,7 +579,7 @@ def test_copy_failure_logs_no_row(monkeypatch: pytest.MonkeyPatch, tmp_path: Pat
         name = "failing-copy"
         model_id = "failing-copy-model"
 
-        def generate_copy(self, request):
+        def generate_copy(self, request, **kwargs):
             raise AdBackendError("문구 생성 API 호출에 실패했습니다: boom")
 
     monkeypatch.setattr(
@@ -536,7 +688,7 @@ def test_a2a_send_message_preserves_backend_error_status_code(
     from dessert_ad_studio.backends.base import AdBackendError
     from dessert_ad_studio.backends.mock import MockAdBackend
 
-    def fail_with_validation_error(self, request):
+    def fail_with_validation_error(self, request, **kwargs):
         raise AdBackendError("bad input", status_code=422)
 
     monkeypatch.setattr(MockAdBackend, "generate_copy", fail_with_validation_error)
@@ -581,7 +733,7 @@ def test_a2a_send_message_rejects_unsupported_reference_before_copy(
 ) -> None:
     from dessert_ad_studio.backends.mock import MockAdBackend
 
-    def fail_if_called(self, request):
+    def fail_if_called(self, request, **kwargs):
         raise AssertionError("copy backend must not be called when the reference is rejected")
 
     monkeypatch.setattr(MockAdBackend, "generate_copy", fail_if_called)

@@ -7,6 +7,10 @@ from typing import Any, Callable, Protocol
 
 from dessert_ad_studio.backends.base import CopyBackend, ImageBackend
 from dessert_ad_studio.generation_logger import GenerationLogger
+from dessert_ad_studio.marketing_context import (
+    KeywordMarketingContextRetriever,
+    MarketingContextRetriever,
+)
 from dessert_ad_studio.observability import NoopWorkflowTracer, WorkflowTracer
 from dessert_ad_studio.product_analysis import ProductAnalyzer
 from dessert_ad_studio.prompts import build_image_prompt
@@ -39,6 +43,9 @@ class GenerationWorkflowDependencies:
     image_backend: ImageBackend
     product_analyzer: ProductAnalyzer
     log_path: str | Path
+    marketing_context_retriever: MarketingContextRetriever = field(
+        default_factory=KeywordMarketingContextRetriever
+    )
     logger_factory: LoggerFactory = GenerationLogger
     workflow_tracer: WorkflowTracer = field(default_factory=NoopWorkflowTracer)
 
@@ -122,22 +129,53 @@ def run_generation_workflow(
             span.set_attributes(metadata)
             _append_trace(trace, "analyze_product", step_started, metadata)
 
+        with tracer.span("retrieve_marketing_context", "retriever") as span:
+            step_started = perf_counter()
+            marketing_context = dependencies.marketing_context_retriever.retrieve(
+                request,
+                product_analysis,
+            )
+            metadata = {
+                "marketing_context_backend": marketing_context.retriever_backend,
+                "retrieved_docs_count": marketing_context.retrieved_docs_count,
+                "guide_categories": list(marketing_context.guide_categories),
+            }
+            span.set_attributes(metadata)
+            _append_trace(trace, "retrieve_marketing_context", step_started, metadata)
+
         with tracer.span("build_image_prompt", "prompt") as span:
             step_started = perf_counter()
             image_prompt = build_image_prompt(
                 request,
                 ranked_template=ranking.template_name,
                 has_reference=used_reference,
+                product_analysis=product_analysis,
             )
-            metadata = {"prompt_length": len(image_prompt), "has_reference": used_reference}
+            metadata = {
+                "prompt_length": len(image_prompt),
+                "has_reference": used_reference,
+                "product_analysis_backend": dependencies.product_analyzer.name,
+                "has_selling_points": bool(product_analysis.selling_points),
+                "selling_points_count": len(product_analysis.selling_points),
+            }
             span.set_attributes(
-                {"prompt_length": len(image_prompt), "used_reference": used_reference}
+                {
+                    "prompt_length": len(image_prompt),
+                    "used_reference": used_reference,
+                    "product_analysis_backend": dependencies.product_analyzer.name,
+                    "has_selling_points": bool(product_analysis.selling_points),
+                    "selling_points_count": len(product_analysis.selling_points),
+                }
             )
             _append_trace(trace, "build_image_prompt", step_started, metadata)
 
         with tracer.span("generate_copy", "llm") as span:
             step_started = perf_counter()
-            copy_result = dependencies.copy_backend.generate_copy(request)
+            copy_result = dependencies.copy_backend.generate_copy(
+                request,
+                product_analysis=product_analysis,
+                marketing_context=marketing_context,
+            )
             metadata = {
                 "copy_backend": dependencies.copy_backend.name,
                 "copy_model_id": getattr(dependencies.copy_backend, "model_id", None),
@@ -174,6 +212,7 @@ def run_generation_workflow(
             prompt_summary=image_prompt,
             elapsed_ms=elapsed_ms,
             product_analysis=product_analysis,
+            marketing_context=marketing_context,
         )
 
         log_record = {
@@ -186,6 +225,9 @@ def run_generation_workflow(
             "image_backend": dependencies.image_backend.name,
             "image_model_id": getattr(dependencies.image_backend, "model_id", None),
             "product_analysis_backend": dependencies.product_analyzer.name,
+            "marketing_context_backend": marketing_context.retriever_backend,
+            "marketing_context_retrieved_docs_count": marketing_context.retrieved_docs_count,
+            "marketing_context_categories": list(marketing_context.guide_categories),
             "used_reference": used_reference,
             "reference_image_name": request.reference_image_name,
             "copy_usage": copy_result.usage,
@@ -212,6 +254,8 @@ def run_generation_workflow(
                 "copy_backend": dependencies.copy_backend.name,
                 "image_backend": dependencies.image_backend.name,
                 "product_analysis_backend": dependencies.product_analyzer.name,
+                "marketing_context_backend": marketing_context.retriever_backend,
+                "marketing_context_retrieved_docs_count": marketing_context.retrieved_docs_count,
                 "prompt_length": len(image_prompt),
                 "used_reference": used_reference,
                 "elapsed_ms": elapsed_ms,

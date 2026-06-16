@@ -21,7 +21,7 @@ Small business owners often need SNS banners, menu images, and promotion copy, b
 - Upload-centered Streamlit Studio UI
 - Three reusable demo scenarios
 - Korean copy candidates
-- Mock Product Analysis for the future VLM flow
+- Mock Product Analysis by default, with an opt-in OpenAI vision analyzer
 - Deterministic Korean banner overlay
 - Downloadable finished banner
 - Backend adapter slots for mock, OpenAI, and FLUX.2
@@ -134,12 +134,17 @@ Copy `.env.example` to `.env` and edit local values. Do not commit `.env`.
 | Variable | Values | Default |
 | --- | --- | --- |
 | `COPY_BACKEND` | `mock`, `openai` | `mock` |
+| `PRODUCT_ANALYSIS_BACKEND` | `mock`, `openai` | `mock` |
 | `IMAGE_BACKEND` | `mock`, `openai`, `flux2` | `mock` |
 | `COPY_MODEL_ID` | any chat model id | `gpt-5.4-mini` |
+| `PRODUCT_ANALYSIS_MODEL_ID` | any vision-capable Responses model id | `gpt-5.4-mini` |
 | `IMAGE_MODEL_ID` | any GPT image model id | `gpt-image-1-mini` |
 | `IMAGE_QUALITY` | `low`, `medium`, `high` | `low` |
 
 Real OpenAI backends need `OPENAI_API_KEY` in `.env`.
+`PRODUCT_ANALYSIS_BACKEND=openai` sends the product request and optional
+reference image to OpenAI through the Responses API with structured output and
+`store=False`.
 
 Uploading a reference image in Streamlit switches the OpenAI image backend from text-to-image to edit mode. The `flux2` backend is text-to-image only for now: uploading a reference image with it returns a 400 instead of silently ignoring the photo.
 
@@ -255,7 +260,7 @@ docs/runbooks/gcp-flux2-validation.md
 ## Roadmap
 
 1. Polish sample demo set and README.
-2. Replace Mock Product Analysis with real VLM analysis.
+2. Complete OpenAI product analysis live smoke, preservation eval, and latency evidence.
 3. Add product-preserving segmentation and composition.
 4. Add lightweight RAG marketing guidance.
 5. Add revision/evaluation loop.
