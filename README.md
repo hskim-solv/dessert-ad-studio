@@ -155,6 +155,8 @@ committed PNG banners under
 [`docs/evidence/assets/demo-gallery/`](docs/evidence/assets/demo-gallery/).
 The Streamlit reviewer flow screenshots are in
 [`docs/evidence/streamlit-reviewer-flow.md`](docs/evidence/streamlit-reviewer-flow.md).
+Real-sample deterministic preservation evidence is in
+[`docs/evidence/real-sample-preservation.md`](docs/evidence/real-sample-preservation.md).
 The README architecture image is
 [`docs/evidence/assets/architecture.svg`](docs/evidence/assets/architecture.svg).
 
@@ -268,7 +270,7 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Extend product-preservation evals from synthetic references to real samples.
+1. Add a live image-edit preservation eval only when a paid provider call is explicitly in scope.
 2. Add product-preserving segmentation/composition only if evals show a real gap.
 3. Add serving optimization benchmarks only when vLLM/TensorRT/SGLang has a measured role.
 4. Keep FastMCP/A2A as thin wrappers after the workflow/API is stable.

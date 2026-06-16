@@ -1,0 +1,101 @@
+{
+  "real_sample_preservation": "passed",
+  "evidence_date": "2026-06-16",
+  "sample_count": 3,
+  "passed_count": 3,
+  "pass_rate": 1.0,
+  "min_top_region_pixel_match_ratio": 1.0,
+  "metric_definition": "Pixel match ratio between the normalized public reference image and the generated banner in the top 55 percent of the image, which the deterministic overlay does not cover.",
+  "items": [
+    {
+      "slug": "dessert-plate",
+      "label": "Dessert plate",
+      "product_name": "디저트 플레이트",
+      "platform": "인스타그램 피드",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Dessert_(28307972126).jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/c/ce/Dessert_%2828307972126%29.jpg",
+      "license_name": "CC BY-SA 2.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+      "attribution": "Charles Haynes",
+      "reference_path": "docs/evidence/assets/real-sample-preservation/references/dessert-plate.png",
+      "banner_path": "docs/evidence/assets/real-sample-preservation/banners/dessert-plate_banner.png",
+      "markdown_reference_path": "assets/real-sample-preservation/references/dessert-plate.png",
+      "markdown_banner_path": "assets/real-sample-preservation/banners/dessert-plate_banner.png",
+      "preservation_metric": {
+        "reference_size": [
+          768,
+          768
+        ],
+        "banner_size": [
+          768,
+          768
+        ],
+        "top_region_ratio": 0.55,
+        "top_region_pixel_match_ratio": 1.0,
+        "matched_pixels": 324096,
+        "total_pixels": 324096
+      },
+      "checklist_passed": true
+    },
+    {
+      "slug": "matcha-pudding",
+      "label": "Matcha pudding",
+      "product_name": "말차 푸딩",
+      "platform": "인스타그램 스토리",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Black_Sesame_pudding,_Matcha_Chantilly_Cream_(15229247433).jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Black_Sesame_pudding%2C_Matcha_Chantilly_Cream_%2815229247433%29.jpg",
+      "license_name": "CC BY 2.0",
+      "license_url": "https://creativecommons.org/licenses/by/2.0",
+      "attribution": "Arnold Gatilao",
+      "reference_path": "docs/evidence/assets/real-sample-preservation/references/matcha-pudding.png",
+      "banner_path": "docs/evidence/assets/real-sample-preservation/banners/matcha-pudding_banner.png",
+      "markdown_reference_path": "assets/real-sample-preservation/references/matcha-pudding.png",
+      "markdown_banner_path": "assets/real-sample-preservation/banners/matcha-pudding_banner.png",
+      "preservation_metric": {
+        "reference_size": [
+          768,
+          768
+        ],
+        "banner_size": [
+          768,
+          768
+        ],
+        "top_region_ratio": 0.55,
+        "top_region_pixel_match_ratio": 1.0,
+        "matched_pixels": 324096,
+        "total_pixels": 324096
+      },
+      "checklist_passed": true
+    },
+    {
+      "slug": "flower-box",
+      "label": "Flower box",
+      "product_name": "플라워 박스",
+      "platform": "네이버 스마트스토어 썸네일",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Blue_flowers_box.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/3/3b/Blue_flowers_box.jpg",
+      "license_name": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "attribution": "Наталія Статива-Жарко",
+      "reference_path": "docs/evidence/assets/real-sample-preservation/references/flower-box.png",
+      "banner_path": "docs/evidence/assets/real-sample-preservation/banners/flower-box_banner.png",
+      "markdown_reference_path": "assets/real-sample-preservation/references/flower-box.png",
+      "markdown_banner_path": "assets/real-sample-preservation/banners/flower-box_banner.png",
+      "preservation_metric": {
+        "reference_size": [
+          768,
+          768
+        ],
+        "banner_size": [
+          768,
+          768
+        ],
+        "top_region_ratio": 0.55,
+        "top_region_pixel_match_ratio": 1.0,
+        "matched_pixels": 324096,
+        "total_pixels": 324096
+      },
+      "checklist_passed": true
+    }
+  ]
+}
