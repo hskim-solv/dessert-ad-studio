@@ -34,6 +34,11 @@ jobs:
           --summary-output /tmp/agentic-rag-promptfoo-package-summary.json
           --results-output /tmp/agentic-rag-promptfoo-results.json
           --timeout-seconds 180
+      - name: Agentic RAG final readiness gate
+        run: >
+          python scripts/build_agentic_rag_final_readiness.py
+          --summary-output /tmp/agentic-rag-final-readiness-summary.json
+          --report-output /tmp/agentic-rag-final-readiness.md
       - run: docker build -f Dockerfile.api -t dessert-ad-studio-api:ci .
       - name: API smoke
         run: |

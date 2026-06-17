@@ -79,7 +79,8 @@ Verified:
   keeping dark non-text texture below threshold while preserving a dense
   rendered-text negative case.
 - Local Agentic RAG eval gates: deterministic Ragas-compatible proxy metrics,
-  real promptfoo package smoke, and GitHub Actions CI steps for both paths.
+  real promptfoo package smoke, and a final readiness audit, with GitHub
+  Actions CI steps for all three paths.
 - AI agent team operating model with main-writer ownership, read-only scouts,
   task-lock template, lane fast gates, and paid-provider tripwires.
 - Docker Compose smoke, Redis/RQ job path, redacted Postgres history, and
