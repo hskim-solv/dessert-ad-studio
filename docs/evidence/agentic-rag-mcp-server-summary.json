@@ -48,5 +48,16 @@
       "policy_count": 3
     }
   },
+  "transport_auth_policy": {
+    "served_transport": "streamable-http",
+    "manual_command": "python -m mcp_servers.dessert_ad_studio_server",
+    "bind_host": "127.0.0.1",
+    "mount_path": "/mcp",
+    "local_loopback_only": true,
+    "production_auth_required": true,
+    "production_auth_status": "pending_auth_provider_selection",
+    "remote_client_contract": "pending_transport_auth_smoke",
+    "raw_inputs_committed": false
+  },
   "raw_inputs_committed": false
 }

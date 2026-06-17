@@ -28,6 +28,7 @@ def build_agentic_rag_mcp_server_summary(*, evidence_date: str) -> dict[str, Any
         has_reference_image=True,
         has_user_constraints=True,
     )
+    transport_auth_policy = dessert_ad_studio_server.transport_auth_policy()
     return {
         "agentic_rag_mcp_server_smoke": "passed",
         "scope": "local_fastmcp_import_and_tool_call_no_network",
@@ -46,8 +47,14 @@ def build_agentic_rag_mcp_server_summary(*, evidence_date: str) -> dict[str, Any
             "query_template_policy": sql,
             "preview_generation_policy": internal,
         },
+        "transport_auth_policy": transport_auth_policy,
         "raw_inputs_committed": _contains_raw_inputs(
-            {"web": web, "sql": sql, "internal": internal}
+            {
+                "web": web,
+                "sql": sql,
+                "internal": internal,
+                "transport_auth_policy": transport_auth_policy,
+            }
         ),
     }
 

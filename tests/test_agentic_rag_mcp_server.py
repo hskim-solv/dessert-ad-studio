@@ -77,6 +77,17 @@ def test_mcp_server_smoke_script_writes_summary(tmp_path: Path) -> None:
         "query_template_policy",
         "preview_generation_policy",
     ]
+    assert summary["transport_auth_policy"] == {
+        "served_transport": "streamable-http",
+        "manual_command": "python -m mcp_servers.dessert_ad_studio_server",
+        "bind_host": "127.0.0.1",
+        "mount_path": "/mcp",
+        "local_loopback_only": True,
+        "production_auth_required": True,
+        "production_auth_status": "pending_auth_provider_selection",
+        "remote_client_contract": "pending_transport_auth_smoke",
+        "raw_inputs_committed": False,
+    }
     assert summary["raw_inputs_committed"] is False
 
     serialized = json.dumps(summary, ensure_ascii=False)

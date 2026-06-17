@@ -53,6 +53,9 @@ Current result:
 - internal API mode: `in_process_contract`
 - MCP package smoke: `passed`
 - MCP version: `1.28.0`
+- MCP served transport policy: `streamable-http`, loopback-only `127.0.0.1`,
+  manual command `python -m mcp_servers.dessert_ad_studio_server`
+- MCP production auth status: `pending_auth_provider_selection`
 - MCP tools:
   - `search_marketing_guides`
   - `query_template_policy`
@@ -84,6 +87,7 @@ Focused tests:
 
 This is not yet live web search or production DB access. The SQL runtime policy
 first gate is local SQLite only; production credentials, audit logging,
-retention, and DB role policy remain pending. The MCP proof imports the package
-and calls the FastMCP-wrapped local tools, but it does not start a long-running
-production MCP service or test remote client auth/transport.
+retention, and DB role policy remain pending. The MCP proof imports the package,
+calls the FastMCP-wrapped local tools, and records a loopback-only
+`streamable-http` transport/auth boundary; it does not select a production auth
+provider or run a remote client auth/transport smoke.

@@ -99,7 +99,8 @@ def build_agentic_rag_eval_report_summary(*, evidence_date: str) -> dict[str, An
             "live_web_search": "pending_runtime_security_policy",
             "local_sql_runtime_policy": "first_gate_complete",
             "production_db_access_audit": "pending_runtime_security_policy",
-            "production_mcp_transport_auth": "pending_runtime_security_policy",
+            "mcp_loopback_transport_auth_boundary": "first_gate_complete",
+            "production_mcp_auth_remote_client": "pending_runtime_security_policy",
         },
         "privacy_boundary": {
             "raw_inputs_committed": False,
@@ -170,9 +171,10 @@ external MCP transports.
 ## Limits
 
 Ragas live metrics remain pending until paid/API-key approval. Live web search,
-production DB access/audit policy, and production MCP transport/auth also
-remain pending runtime-security work. The local SQL runtime policy first gate is
-complete, but it is not production DB access. This report is a reviewer-facing
+production DB access/audit policy, and production MCP auth/remote client smoke
+also remain pending runtime-security work. The local SQL runtime policy and MCP
+loopback transport/auth boundary first gates are complete, but they are not
+production DB access or production MCP auth. This report is a reviewer-facing
 consolidation of the local deterministic gates, not a replacement for
 production traffic evidence.
 """

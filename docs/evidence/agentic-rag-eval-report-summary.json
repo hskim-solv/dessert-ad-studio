@@ -54,7 +54,8 @@
     "live_web_search": "pending_runtime_security_policy",
     "local_sql_runtime_policy": "first_gate_complete",
     "production_db_access_audit": "pending_runtime_security_policy",
-    "production_mcp_transport_auth": "pending_runtime_security_policy"
+    "mcp_loopback_transport_auth_boundary": "first_gate_complete",
+    "production_mcp_auth_remote_client": "pending_runtime_security_policy"
   },
   "privacy_boundary": {
     "raw_inputs_committed": false,

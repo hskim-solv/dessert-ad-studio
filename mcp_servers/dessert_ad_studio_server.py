@@ -18,6 +18,20 @@ except ModuleNotFoundError as exc:  # pragma: no cover - exercised only without 
 mcp = FastMCP("Dessert Ad Studio", json_response=True)
 
 
+def transport_auth_policy() -> dict:
+    return {
+        "served_transport": "streamable-http",
+        "manual_command": "python -m mcp_servers.dessert_ad_studio_server",
+        "bind_host": "127.0.0.1",
+        "mount_path": "/mcp",
+        "local_loopback_only": True,
+        "production_auth_required": True,
+        "production_auth_status": "pending_auth_provider_selection",
+        "remote_client_contract": "pending_transport_auth_smoke",
+        "raw_inputs_committed": False,
+    }
+
+
 @mcp.tool()
 def search_marketing_guides(query: str) -> dict:
     """Search local curated marketing guide snapshots without external web calls."""
@@ -54,7 +68,7 @@ def preview_generation_policy(
 
 
 def main() -> None:
-    mcp.run(transport="streamable-http")
+    mcp.run(transport=transport_auth_policy()["served_transport"])
 
 
 if __name__ == "__main__":
