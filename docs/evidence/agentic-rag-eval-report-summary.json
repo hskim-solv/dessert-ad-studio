@@ -1,0 +1,62 @@
+{
+  "agentic_rag_eval_report": "passed",
+  "scope": "offline_reviewer_eval_report_no_paid_api_call",
+  "evidence_date": "2026-06-17",
+  "source_artifacts": [
+    "docs/evidence/agentic-rag-eval-guardrail-summary.json",
+    "docs/evidence/rag-baseline-results.json",
+    "docs/evidence/rag-chunking-comparison-results.json",
+    "docs/evidence/pgvector-baseline-results.json",
+    "docs/evidence/agentic-rag-promptfoo-package-summary.json"
+  ],
+  "golden_eval": {
+    "dataset": "agentic_rag_golden_v1",
+    "case_count": 13,
+    "faithfulness": 1.0,
+    "answer_relevancy": 1.0,
+    "context_precision": 1.0,
+    "context_recall": 1.0
+  },
+  "retrieval": {
+    "keyword_case_count": 10,
+    "keyword_category_hit_rate": 1.0,
+    "keyword_precision": 0.7466666666666667,
+    "required_category_hit_rate": 1.0,
+    "chunking_eval_case_count": 10,
+    "chunking_selected_strategy": "field_aware",
+    "chunking_category_hit_rate": 0.9,
+    "chunking_required_category_hit_rate": 1.0,
+    "pgvector_case_count": 10,
+    "pgvector_category_hit_rate": 1.0,
+    "pgvector_precision": 1.0
+  },
+  "promptfoo": {
+    "passed": true,
+    "package": "promptfoo",
+    "version": "0.121.17",
+    "assert_pass_count": 9,
+    "assert_fail_count": 0,
+    "errors": 0,
+    "failures": 0,
+    "token_usage_total": 0,
+    "cost": 0
+  },
+  "guardrails": {
+    "prompt_injection_blocked": true,
+    "tool_budget_passed": true,
+    "max_tool_calls": 7,
+    "planned_tool_count": 7,
+    "unexpected_tools": [],
+    "raw_inputs_absent": true
+  },
+  "limits": {
+    "ragas_live_gate": "pending_paid_api_approval",
+    "live_web_search": "pending_runtime_security_policy",
+    "production_sql_policy": "pending_runtime_security_policy",
+    "production_mcp_transport_auth": "pending_runtime_security_policy"
+  },
+  "privacy_boundary": {
+    "raw_inputs_committed": false,
+    "paid_api_call_count": 0
+  }
+}

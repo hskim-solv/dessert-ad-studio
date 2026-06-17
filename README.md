@@ -46,6 +46,8 @@ Verified:
   reviewer/comment hashes and no persistent audit-retention claim.
 - Local OpenInference trace first gate for Agentic RAG graph nodes, with
   redacted span attributes and API stream tracer wiring.
+- Reviewer-facing offline Agentic RAG eval report that consolidates golden
+  eval, retrieval, chunking, pgvector, promptfoo, and guardrail evidence.
 - Local Agentic RAG eval gates: deterministic Ragas-compatible proxy metrics,
   real promptfoo package smoke, and GitHub Actions CI steps for both paths.
 - AI agent team operating model with main-writer ownership, read-only scouts,
