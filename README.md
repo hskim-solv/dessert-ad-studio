@@ -6,6 +6,12 @@ The app turns a product photo and a short marketing request into Korean ad copy,
 a generated or composed visual, and a downloadable banner with deterministic
 Korean text overlay.
 
+Final portfolio target: a production-grade Agentic RAG workflow for
+small-business ad generation. The current multimodal ad workflow remains the
+business domain; the next architecture layer is a typed graph control plane for
+retrieval, tool orchestration, guardrails, approval, streaming, eval, trace, and
+deployment evidence.
+
 ## Problem
 
 Small business owners often need SNS banners, menu images, and promotion copy, but design tools and prompt engineering add friction. A raw image-generation model also tends to distort Korean text, so the service separates visual generation from Korean text rendering.
@@ -304,8 +310,10 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Implement remediation for the failed paid `gpt-image-2` + `quality=medium` provider-quality gate before any further paid iteration.
-2. Add human visual review or provider-quality visual statistics for generated assets.
-3. Keep FastMCP/A2A as optional thin wrappers after the workflow/API evidence is stable.
+1. Implement the Agentic RAG control plane: typed graph state, planner/supervisor, retriever/tool/worker/critic nodes, checkpointing, HITL approval, and SSE/WebSocket streaming.
+2. Add Ragas + promptfoo golden eval gates, prompt-injection/tool-budget tests, and citation-quality reporting.
+3. Implement remediation for the failed paid `gpt-image-2` + `quality=medium` provider-quality gate before any further paid full-gate iteration.
+4. Add human visual review or provider-quality visual statistics for generated assets.
+5. Keep FastMCP/A2A as optional thin wrappers after the workflow/API evidence is stable.
 
 FastMCP is intentionally deferred. It can later expose the studio as agent-callable tools such as `generate_dessert_ad`, generation log lookup, result retrieval, and template scoring.

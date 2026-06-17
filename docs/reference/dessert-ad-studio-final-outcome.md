@@ -4,27 +4,78 @@ Updated: 2026-06-17
 
 ## Final Product Definition
 
-Dessert Ad Studio v1 is a product-photo-preserving AI ad generation service for
-small cafe and dessert businesses.
+Dessert Ad Studio v2 is a **Production-grade Agentic RAG System for
+small-business ad generation**.
 
-The user uploads one product photo and a short marketing request. The system
-analyzes the product, retrieves industry/platform marketing guidance, generates
-Korean ad copy, creates or composes a product-preserving visual, overlays Korean
-text deterministically, and returns downloadable ad assets with evaluation,
-trace, and deployment evidence.
+The product is not a generic RAG chatbot and not an image-generation demo. The
+user uploads a product photo and a short marketing request. An Agentic RAG
+control plane retrieves business evidence, plans tool calls, validates
+guardrails, requests human approval when needed, orchestrates copy/image/overlay
+workers, streams execution state, and returns cited ad assets with evaluation,
+trace, cost, failure, and deployment evidence.
 
 ## Canonical Portfolio Goal
 
 This repository should be presented as:
 
-> A product-photo-preserving AI ad generation service that demonstrates RAG,
-> agent workflow orchestration, LLMOps/AgentOps evidence, and deployment-shaped
-> AI backend engineering evidence.
+> A production-grade Agentic RAG workflow that retrieves business evidence,
+> orchestrates tools with a typed graph, enforces guardrails, streams execution
+> state, and produces cited ad assets with evaluation, tracing, cost controls,
+> failure analysis, and deployability evidence.
 
 The project should not be framed as "a dessert ad app" or "an image generation
 demo." The dessert/cafe domain is the concrete business scenario. The hiring
 signal is the ability to build, evaluate, observe, and deploy a multimodal AI
 workflow as a reliable service.
+
+## Final Deliverable Scope
+
+The final artifact should prove the following integrated system:
+
+```mermaid
+flowchart LR
+  UI[Streamlit reviewer UI] --> API[FastAPI async API<br/>SSE/WebSocket run stream]
+  API --> G[LangGraph StateGraph<br/>typed state schema]
+
+  G --> PLAN[Planner / supervisor]
+  PLAN --> RAG[Document retrieval tool]
+  RAG --> VDB[(pgvector / hybrid retrieval)]
+  RAG --> CITE[Citation builder]
+
+  PLAN --> TOOLS[Tool allowlist]
+  TOOLS --> SQL[SQL query tool]
+  TOOLS --> WEB[Web search tool]
+  TOOLS --> INT[Internal API tool]
+  TOOLS --> MCP[MCP tool server]
+
+  PLAN --> WORK[Worker / executor]
+  WORK --> COPY[Copy backend]
+  WORK --> IMG[Image-edit backend]
+  WORK --> OVERLAY[Deterministic Korean overlay]
+
+  G --> REFLECT[Critic / reflection loop]
+  REFLECT --> GUARD[Structured validation<br/>PII/secrets/tool budget]
+  GUARD --> HITL[Human approval node]
+  HITL --> OUT[Cited ad package<br/>assets + eval + trace]
+```
+
+The concrete domain remains Korean small-business advertising. The portfolio
+claim is the production engineering around Agentic RAG: backend contracts,
+stateful orchestration, retrieval quality, tool safety, eval, tracing, cost,
+fallbacks, and deployment evidence.
+
+## Capability Classification
+
+| Category | Must be included in final portfolio | Strong bonus | Not required for this portfolio |
+|---|---|---|---|
+| Backend | Python 3.11+, FastAPI, Pydantic schemas, async endpoints, SSE or WebSocket streaming | Separate reviewer UI for human approval | Replacing FastAPI with another backend framework |
+| Agent orchestration | LangGraph StateGraph, typed state schema, conditional edges, retry/reflection loop, supervisor-worker or planner-executor, SQLite/Postgres checkpointing, human-in-the-loop approval node | Multi-agent decomposition with independent worker traces | RLHF or custom agent training |
+| RAG | Document ingestion, chunking comparison, embeddings, vector DB, hybrid search or reranker, citations, retrieval fallback | GraphRAG or knowledge graph evidence | Broad web-scale corpus |
+| Tools | Web search, SQL query, internal API, document retrieval, tool allowlist | One MCP tool server | Large marketplace of tools |
+| Evaluation | Golden dataset, Ragas metrics, promptfoo regression, CI eval gate | Ragas + promptfoo trend report across releases | Human preference training loop |
+| Observability | Phoenix or LangSmith tracing, latency, token usage, cost, tool success/failure, failed-run analysis | Two tracing backends compared | Production APM contract with real customer traffic |
+| Guardrails | Structured output validation, prompt-injection tests, max tool-call budget, PII/secrets leakage prevention, graceful fallback | Agent security/red-team report | Formal verification |
+| Deployment | Docker, GitHub Actions, architecture diagram, eval report | Cloud deploy on AWS/GCP/Azure, Kubernetes, Terraform, demo video | Robotics, theorem proving, custom SLM training |
 
 ## Korean Hiring Validation
 
@@ -68,9 +119,21 @@ Verified:
   failure, duplicate polling, worker startup wait, and K8s async smoke.
 - 30-scenario product-like deterministic workflow eval with failure-case summary
   fields.
+- Final target architecture decision: Agentic RAG control plane over the
+  existing multimodal workflow, recorded in
+  [`docs/adr/0011-agentic-rag-control-plane-final-target.md`](../adr/0011-agentic-rag-control-plane-final-target.md).
 
 Not yet proven:
 
+- LangGraph StateGraph orchestration, typed graph state, conditional edges,
+  retry/reflection loop, checkpointing, and human approval node.
+- SSE/WebSocket execution streaming.
+- Ragas and promptfoo eval gates in CI.
+- Agent tool suite covering web search, SQL query, internal API, document
+  retrieval, and one MCP tool server.
+- Production-grade citation assembly across retrieved documents and generated
+  ad outputs.
+- Cloud deployment and demo video.
 - Provider-quality image editing. The first paid OpenAI image-edit gate failed;
   the strengthened `gpt-image-2` + `quality=medium` gate also failed. ROI
   preservation checks passed, but latency, text-contamination, and cost guard
@@ -157,6 +220,10 @@ flowchart LR
 | M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields, and `docs/evidence/cost-guard-summary.json`. |
 | M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, Streamlit reviewer screenshots at `docs/evidence/streamlit-reviewer-flow.md`, real-sample preservation evidence at `docs/evidence/real-sample-preservation.md`, paid OpenAI image-edit failure evidence at `docs/evidence/openai-image-edit-preservation.md`, README links, reproducible command map. |
 | M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, live worker outage/restore smoke, explicit retry/timeout/cancel non-support, 30-scenario product-like eval, offline visual proxy gate, paid provider-quality failure evidence, provider-gate postmortem, one-sample canary CLI, first trace/log privacy allowlist gate, and first cost guard are complete. Next evidence should cover text/latency/cost remediation for the failed provider gate plus human/provider visual quality review. |
+| M8 Agentic RAG graph | Add the LangGraph control plane without discarding existing workflow evidence. | Pending: typed state schema, planner/supervisor node, retriever node, tool-call node, worker node, critic/reflection node, HITL approval node, checkpointing, and graph trace evidence. |
+| M9 Agentic RAG eval/guardrail gate | Prove answer/ad package faithfulness, citation quality, and tool safety. | Pending: golden dataset, Ragas faithfulness/answer relevancy/context precision/recall, promptfoo regression, prompt-injection tests, tool budget tests, and CI eval command. |
+| M10 Streaming and reviewer approval | Make long-running graph execution reviewable in real time. | Pending: SSE/WebSocket endpoint, reviewer approval UI, approval audit summary, and graceful fallback states. |
+| M11 Cloud/demo packaging | Show deployability beyond local/kind evidence. | Pending: one selected AWS/GCP/Azure deployment path, architecture diagram update, demo video, and eval report. |
 
 ## Failure Conditions
 
@@ -184,28 +251,35 @@ These decisions still need explicit selection before implementation:
 | Vector retrieval backend | Decided: pgvector hybrid lane; keyword remains default | Reevaluate if pgvector precision stops beating keyword baseline as the guide corpus grows, or if dedicated vector DB operations become more important than Postgres integration. |
 | Queue/history stack | Decided: Redis/RQ plus Postgres redacted history | Reevaluate only if durable queued payloads, complex routing, scheduled retries, or reference-image async storage are required. |
 | Real VLM provider | Decided first provider: OpenAI Responses Vision; mock remains default | Reevaluate if latency, cost, parse failures, or image privacy constraints beat the current OpenAI trade-off. |
-| Agent framework adoption | Explicit typed workflow in current code | Adopt LangGraph only if it reduces workflow complexity or improves traceability. |
+| Agentic RAG final architecture | Decided: Agentic RAG control plane over existing multimodal workflow | See ADR 0011. Specific library-level implementation decisions still need focused ADRs when candidates are non-trivial. |
+| Agent framework implementation | Target: LangGraph StateGraph | Before coding the production graph, record a focused implementation ADR if LangGraph is compared against another serious candidate. |
+| Streaming protocol | SSE or WebSocket | Pick one before implementation based on reviewer UX and deployment simplicity. |
+| Agent eval stack | Target: Ragas plus promptfoo | Keep deterministic local evals until dependencies and CI runtime are bounded. |
 | Serving optimization lane | Keep Triton/ONNX proof | Add vLLM/TensorRT/SGLang only with a targeted benchmark and role-specific portfolio reason. |
 | MCP/A2A | Later thin wrapper | Add only after the core workflow/API is stable and documented. |
 
 ## Final Deliverables
 
-1. `README.md`: project explanation, run commands, architecture image, and sample output.
-2. `docs/evidence/`: RAG eval, workflow trace, K8s/Docker validation, evidence index, sample gallery.
-3. `docs/adr/`: keyword retrieval, K8s, backend, and adoption decisions.
-4. `docs/evidence/assets/demo-gallery/`: committed representative banner set, with raw regenerated files ignored under `outputs/demo-gallery/`.
-5. `tests/`: backend contract, workflow, prompt, retrieval, API, and eval coverage.
-6. `deploy/`: Docker Compose and Kubernetes manifests.
-7. Runnable demo: local Streamlit/FastAPI or compose-based execution.
+1. `README.md`: Agentic RAG positioning, run commands, architecture image, sample output, and honest proven/pending scope.
+2. `src/.../agent_graph/`: LangGraph StateGraph, typed state, conditional edges, checkpointing, reflection/retry, HITL approval, and tool nodes.
+3. FastAPI surface: async graph-run endpoint plus SSE/WebSocket streaming endpoint.
+4. RAG surface: ingestion, chunking comparison, embeddings, pgvector/hybrid retrieval, citations, and retrieval fallback.
+5. Tool suite: web search, SQL query, internal API, document retrieval, and one MCP tool server.
+6. `docs/evidence/`: RAG eval, Ragas/promptfoo reports, workflow trace, K8s/Docker validation, evidence index, sample gallery, failed-run analysis.
+7. `docs/adr/`: architecture and adoption decisions, including ADR 0011.
+8. `tests/`: backend contract, graph state, tool allowlist, prompt injection, retrieval, API, eval, and streaming coverage.
+9. `deploy/`: Docker Compose, Kubernetes manifests, and one selected cloud deployment path.
+10. Reviewer assets: architecture diagram, demo video, eval report, and committed representative outputs.
 
 ## Final Success Statement
 
 The project is complete when it can be described accurately as:
 
-> A small-business ad-generation workflow that takes a product photo, performs
-> VLM product analysis, retrieves marketing guidance, generates Korean ad copy,
-> creates a product-preserving visual, renders Korean text deterministically, and
-> ships with evaluation, trace, deployment, and reproducibility evidence.
+> A production-grade Agentic RAG system for small-business ad generation: it
+> retrieves cited business evidence, orchestrates tools through a typed graph,
+> validates structured outputs and guardrails, streams execution state, supports
+> human approval, and ships with evaluation, tracing, cost, failure, and
+> deployment evidence.
 
 ## Next Milestone
 
@@ -220,3 +294,8 @@ gate has failed with redacted evidence and an offline postmortem. The remaining
 portfolio gap is text/latency/cost remediation for provider-quality image
 editing plus human/provider generated-asset quality review. A one-sample
 `--sample-slug` canary is available before another paid full-gate iteration.
+
+The next architectural milestone is M8: implement the Agentic RAG graph control
+plane while preserving the current evidence base. Paid provider-quality
+image-edit remediation remains a downstream tool-quality track, not the main
+architecture blocker.

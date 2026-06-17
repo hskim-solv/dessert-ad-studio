@@ -55,6 +55,7 @@ Latest local regression snapshot: `227 passed, 1 warning`.
 | Redis/RQ and Postgres history | [`docs/adr/0008-redis-rq-generation-jobs-history.md`](../adr/0008-redis-rq-generation-jobs-history.md) |
 | OpenAI vision product analysis | [`docs/adr/0009-openai-vision-product-analysis.md`](../adr/0009-openai-vision-product-analysis.md) |
 | Kubernetes live smoke | [`docs/adr/0010-kubernetes-live-deployability-smoke.md`](../adr/0010-kubernetes-live-deployability-smoke.md) |
+| Agentic RAG final target | [`docs/adr/0011-agentic-rag-control-plane-final-target.md`](../adr/0011-agentic-rag-control-plane-final-target.md) |
 
 ## Privacy And Storage Boundary
 
@@ -70,6 +71,7 @@ Latest local regression snapshot: `227 passed, 1 warning`.
 
 ## Next Packaging Polish
 
+- Implement the M8 Agentic RAG control plane as the next architecture milestone.
 - Do not claim provider-quality image editing from the paid OpenAI gate; the
   latest `gpt-image-2`/`medium` run failed latency, text-contamination, and cost
   checks.
