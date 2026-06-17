@@ -52,6 +52,13 @@ def test_agentic_rag_final_readiness_script_writes_boundary_audit(
         == (summary["ci_gate_integrity"]["required_strings_total"])
     )
     assert summary["ci_gate_integrity"]["missing_required_strings"] == []
+    assert summary["claim_boundary_integrity"]["passed"] is True
+    assert (
+        summary["claim_boundary_integrity"]["required_phrase_checks_passed"]
+        == summary["claim_boundary_integrity"]["required_phrase_checks_total"]
+    )
+    assert summary["claim_boundary_integrity"]["missing_required_phrases"] == []
+    assert summary["claim_boundary_integrity"]["forbidden_phrase_hits"] == []
     assert summary["capability_counts"]["total"] == 9
     assert summary["capability_counts"]["passed"] == 9
     assert summary["capability_counts"]["not_claimed"] == 1
@@ -89,4 +96,5 @@ def test_agentic_rag_final_readiness_script_writes_boundary_audit(
     assert "latency_threshold_exceeded" in report
     assert "Evidence Index Integrity" in report
     assert "CI Gate Integrity" in report
+    assert "Claim Boundary Integrity" in report
     assert "docs/evidence/agentic-rag-decision-register-summary.json" in report

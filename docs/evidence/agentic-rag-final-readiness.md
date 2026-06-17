@@ -15,6 +15,7 @@ cloud deployment.
 - Missing artifacts: `[]`
 - Evidence index integrity: `True`
 - CI gate integrity: `True`
+- Claim boundary integrity: `True`
 - Production complete: `False`
 - Reason: Local first gates and reviewer packaging are consolidated, but live/API-key, credentialed DB, production MCP auth, external trace, cloud/demo, and image latency decisions remain user-gated.
 
@@ -66,6 +67,16 @@ cloud deployment.
 - Required strings present:
   `6`
 - Missing required strings:
+  `[]`
+
+## Claim Boundary Integrity
+
+- Required phrase checks:
+  `9` /
+  `9`
+- Missing required phrases:
+  `[]`
+- Forbidden phrase hits:
   `[]`
 
 ## Source Artifacts

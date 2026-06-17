@@ -229,11 +229,13 @@ def build_agentic_rag_final_readiness_summary(*, evidence_date: str) -> dict[str
     pending_decisions = decision_register["decisions"]
     evidence_index_integrity = _build_evidence_index_integrity(source_artifacts)
     ci_gate_integrity = _build_ci_gate_integrity()
+    claim_boundary_integrity = _build_claim_boundary_integrity()
     passed = (
         not missing_artifacts
         and all(capability["passed"] for capability in capabilities)
         and evidence_index_integrity["passed"] is True
         and ci_gate_integrity["passed"] is True
+        and claim_boundary_integrity["passed"] is True
         and decision_register["decisions_requiring_user_approval"]
         == decision_register["decision_count"]
         and decision_register["production_claim_added"] is False
@@ -249,6 +251,7 @@ def build_agentic_rag_final_readiness_summary(*, evidence_date: str) -> dict[str
         "missing_artifacts": missing_artifacts,
         "evidence_index_integrity": evidence_index_integrity,
         "ci_gate_integrity": ci_gate_integrity,
+        "claim_boundary_integrity": claim_boundary_integrity,
         "capabilities": capabilities,
         "capability_counts": {
             "total": len(capabilities),
@@ -308,6 +311,7 @@ def render_agentic_rag_final_readiness(summary: dict[str, Any]) -> str:
     provider = summary["provider_quality_boundary"]
     evidence_index = summary["evidence_index_integrity"]
     ci_gate = summary["ci_gate_integrity"]
+    claim_boundary = summary["claim_boundary_integrity"]
     return f"""# Agentic RAG Final Readiness Audit
 
 Date: {summary["evidence_date"]}
@@ -325,6 +329,7 @@ cloud deployment.
 - Missing artifacts: `{summary["missing_artifacts"]}`
 - Evidence index integrity: `{evidence_index["passed"]}`
 - CI gate integrity: `{ci_gate["passed"]}`
+- Claim boundary integrity: `{claim_boundary["passed"]}`
 - Production complete: `{summary["completion_claim"]["production_complete"]}`
 - Reason: {summary["completion_claim"]["reason"]}
 
@@ -369,6 +374,16 @@ cloud deployment.
   `{ci_gate["required_strings_present"]}`
 - Missing required strings:
   `{ci_gate["missing_required_strings"]}`
+
+## Claim Boundary Integrity
+
+- Required phrase checks:
+  `{claim_boundary["required_phrase_checks_passed"]}` /
+  `{claim_boundary["required_phrase_checks_total"]}`
+- Missing required phrases:
+  `{claim_boundary["missing_required_phrases"]}`
+- Forbidden phrase hits:
+  `{claim_boundary["forbidden_phrase_hits"]}`
 
 ## Source Artifacts
 
@@ -431,6 +446,59 @@ def _build_ci_gate_integrity() -> dict[str, Any]:
         "required_strings_total": len(required_strings),
         "missing_required_strings": missing,
     }
+
+
+def _build_claim_boundary_integrity() -> dict[str, Any]:
+    required_phrases = {
+        "README.md": [
+            "provider-quality image editing is not proven",
+            "Agentic RAG is still at first-gate maturity",
+            "pending decision register",
+        ],
+        "docs/reference/dessert-ad-studio-final-outcome.md": [
+            "Not yet proven:",
+            "Provider-quality image editing remains unproven",
+            "pending decision register",
+        ],
+        "docs/evidence/README.md": [
+            "provider-quality image editing in the `not_claimed` boundary",
+            "production completion false",
+            "GitHub Actions CI step",
+        ],
+    }
+    forbidden_phrases = [
+        "provider-quality image editing is proven",
+        "provider-quality image editing proven",
+        "production-complete Agentic RAG",
+        "full production streaming is proven",
+    ]
+    missing_required: list[dict[str, str]] = []
+    forbidden_hits: list[dict[str, str]] = []
+
+    for path_text, phrases in required_phrases.items():
+        path = Path(path_text)
+        text = path.read_text(encoding="utf-8")
+        for phrase in phrases:
+            if not _contains_normalized(text, phrase):
+                missing_required.append({"path": path_text, "phrase": phrase})
+        for phrase in forbidden_phrases:
+            if _contains_normalized(text, phrase):
+                forbidden_hits.append({"path": path_text, "phrase": phrase})
+
+    required_total = sum(len(phrases) for phrases in required_phrases.values())
+    return {
+        "passed": not missing_required and not forbidden_hits,
+        "checked_paths": list(required_phrases),
+        "required_phrase_checks_passed": required_total - len(missing_required),
+        "required_phrase_checks_total": required_total,
+        "missing_required_phrases": missing_required,
+        "forbidden_phrases": forbidden_phrases,
+        "forbidden_phrase_hits": forbidden_hits,
+    }
+
+
+def _contains_normalized(text: str, phrase: str) -> bool:
+    return " ".join(phrase.split()) in " ".join(text.split())
 
 
 def _required(artifacts: dict[str, Any | None], name: str) -> dict[str, Any]:

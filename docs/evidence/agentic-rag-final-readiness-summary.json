@@ -42,6 +42,24 @@
     "required_strings_total": 6,
     "missing_required_strings": []
   },
+  "claim_boundary_integrity": {
+    "passed": true,
+    "checked_paths": [
+      "README.md",
+      "docs/reference/dessert-ad-studio-final-outcome.md",
+      "docs/evidence/README.md"
+    ],
+    "required_phrase_checks_passed": 9,
+    "required_phrase_checks_total": 9,
+    "missing_required_phrases": [],
+    "forbidden_phrases": [
+      "provider-quality image editing is proven",
+      "provider-quality image editing proven",
+      "production-complete Agentic RAG",
+      "full production streaming is proven"
+    ],
+    "forbidden_phrase_hits": []
+  },
   "capabilities": [
     {
       "id": "backend_async_streaming",
