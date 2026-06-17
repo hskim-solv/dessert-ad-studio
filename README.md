@@ -31,6 +31,9 @@ Verified:
 
 - Deterministic Korean overlay and demo banner generation.
 - Curated marketing retrieval eval plus a measured pgvector storage/query lane.
+- Offline LangGraph control-plane first gate with typed state, conditional
+  HITL routing, keyword retrieval, citations, checkpoint evidence, and redacted
+  summary artifact.
 - Docker Compose smoke, Redis/RQ job path, redacted Postgres history, and
   local AgentOps trace evidence.
 - Kubernetes manifests that render through Kustomize with probes, ingress, HPA,
@@ -43,8 +46,9 @@ Known gaps:
 - Paid OpenAI image-edit provider gates have failed; the deterministic
   preservation path and offline visual proxy pass, but provider-quality image
   editing is not proven.
-- Kubernetes base evidence covers the synchronous API/UI/Triton path; the
-  async worker/Redis/Postgres operational path is still Docker Compose only.
+- Agentic RAG is only at the offline control-plane first gate. Worker
+  execution, retry/reflection, durable checkpointing, API streaming, and full
+  agent eval gates are still pending.
 - Current eval sets are demo-scale and need a larger real/product-like scenario
   matrix before broader quality claims.
 
@@ -310,7 +314,7 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Implement the Agentic RAG control plane: typed graph state, planner/supervisor, retriever/tool/worker/critic nodes, checkpointing, HITL approval, and SSE/WebSocket streaming.
+1. Extend the Agentic RAG control plane from the offline LangGraph first gate to worker execution, retry/reflection, durable checkpointing, and SSE/WebSocket streaming.
 2. Add Ragas + promptfoo golden eval gates, prompt-injection/tool-budget tests, and citation-quality reporting.
 3. Implement remediation for the failed paid `gpt-image-2` + `quality=medium` provider-quality gate before any further paid full-gate iteration.
 4. Add human visual review or provider-quality visual statistics for generated assets.

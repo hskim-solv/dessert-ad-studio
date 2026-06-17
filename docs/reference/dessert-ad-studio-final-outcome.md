@@ -122,11 +122,18 @@ Verified:
 - Final target architecture decision: Agentic RAG control plane over the
   existing multimodal workflow, recorded in
   [`docs/adr/0011-agentic-rag-control-plane-final-target.md`](../adr/0011-agentic-rag-control-plane-final-target.md).
+- First LangGraph control-plane gate: typed graph state, deterministic
+  planner/retriever/citation/guardrail/HITL/finalize nodes, conditional
+  approval routing, in-memory checkpoint proof, 3 citations, 7 checkpoints, and
+  redacted summary evidence in
+  [`docs/evidence/agentic-rag-graph.md`](../evidence/agentic-rag-graph.md).
 
 Not yet proven:
 
-- LangGraph StateGraph orchestration, typed graph state, conditional edges,
-  retry/reflection loop, checkpointing, and human approval node.
+- Full LangGraph production orchestration. The first offline graph gate is
+  complete, but retry/reflection, downstream worker execution, durable
+  SQLite/Postgres checkpointing, and production graph trace integration remain
+  pending.
 - SSE/WebSocket execution streaming.
 - Ragas and promptfoo eval gates in CI.
 - Agent tool suite covering web search, SQL query, internal API, document
@@ -220,7 +227,7 @@ flowchart LR
 | M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields, and `docs/evidence/cost-guard-summary.json`. |
 | M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, Streamlit reviewer screenshots at `docs/evidence/streamlit-reviewer-flow.md`, real-sample preservation evidence at `docs/evidence/real-sample-preservation.md`, paid OpenAI image-edit failure evidence at `docs/evidence/openai-image-edit-preservation.md`, README links, reproducible command map. |
 | M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, live worker outage/restore smoke, explicit retry/timeout/cancel non-support, 30-scenario product-like eval, offline visual proxy gate, paid provider-quality failure evidence, provider-gate postmortem, one-sample canary CLI, first trace/log privacy allowlist gate, and first cost guard are complete. Next evidence should cover text/latency/cost remediation for the failed provider gate plus human/provider visual quality review. |
-| M8 Agentic RAG graph | Add the LangGraph control plane without discarding existing workflow evidence. | Pending: typed state schema, planner/supervisor node, retriever node, tool-call node, worker node, critic/reflection node, HITL approval node, checkpointing, and graph trace evidence. |
+| M8 Agentic RAG graph | Add the LangGraph control plane without discarding existing workflow evidence. | First gate complete: ADR 0012, `langgraph` dependency, typed state schema, deterministic planner/retriever/citation/guardrail/HITL/finalize nodes, conditional approval route, in-memory checkpoint proof, redacted smoke summary, and focused tests. Pending: downstream worker node execution, retry/reflection, durable SQLite/Postgres checkpointing, graph trace integration, and API/streaming wiring. |
 | M9 Agentic RAG eval/guardrail gate | Prove answer/ad package faithfulness, citation quality, and tool safety. | Pending: golden dataset, Ragas faithfulness/answer relevancy/context precision/recall, promptfoo regression, prompt-injection tests, tool budget tests, and CI eval command. |
 | M10 Streaming and reviewer approval | Make long-running graph execution reviewable in real time. | Pending: SSE/WebSocket endpoint, reviewer approval UI, approval audit summary, and graceful fallback states. |
 | M11 Cloud/demo packaging | Show deployability beyond local/kind evidence. | Pending: one selected AWS/GCP/Azure deployment path, architecture diagram update, demo video, and eval report. |
@@ -252,7 +259,7 @@ These decisions still need explicit selection before implementation:
 | Queue/history stack | Decided: Redis/RQ plus Postgres redacted history | Reevaluate only if durable queued payloads, complex routing, scheduled retries, or reference-image async storage are required. |
 | Real VLM provider | Decided first provider: OpenAI Responses Vision; mock remains default | Reevaluate if latency, cost, parse failures, or image privacy constraints beat the current OpenAI trade-off. |
 | Agentic RAG final architecture | Decided: Agentic RAG control plane over existing multimodal workflow | See ADR 0011. Specific library-level implementation decisions still need focused ADRs when candidates are non-trivial. |
-| Agent framework implementation | Target: LangGraph StateGraph | Before coding the production graph, record a focused implementation ADR if LangGraph is compared against another serious candidate. |
+| Agent framework implementation | Decided: LangGraph StateGraph for the control plane | See ADR 0012. Reevaluate if privacy-safe checkpointing or production worker integration becomes awkward. |
 | Streaming protocol | SSE or WebSocket | Pick one before implementation based on reviewer UX and deployment simplicity. |
 | Agent eval stack | Target: Ragas plus promptfoo | Keep deterministic local evals until dependencies and CI runtime are bounded. |
 | Serving optimization lane | Keep Triton/ONNX proof | Add vLLM/TensorRT/SGLang only with a targeted benchmark and role-specific portfolio reason. |

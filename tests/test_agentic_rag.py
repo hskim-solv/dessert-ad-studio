@@ -1,0 +1,99 @@
+import json
+
+from langgraph.checkpoint.memory import InMemorySaver
+
+from dessert_ad_studio.agentic_rag import (
+    build_agentic_rag_graph,
+    build_agentic_rag_initial_state,
+)
+from dessert_ad_studio.schemas import GenerationRequest
+
+
+def sensitive_request() -> GenerationRequest:
+    return GenerationRequest(
+        campaign_purpose="new_menu",
+        product_name="비공개 말차 푸딩",
+        tone="premium",
+        template_hint="minimal_premium",
+        price_text="7,500원",
+        user_constraints="VIP 고객에게만 보일 문구",
+        revision_request="비공개 할인 강조",
+        reference_image_b64="c2VjcmV0LWltYWdlLWJ5dGVz",
+        reference_image_name="secret-reference.png",
+    )
+
+
+def test_agentic_rag_graph_routes_paid_provider_to_human_approval_without_raw_inputs():
+    checkpointer = InMemorySaver()
+    graph = build_agentic_rag_graph(checkpointer=checkpointer)
+    state = build_agentic_rag_initial_state(
+        sensitive_request(),
+        requires_paid_provider=True,
+        estimated_cost_usd=0.12,
+        approval_cost_threshold_usd=0.10,
+    )
+
+    result = graph.invoke(state, {"configurable": {"thread_id": "paid-provider-test"}})
+
+    assert result["status"] == "needs_approval"
+    assert result["next_action"] == "wait_for_human_approval"
+    assert result["approval"] == {
+        "required": True,
+        "reasons": ["paid_provider_requested", "estimated_cost_exceeds_threshold"],
+    }
+    assert result["node_trace"] == [
+        "plan_campaign",
+        "retrieve_context",
+        "build_citations",
+        "guardrail_check",
+        "human_approval",
+    ]
+    assert result["marketing_context"]["retrieved_docs_count"] >= 1
+    assert result["citations"]
+    assert result["citations"][0]["source_doc_id"].startswith("guide-")
+    assert list(checkpointer.list({"configurable": {"thread_id": "paid-provider-test"}}))
+
+    serialized = json.dumps(result, ensure_ascii=False)
+    for raw_value in [
+        "비공개 말차 푸딩",
+        "VIP 고객에게만 보일 문구",
+        "비공개 할인 강조",
+        "secret-reference.png",
+        "c2VjcmV0LWltYWdlLWJ5dGVz",
+    ]:
+        assert raw_value not in serialized
+    assert result["request_summary"]["has_reference_image"] is True
+    assert len(result["request_summary"]["product_name_sha256"]) == 64
+    assert len(result["request_summary"]["reference_image_name_sha256"]) == 64
+
+
+def test_agentic_rag_graph_routes_low_cost_local_run_to_worker():
+    graph = build_agentic_rag_graph()
+    state = build_agentic_rag_initial_state(
+        GenerationRequest(
+            campaign_purpose="brand_awareness",
+            product_name="딸기 크림 크루아상",
+            tone="warm",
+            template_hint="cozy_cafe",
+            user_constraints="인스타그램 피드용",
+        ),
+        requires_paid_provider=False,
+        estimated_cost_usd=0.0,
+        approval_cost_threshold_usd=0.10,
+    )
+
+    result = graph.invoke(state)
+
+    assert result["status"] == "ready_for_worker"
+    assert result["next_action"] == "dispatch_generation_worker"
+    assert result["approval"] == {"required": False, "reasons": []}
+    assert result["node_trace"] == [
+        "plan_campaign",
+        "retrieve_context",
+        "build_citations",
+        "guardrail_check",
+        "finalize",
+    ]
+    assert result["plan"]["worker"] == "generation_workflow"
+    assert result["marketing_context"]["retriever_backend"] == "keyword"
+    assert result["citations"]
