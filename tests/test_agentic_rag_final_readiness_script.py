@@ -40,6 +40,18 @@ def test_agentic_rag_final_readiness_script_writes_boundary_audit(
     assert summary["agentic_rag_final_readiness"] == "passed"
     assert summary["scope"] == "portfolio_boundary_audit_no_paid_api_call"
     assert summary["missing_artifacts"] == []
+    assert summary["evidence_index_integrity"]["passed"] is True
+    assert summary["evidence_index_integrity"]["missing_from_evidence_index"] == []
+    assert summary["evidence_index_integrity"]["checked_artifact_count"] == len(
+        summary["source_artifacts"]
+    )
+    assert summary["ci_gate_integrity"]["passed"] is True
+    assert summary["ci_gate_integrity"]["workflow"] == ".github/workflows/ci.yml"
+    assert (
+        summary["ci_gate_integrity"]["required_strings_present"]
+        == (summary["ci_gate_integrity"]["required_strings_total"])
+    )
+    assert summary["ci_gate_integrity"]["missing_required_strings"] == []
     assert summary["capability_counts"]["total"] == 9
     assert summary["capability_counts"]["passed"] == 9
     assert summary["capability_counts"]["not_claimed"] == 1
@@ -75,4 +87,6 @@ def test_agentic_rag_final_readiness_script_writes_boundary_audit(
     assert "Production complete: `False`" in report
     assert "`provider_quality_claim_boundary`" in report
     assert "latency_threshold_exceeded" in report
+    assert "Evidence Index Integrity" in report
+    assert "CI Gate Integrity" in report
     assert "docs/evidence/agentic-rag-decision-register-summary.json" in report

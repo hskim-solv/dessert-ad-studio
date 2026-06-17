@@ -13,6 +13,8 @@ cloud deployment.
 - Capabilities passed: `9` /
   `9`
 - Missing artifacts: `[]`
+- Evidence index integrity: `True`
+- CI gate integrity: `True`
 - Production complete: `False`
 - Reason: Local first gates and reviewer packaging are consolidated, but live/API-key, credentialed DB, production MCP auth, external trace, cloud/demo, and image latency decisions remain user-gated.
 
@@ -51,6 +53,20 @@ cloud deployment.
 - Latest paid canary estimated cost:
   `$0.08859`
 - Root causes: `latency_threshold_exceeded`
+
+## Evidence Index Integrity
+
+- Checked artifact count: `24`
+- Missing from evidence index:
+  `[]`
+
+## CI Gate Integrity
+
+- Workflow: `.github/workflows/ci.yml`
+- Required strings present:
+  `6`
+- Missing required strings:
+  `[]`
 
 ## Source Artifacts
 

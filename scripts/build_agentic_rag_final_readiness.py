@@ -9,6 +9,7 @@ from typing import Any
 
 DEFAULT_REPORT_OUTPUT = Path("docs/evidence/agentic-rag-final-readiness.md")
 DEFAULT_SUMMARY_OUTPUT = Path("docs/evidence/agentic-rag-final-readiness-summary.json")
+CI_WORKFLOW = Path(".github/workflows/ci.yml")
 
 SOURCE_ARTIFACTS = {
     "final_outcome": Path("docs/reference/dessert-ad-studio-final-outcome.md"),
@@ -226,9 +227,13 @@ def build_agentic_rag_final_readiness_summary(*, evidence_date: str) -> dict[str
     ]
 
     pending_decisions = decision_register["decisions"]
+    evidence_index_integrity = _build_evidence_index_integrity(source_artifacts)
+    ci_gate_integrity = _build_ci_gate_integrity()
     passed = (
         not missing_artifacts
         and all(capability["passed"] for capability in capabilities)
+        and evidence_index_integrity["passed"] is True
+        and ci_gate_integrity["passed"] is True
         and decision_register["decisions_requiring_user_approval"]
         == decision_register["decision_count"]
         and decision_register["production_claim_added"] is False
@@ -242,6 +247,8 @@ def build_agentic_rag_final_readiness_summary(*, evidence_date: str) -> dict[str
         "evidence_date": evidence_date,
         "source_artifacts": source_artifacts,
         "missing_artifacts": missing_artifacts,
+        "evidence_index_integrity": evidence_index_integrity,
+        "ci_gate_integrity": ci_gate_integrity,
         "capabilities": capabilities,
         "capability_counts": {
             "total": len(capabilities),
@@ -299,6 +306,8 @@ def render_agentic_rag_final_readiness(summary: dict[str, Any]) -> str:
     decision_ids = ", ".join(summary["pending_decision_register"]["decision_ids"])
     source_rows = "\n".join(f"- `{path}`" for path in summary["source_artifacts"])
     provider = summary["provider_quality_boundary"]
+    evidence_index = summary["evidence_index_integrity"]
+    ci_gate = summary["ci_gate_integrity"]
     return f"""# Agentic RAG Final Readiness Audit
 
 Date: {summary["evidence_date"]}
@@ -314,6 +323,8 @@ cloud deployment.
 - Capabilities passed: `{summary["capability_counts"]["passed"]}` /
   `{summary["capability_counts"]["total"]}`
 - Missing artifacts: `{summary["missing_artifacts"]}`
+- Evidence index integrity: `{evidence_index["passed"]}`
+- CI gate integrity: `{ci_gate["passed"]}`
 - Production complete: `{summary["completion_claim"]["production_complete"]}`
 - Reason: {summary["completion_claim"]["reason"]}
 
@@ -345,6 +356,20 @@ cloud deployment.
   `${provider["latest_paid_canary"]["estimated_cost_usd"]}`
 - Root causes: `{", ".join(provider["root_causes"])}`
 
+## Evidence Index Integrity
+
+- Checked artifact count: `{evidence_index["checked_artifact_count"]}`
+- Missing from evidence index:
+  `{evidence_index["missing_from_evidence_index"]}`
+
+## CI Gate Integrity
+
+- Workflow: `{ci_gate["workflow"]}`
+- Required strings present:
+  `{ci_gate["required_strings_present"]}`
+- Missing required strings:
+  `{ci_gate["missing_required_strings"]}`
+
 ## Source Artifacts
 
 {source_rows}
@@ -370,6 +395,42 @@ def _load_artifacts(paths: dict[str, Path]) -> dict[str, Any | None]:
         else:
             artifacts[name] = {"path_exists": True}
     return artifacts
+
+
+def _build_evidence_index_integrity(source_artifacts: list[str]) -> dict[str, Any]:
+    evidence_index_path = Path("docs/evidence/README.md")
+    evidence_index = evidence_index_path.read_text(encoding="utf-8")
+    missing = [
+        artifact
+        for artifact in source_artifacts
+        if artifact not in evidence_index and Path(artifact).name not in evidence_index
+    ]
+    return {
+        "passed": not missing,
+        "index_path": str(evidence_index_path),
+        "checked_artifact_count": len(source_artifacts),
+        "missing_from_evidence_index": missing,
+    }
+
+
+def _build_ci_gate_integrity() -> dict[str, Any]:
+    workflow = CI_WORKFLOW.read_text(encoding="utf-8")
+    required_strings = [
+        "Agentic RAG eval guardrail gate",
+        "Agentic RAG promptfoo package gate",
+        "Agentic RAG final readiness gate",
+        "python scripts/build_agentic_rag_final_readiness.py",
+        "--summary-output /tmp/agentic-rag-final-readiness-summary.json",
+        "--report-output /tmp/agentic-rag-final-readiness.md",
+    ]
+    missing = [item for item in required_strings if item not in workflow]
+    return {
+        "passed": not missing,
+        "workflow": str(CI_WORKFLOW),
+        "required_strings_present": len(required_strings) - len(missing),
+        "required_strings_total": len(required_strings),
+        "missing_required_strings": missing,
+    }
 
 
 def _required(artifacts: dict[str, Any | None], name: str) -> dict[str, Any]:

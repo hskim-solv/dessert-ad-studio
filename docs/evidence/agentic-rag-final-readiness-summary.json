@@ -29,6 +29,19 @@
     "docs/evidence/provider-gate-postmortem-summary.json"
   ],
   "missing_artifacts": [],
+  "evidence_index_integrity": {
+    "passed": true,
+    "index_path": "docs/evidence/README.md",
+    "checked_artifact_count": 24,
+    "missing_from_evidence_index": []
+  },
+  "ci_gate_integrity": {
+    "passed": true,
+    "workflow": ".github/workflows/ci.yml",
+    "required_strings_present": 6,
+    "required_strings_total": 6,
+    "missing_required_strings": []
+  },
   "capabilities": [
     {
       "id": "backend_async_streaming",
