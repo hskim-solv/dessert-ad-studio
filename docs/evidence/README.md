@@ -1,6 +1,6 @@
 # Dessert Ad Studio Evidence Index
 
-Date: 2026-06-16
+Date: 2026-06-17
 
 This index maps the repository evidence to the senior portfolio signals behind
 Dessert Ad Studio: retrieval quality, workflow reliability, observability,
@@ -20,6 +20,8 @@ deployment readiness, privacy boundaries, and model-backed product analysis.
 docker compose config -q
 ```
 
+Latest local regression snapshot: `190 passed, 1 warning`.
+
 ## Evidence Map
 
 | Signal | Evidence | Current result | Reproduce |
@@ -33,6 +35,7 @@ docker compose config -q
 | Streamlit reviewer flow | [`streamlit-reviewer-flow.md`](streamlit-reviewer-flow.md), [`assets/streamlit-reviewer-input.png`](assets/streamlit-reviewer-input.png), [`assets/streamlit-reviewer-result.png`](assets/streamlit-reviewer-result.png) | Local reviewer flow shows input form, revision request, generated banner, revised copy, and download action | See the API, Streamlit, and Playwright capture steps in the evidence note |
 | Real-sample preservation | [`real-sample-preservation.md`](real-sample-preservation.md), [`real-sample-preservation-results.json`](real-sample-preservation-results.json), [`assets/real-sample-preservation/`](assets/real-sample-preservation/) | 3 public sample photos, pass rate 1.00, minimum top-region pixel match 1.00 for deterministic composition | `.venv/bin/python scripts/build_real_sample_preservation_evidence.py --date 2026-06-16` |
 | OpenAI image-edit preservation | [`openai-image-edit-preservation.md`](openai-image-edit-preservation.md), [`openai-image-edit-preservation-live-summary.json`](openai-image-edit-preservation-live-summary.json) | Paid live edit completed under the initial single-sample gate and failed: color similarity 0.234960 vs 0.25 threshold; script now supports strengthened multi-sample provider-quality gate | `.venv/bin/python scripts/openai_image_edit_preservation_smoke.py --reference-set public-samples --model-id gpt-image-2 --quality medium --date 2026-06-17` |
+| Adversarial portfolio review | [`../reference/adversarial-portfolio-review.md`](../reference/adversarial-portfolio-review.md) | Three independent subagents identified overclaiming and converted it into an M7 hardening roadmap | Review-only artifact; no paid/API calls |
 | Architecture preview | [`assets/architecture.svg`](assets/architecture.svg) | README-ready architecture image maps UX, workflow, RAG/eval/ops/deploy/privacy layers | `rsvg-convert docs/evidence/assets/architecture.svg -o /tmp/dessert-ad-studio-architecture.png` |
 | Kubernetes deployability | [`k8s-deployment.md`](k8s-deployment.md) | Base, GPU, and AgentOps overlays render; probes, resources, HPA, ingress, OTEL collector, Phoenix path verified structurally | `kubectl kustomize deploy/k8s/base` and overlay commands in the evidence note |
 | OpenAI product analysis | [`product-analysis-openai.md`](product-analysis-openai.md), [`product-analysis-openai-live-summary.json`](product-analysis-openai-live-summary.json), [`product-analysis-openai-eval-results.json`](product-analysis-openai-eval-results.json) | Live smoke passed; 10-case synthetic reference eval pass rate 1.00, p95 latency 13.15s | `.venv/bin/python scripts/openai_product_analysis_smoke.py --eval --eval-count 10 --output docs/evidence/product-analysis-openai-eval-results.json` |
@@ -59,5 +62,9 @@ docker compose config -q
 
 ## Next Packaging Polish
 
+- Add live Kubernetes deployability evidence or narrow the K8s claim to
+  render-level evidence everywhere.
 - Run the strengthened provider-quality gate with `gpt-image-2` and
   `quality=medium` only if a second paid image-edit iteration is approved.
+- Add trace/log allowlist tests, async reliability checks, and a larger
+  product-like eval pack before making broader production-quality claims.

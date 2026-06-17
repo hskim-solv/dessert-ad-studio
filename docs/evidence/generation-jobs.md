@@ -193,7 +193,7 @@ Verified on 2026-06-15 and 2026-06-16:
 | Focused job tests | `tests/test_generation_jobs.py`: `4 passed, 1 warning` |
 | Streamlit job UX tests | `tests/test_streamlit_jobs.py`: `3 passed` |
 | Focused Streamlit + API job tests | `6 passed` |
-| Full test suite | `169 passed, 1 warning` |
+| Full test suite | Historical snapshot: `169 passed, 1 warning`. Current checkout regression snapshot is tracked in `docs/evidence/README.md`. |
 | Ruff | pass |
 | Compose config | pass |
 | Redis/RQ enqueue + `SimpleWorker` burst | queued 1 job, processed to `succeeded`, `copy_options_count=3` |

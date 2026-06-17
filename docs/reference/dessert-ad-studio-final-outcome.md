@@ -18,8 +18,8 @@ trace, and deployment evidence.
 This repository should be presented as:
 
 > A product-photo-preserving AI ad generation service that demonstrates RAG,
-> agent workflow orchestration, LLMOps/AgentOps evidence, and production-grade
-> AI backend deployment.
+> agent workflow orchestration, LLMOps/AgentOps evidence, and deployment-shaped
+> AI backend engineering evidence.
 
 The project should not be framed as "a dessert ad app" or "an image generation
 demo." The dessert/cafe domain is the concrete business scenario. The hiring
@@ -46,8 +46,30 @@ fix the portfolio direction, but not enough for exact market-share statistics.
 Confirmed positioning:
 
 > For the Korean market, the strongest senior portfolio angle is not model
-> novelty. It is productionized RAG + AI backend + workflow orchestration +
-> evaluation + observability + deployment evidence.
+> novelty. It is measured retrieval + AI backend + workflow orchestration +
+> evaluation + observability + deployability evidence.
+
+## Current Verification Scope
+
+Verified:
+
+- Deterministic preservation/composition path for public samples.
+- Korean text rendering through deterministic overlay instead of image-model
+  text rendering.
+- Curated retrieval baseline plus a measured pgvector storage/query lane.
+- Redis/RQ and Postgres job/history path in Docker Compose.
+- Local/demo AgentOps trace evidence and Kubernetes Kustomize render evidence.
+
+Not yet proven:
+
+- Provider-quality image editing. The first paid OpenAI image-edit gate failed;
+  a stronger `gpt-image-2` + `quality=medium` gate is prepared but not run.
+- Live Kubernetes operation. Current Kubernetes evidence is render/deployability
+  evidence, not pod scheduling plus in-cluster traffic proof.
+- Production trace privacy. Current trace evidence is local/demo scoped and
+  still needs an attribute allowlist test before production claims.
+- Broad quality statistics. Current evals are useful regression gates but still
+  demo-scale.
 
 ## Target Architecture
 
@@ -119,6 +141,7 @@ flowchart LR
 | M4 Real product analysis | Replace mock product analysis with a real VLM-backed analyzer while preserving redaction policy. | Complete first analyzer gate: OpenAI Responses Vision adapter, ADR, no-network tests, env/compose wiring, one redacted live smoke, 10-case synthetic reference eval, pass rate 1.00, p95 latency 13.15s. |
 | M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields. |
 | M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, Streamlit reviewer screenshots at `docs/evidence/streamlit-reviewer-flow.md`, real-sample preservation evidence at `docs/evidence/real-sample-preservation.md`, paid OpenAI image-edit failure evidence at `docs/evidence/openai-image-edit-preservation.md`, README links, reproducible command map. |
+| M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings. Next evidence should cover live K8s operation, provider-quality image-edit gate, larger eval pack, trace allowlist tests, and async reliability matrix. |
 
 ## Failure Conditions
 
@@ -171,9 +194,9 @@ The project is complete when it can be described accurately as:
 
 ## Next Milestone
 
-The immediate M6 portfolio-packaging gate is complete. The evidence index now
-links the main quality, trace, deployment, product-analysis, demo gallery,
-architecture, Streamlit reviewer-flow, real-sample preservation proof, and the
-first paid OpenAI image-edit failure report. The next milestone should run the
-strengthened `gpt-image-2` + `quality=medium` provider-quality gate only if a
-second paid image-edit iteration is approved.
+The immediate M6 portfolio-packaging gate is complete, but the adversarial
+review moved the project into M7 hardening. The next milestone should first add
+live Kubernetes deployability proof or explicitly narrow Kubernetes claims to
+render-level evidence. After that, run the strengthened `gpt-image-2` +
+`quality=medium` provider-quality image-edit gate only if a second paid
+iteration is approved.

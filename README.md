@@ -2,7 +2,9 @@
 
 Small-business ad banner studio for cafe, bakery, and local-store owners.
 
-The app turns a product photo and a short marketing request into Korean ad copy, a generated visual, and a downloadable banner with deterministic Korean text overlay.
+The app turns a product photo and a short marketing request into Korean ad copy,
+a generated or composed visual, and a downloadable banner with deterministic
+Korean text overlay.
 
 ## Problem
 
@@ -16,6 +18,26 @@ Small business owners often need SNS banners, menu images, and promotion copy, b
 4. Optionally add a concise revision request such as premium tone, discount emphasis, or shorter copy.
 5. Render headline, price, and CTA with a PIL overlay.
 6. Download the finished PNG banner.
+
+## Current Verification Scope
+
+Verified:
+
+- Deterministic Korean overlay and demo banner generation.
+- Curated marketing retrieval eval plus a measured pgvector storage/query lane.
+- Docker Compose smoke, Redis/RQ job path, redacted Postgres history, and
+  local AgentOps trace evidence.
+- Kubernetes manifests that render through Kustomize with probes, ingress, HPA,
+  Triton, Streamlit, and AgentOps overlays.
+
+Known gaps:
+
+- The first paid OpenAI image-edit provider gate failed; the deterministic
+  preservation path passes, but provider-quality image editing is still pending.
+- Kubernetes evidence is render/deployability evidence, not a live cluster
+  operation proof yet.
+- Current eval sets are demo-scale and need a larger real/product-like scenario
+  matrix before broader quality claims.
 
 ## Core Features
 
@@ -52,7 +74,7 @@ Run the API:
 uvicorn api.main:app --reload --port 8000
 ```
 
-## A2A Interoperability Spike
+## Optional A2A Interoperability Spike
 
 The API exposes a narrow A2A-compatible surface for portfolio interoperability evidence.
 It does not replace the normal REST API or the Streamlit UI.
@@ -235,7 +257,7 @@ FastAPI:   http://localhost:8080
 Triton:    http://localhost:8000
 ```
 
-## Kubernetes Deployment Evidence
+## Kubernetes Deployability Evidence
 
 Kubernetes manifests live under `deploy/k8s`:
 
@@ -246,7 +268,9 @@ kubectl kustomize deploy/k8s/overlays/agentops
 ```
 
 The base stack includes FastAPI, Streamlit, Triton, PVCs, NGINX Ingress, health
-probes, resource requests/limits, and API HPA. The AgentOps overlay routes API
+probes, resource requests/limits, and API HPA. This is structural deployability
+evidence. A live cluster apply, pod readiness proof, and full in-cluster
+`/generate` smoke are still roadmap items. The AgentOps overlay routes API
 workflow traces through OpenTelemetry Collector to Phoenix.
 
 Evidence:
@@ -273,9 +297,11 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Run the strengthened `gpt-image-2` + `quality=medium` provider-quality image-edit gate only if a second paid iteration is approved.
-2. Add product-preserving segmentation/composition only if evals show a real gap.
-3. Add serving optimization benchmarks only when vLLM/TensorRT/SGLang has a measured role.
-4. Keep FastMCP/A2A as thin wrappers after the workflow/API is stable.
+1. Add live Kubernetes deployability proof: `kind` or cluster apply, pod readiness, ingress or port-forward smoke, Triton model sync, and full `/generate` path.
+2. Align Kubernetes with async operations by adding a worker/Redis/Postgres overlay or explicitly keeping K8s as a sync API skeleton.
+3. Run the strengthened `gpt-image-2` + `quality=medium` provider-quality image-edit gate only if a second paid iteration is approved.
+4. Add a 30+ case real evaluation pack with retrieval grounding, visual review rubric, failure taxonomy, latency p95, and cost summary.
+5. Add trace/log attribute allowlist tests and async reliability checks for burst jobs, worker failure, retries, timeout behavior, and history consistency.
+6. Keep FastMCP/A2A as optional thin wrappers after the workflow/API evidence is stable.
 
 FastMCP is intentionally deferred. It can later expose the studio as agent-callable tools such as `generate_dessert_ad`, generation log lookup, result retrieval, and template scoring.

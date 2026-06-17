@@ -76,7 +76,7 @@ Verified on 2026-06-16:
 |---|---|
 | ADR | `docs/adr/0009-openai-vision-product-analysis.md` records OpenAI vs Gemini vs local VLM decision. |
 | Focused no-network tests | `15 passed` |
-| Full test suite | `180 passed, 1 warning` |
+| Full test suite | Historical snapshot: `180 passed, 1 warning`. Current checkout regression snapshot is tracked in `docs/evidence/README.md`. |
 | Ruff | pass |
 | Compose config | pass |
 | Diff whitespace | pass |
