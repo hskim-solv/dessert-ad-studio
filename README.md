@@ -56,6 +56,9 @@ Verified:
   retention behind explicit user decision.
 - Local OpenInference trace first gate for Agentic RAG graph nodes, with
   redacted span attributes and API stream tracer wiring.
+- Local Agentic RAG run-metrics first gate for latency, mock token/cost,
+  tool-call success/failure, failed-run analysis, and redacted graceful
+  fallback summary.
 - Reviewer-facing offline Agentic RAG eval report that consolidates golden
   eval, retrieval, chunking, pgvector, promptfoo, and guardrail evidence.
 - Demo video storyboard with an 8-shot, 180-second recording plan that references

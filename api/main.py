@@ -623,6 +623,23 @@ def _agentic_rag_stream_update(node_name: str, update: dict[str, Any]) -> dict[s
             payload["cited_ad_package_source_doc_count"] = len(source_doc_ids)
         payload["raw_assets_committed"] = cited_ad_package.get("raw_assets_committed", False)
 
+    graceful_fallback = update.get("graceful_fallback")
+    if isinstance(graceful_fallback, dict):
+        payload["graceful_fallback_ready"] = graceful_fallback.get("status") == "ready"
+        payload["fallback_reason"] = graceful_fallback.get("reason")
+        payload["fallback_next_action"] = graceful_fallback.get("next_action")
+        payload["fallback_retry_attempts"] = graceful_fallback.get("retry_attempts")
+        payload["fallback_retry_budget"] = graceful_fallback.get("retry_budget")
+        payload["fallback_last_error_type"] = graceful_fallback.get("last_error_type")
+        payload["raw_error_committed"] = graceful_fallback.get(
+            "raw_error_committed",
+            False,
+        )
+        payload["raw_inputs_committed"] = graceful_fallback.get(
+            "raw_inputs_committed",
+            False,
+        )
+
     reflection = update.get("reflection")
     if isinstance(reflection, dict):
         payload["reflection"] = {

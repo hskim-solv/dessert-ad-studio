@@ -151,6 +151,7 @@ def _failed_run_summary(
         error_type = worker_result.get("error_type")
         worker_error_types = [str(error_type)] if error_type else []
     reflection = result.get("reflection", {})
+    graceful_fallback = result.get("graceful_fallback", {})
     return {
         "status": result["status"],
         "next_action": result["next_action"],
@@ -158,6 +159,14 @@ def _failed_run_summary(
         "retry_attempts": reflection.get("attempts", 0),
         "retry_budget": reflection.get("retry_budget", 0),
         "failed_span_count": len(worker_records),
+        "graceful_fallback_ready": graceful_fallback.get("status") == "ready",
+        "fallback_reason": graceful_fallback.get("reason"),
+        "fallback_next_action": graceful_fallback.get("next_action"),
+        "fallback_retry_attempts": graceful_fallback.get("retry_attempts", 0),
+        "fallback_retry_budget": graceful_fallback.get("retry_budget", 0),
+        "fallback_last_error_type": graceful_fallback.get("last_error_type"),
+        "raw_error_committed": graceful_fallback.get("raw_error_committed", False),
+        "raw_inputs_committed": graceful_fallback.get("raw_inputs_committed", False),
         "raw_error_message_committed": False,
     }
 

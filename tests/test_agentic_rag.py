@@ -281,6 +281,51 @@ def test_agentic_rag_graph_reflects_and_retries_worker_failure_without_error_det
     assert "private customer text" not in serialized
 
 
+def test_agentic_rag_graph_returns_redacted_graceful_fallback_after_retry_budget():
+    attempts = 0
+
+    def worker_executor(state: dict) -> dict:
+        nonlocal attempts
+        attempts += 1
+        raise RuntimeError("raw provider error with private customer text")
+
+    graph = build_agentic_rag_graph(worker_executor=worker_executor)
+    state = build_agentic_rag_initial_state(
+        GenerationRequest(
+            campaign_purpose="new_menu",
+            product_name="비공개 말차 푸딩",
+            tone="clean",
+            template_hint="minimal_premium",
+            user_constraints="VIP 고객 전용 문구",
+        ),
+        requires_paid_provider=False,
+        estimated_cost_usd=0.0,
+        approval_cost_threshold_usd=0.10,
+    )
+
+    result = graph.invoke(state)
+
+    assert attempts == 2
+    assert result["status"] == "failed"
+    assert result["next_action"] == "inspect_failed_run"
+    assert result["graceful_fallback"] == {
+        "status": "ready",
+        "reason": "worker_failed_after_retry_budget",
+        "next_action": "inspect_failed_run",
+        "retry_attempts": 1,
+        "retry_budget": 1,
+        "last_error_type": "RuntimeError",
+        "raw_error_committed": False,
+        "raw_inputs_committed": False,
+    }
+
+    serialized = json.dumps(result, ensure_ascii=False)
+    assert "raw provider error" not in serialized
+    assert "private customer text" not in serialized
+    assert "비공개 말차 푸딩" not in serialized
+    assert "VIP 고객" not in serialized
+
+
 def test_agentic_rag_graph_routes_low_cost_local_run_to_worker():
     graph = build_agentic_rag_graph()
     state = build_agentic_rag_initial_state(

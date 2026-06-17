@@ -7,49 +7,49 @@
   "final_next_action": "return_cited_ad_package",
   "latency": {
     "span_count": 7,
-    "total_elapsed_ms": 1.296,
-    "max_elapsed_ms": 0.891,
+    "total_elapsed_ms": 0.385,
+    "max_elapsed_ms": 0.273,
     "by_node": [
       {
         "name": "agentic_rag.plan_campaign",
         "kind": "AGENT",
-        "elapsed_ms": 0.052,
+        "elapsed_ms": 0.013,
         "error_type": null
       },
       {
         "name": "agentic_rag.run_tool_suite",
         "kind": "TOOL",
-        "elapsed_ms": 0.891,
+        "elapsed_ms": 0.273,
         "error_type": null
       },
       {
         "name": "agentic_rag.retrieve_context",
         "kind": "RETRIEVER",
-        "elapsed_ms": 0.214,
+        "elapsed_ms": 0.064,
         "error_type": null
       },
       {
         "name": "agentic_rag.build_citations",
         "kind": "CHAIN",
-        "elapsed_ms": 0.022,
+        "elapsed_ms": 0.009,
         "error_type": null
       },
       {
         "name": "agentic_rag.guardrail_check",
         "kind": "GUARDRAIL",
-        "elapsed_ms": 0.025,
+        "elapsed_ms": 0.008,
         "error_type": null
       },
       {
         "name": "agentic_rag.execute_worker",
         "kind": "TOOL",
-        "elapsed_ms": 0.053,
+        "elapsed_ms": 0.011,
         "error_type": null
       },
       {
         "name": "agentic_rag.finalize",
         "kind": "CHAIN",
-        "elapsed_ms": 0.039,
+        "elapsed_ms": 0.008,
         "error_type": null
       }
     ]
@@ -92,6 +92,14 @@
     "retry_attempts": 1,
     "retry_budget": 1,
     "failed_span_count": 2,
+    "graceful_fallback_ready": true,
+    "fallback_reason": "worker_failed_after_retry_budget",
+    "fallback_next_action": "inspect_failed_run",
+    "fallback_retry_attempts": 1,
+    "fallback_retry_budget": 1,
+    "fallback_last_error_type": "RuntimeError",
+    "raw_error_committed": false,
+    "raw_inputs_committed": false,
     "raw_error_message_committed": false
   },
   "raw_inputs_committed": false

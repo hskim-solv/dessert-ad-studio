@@ -20,8 +20,8 @@ calling paid providers.
 - Captures per-node elapsed time from `InMemoryWorkflowTracer`.
 - Reports local mock token usage and cost as explicit zero values.
 - Reports planned tool budget and local tool-suite result counts.
-- Executes a deterministic failed-worker route to summarize retry/reflection
-  and final `inspect_failed_run` behavior.
+- Executes a deterministic failed-worker route to summarize retry/reflection,
+  redacted graceful fallback, and final `inspect_failed_run` behavior.
 
 ## Result
 
@@ -42,6 +42,9 @@ Current result:
 - failed-run status: `failed`
 - failed-run next action: `inspect_failed_run`
 - retry attempts: `1`
+- graceful fallback ready: `true`
+- fallback reason: `worker_failed_after_retry_budget`
+- raw error committed: `false`
 - raw inputs committed: `false`
 
 ## Reproduce
@@ -64,7 +67,7 @@ Focused test:
 
 - This is a local no-paid-provider gate. Real provider token accounting and
   cost telemetry remain provider-gated.
-- It proves summary-level failed-run analysis, not a production incident
-  dashboard.
+- It proves summary-level failed-run analysis and redacted graceful fallback,
+  not a production incident dashboard.
 - Production retention policy still requires a deployment-specific review
   before storing external traces or run metrics.

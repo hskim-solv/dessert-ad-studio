@@ -320,6 +320,42 @@ def test_agentic_rag_run_stream_emits_redacted_worker_events(
         assert raw_value not in body
 
 
+def test_agentic_rag_stream_update_exposes_redacted_graceful_fallback() -> None:
+    import api.main as api_main
+
+    payload = api_main._agentic_rag_stream_update(
+        "finalize",
+        {
+            "status": "failed",
+            "next_action": "inspect_failed_run",
+            "graceful_fallback": {
+                "status": "ready",
+                "reason": "worker_failed_after_retry_budget",
+                "next_action": "inspect_failed_run",
+                "retry_attempts": 1,
+                "retry_budget": 1,
+                "last_error_type": "RuntimeError",
+                "raw_error_committed": False,
+                "raw_inputs_committed": False,
+            },
+        },
+    )
+
+    assert payload == {
+        "node": "finalize",
+        "status": "failed",
+        "next_action": "inspect_failed_run",
+        "graceful_fallback_ready": True,
+        "fallback_reason": "worker_failed_after_retry_budget",
+        "fallback_next_action": "inspect_failed_run",
+        "fallback_retry_attempts": 1,
+        "fallback_retry_budget": 1,
+        "fallback_last_error_type": "RuntimeError",
+        "raw_error_committed": False,
+        "raw_inputs_committed": False,
+    }
+
+
 def test_agentic_rag_run_replay_returns_redacted_sqlite_checkpoint_summary(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

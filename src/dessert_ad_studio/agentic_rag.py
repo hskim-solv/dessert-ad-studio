@@ -91,6 +91,17 @@ class AgenticRagCitedAdPackage(TypedDict):
     raw_assets_committed: bool
 
 
+class AgenticRagGracefulFallback(TypedDict):
+    status: str
+    reason: str
+    next_action: AgenticRagNextAction
+    retry_attempts: int
+    retry_budget: int
+    last_error_type: str
+    raw_error_committed: bool
+    raw_inputs_committed: bool
+
+
 class AgenticRagState(TypedDict, total=False):
     request_summary: AgenticRagRequestSummary
     requires_paid_provider: bool
@@ -103,6 +114,7 @@ class AgenticRagState(TypedDict, total=False):
     approval: AgenticRagApproval
     worker_result: dict[str, Any]
     cited_ad_package: AgenticRagCitedAdPackage
+    graceful_fallback: AgenticRagGracefulFallback
     reflection: dict[str, Any]
     status: AgenticRagStatus
     next_action: AgenticRagNextAction
@@ -128,6 +140,13 @@ class AgenticRagReplaySummary(TypedDict, total=False):
     used_reference: bool
     cited_ad_package_ready: bool
     cited_ad_package_source_doc_count: int
+    graceful_fallback_ready: bool
+    fallback_reason: str
+    fallback_next_action: AgenticRagNextAction
+    fallback_retry_attempts: int
+    fallback_retry_budget: int
+    fallback_last_error_type: str
+    raw_error_committed: bool
     raw_inputs_committed: bool
 
 
@@ -321,6 +340,19 @@ def load_agentic_rag_sqlite_replay_summary(
         source_doc_ids = cited_ad_package.get("citation_source_doc_ids", [])
         if isinstance(source_doc_ids, list):
             summary["cited_ad_package_source_doc_count"] = len(source_doc_ids)
+
+    graceful_fallback = latest_state.get("graceful_fallback")
+    if isinstance(graceful_fallback, dict):
+        summary["graceful_fallback_ready"] = graceful_fallback.get("status") == "ready"
+        summary["fallback_reason"] = str(graceful_fallback.get("reason", ""))
+        summary["fallback_next_action"] = graceful_fallback.get(
+            "next_action",
+            "inspect_failed_run",
+        )
+        summary["fallback_retry_attempts"] = int(graceful_fallback.get("retry_attempts", 0))
+        summary["fallback_retry_budget"] = int(graceful_fallback.get("retry_budget", 0))
+        summary["fallback_last_error_type"] = str(graceful_fallback.get("last_error_type", ""))
+        summary["raw_error_committed"] = bool(graceful_fallback.get("raw_error_committed", False))
 
     return summary
 
@@ -587,6 +619,10 @@ def _finalize(state: AgenticRagState) -> dict[str, Any]:
         return {
             "status": "failed",
             "next_action": "inspect_failed_run",
+            "graceful_fallback": _build_graceful_fallback_summary(
+                state,
+                worker_result,
+            ),
             "node_trace": _trace_after(state, "finalize"),
         }
     return {
@@ -610,6 +646,28 @@ def _build_cited_ad_package_summary(
         "copy_option_count": int(worker_result.get("copy_option_count", 0)),
         "used_reference": bool(worker_result.get("used_reference", False)),
         "raw_assets_committed": False,
+    }
+
+
+def _build_graceful_fallback_summary(
+    state: AgenticRagState,
+    worker_result: dict[str, Any],
+) -> AgenticRagGracefulFallback:
+    reflection = state.get("reflection", {})
+    return {
+        "status": "ready",
+        "reason": "worker_failed_after_retry_budget",
+        "next_action": "inspect_failed_run",
+        "retry_attempts": int(reflection.get("attempts", 0)),
+        "retry_budget": int(reflection.get("retry_budget", _reflection_budget(state))),
+        "last_error_type": str(
+            reflection.get(
+                "last_error_type",
+                worker_result.get("error_type", "WorkerError"),
+            )
+        ),
+        "raw_error_committed": False,
+        "raw_inputs_committed": False,
     }
 
 

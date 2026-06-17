@@ -207,6 +207,14 @@ def test_agentic_rag_run_metrics_smoke_writes_redacted_summary(tmp_path: Path) -
     assert summary["failed_run_analysis"]["next_action"] == "inspect_failed_run"
     assert summary["failed_run_analysis"]["worker_error_types"] == ["RuntimeError"]
     assert summary["failed_run_analysis"]["retry_attempts"] == 1
+    assert summary["failed_run_analysis"]["graceful_fallback_ready"] is True
+    assert summary["failed_run_analysis"]["fallback_reason"] == "worker_failed_after_retry_budget"
+    assert summary["failed_run_analysis"]["fallback_next_action"] == "inspect_failed_run"
+    assert summary["failed_run_analysis"]["fallback_retry_attempts"] == 1
+    assert summary["failed_run_analysis"]["fallback_retry_budget"] == 1
+    assert summary["failed_run_analysis"]["fallback_last_error_type"] == "RuntimeError"
+    assert summary["failed_run_analysis"]["raw_error_committed"] is False
+    assert summary["failed_run_analysis"]["raw_inputs_committed"] is False
     assert summary["raw_inputs_committed"] is False
 
     serialized = json.dumps(summary, ensure_ascii=False)
