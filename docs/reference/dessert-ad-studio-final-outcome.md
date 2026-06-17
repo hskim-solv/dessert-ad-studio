@@ -80,8 +80,9 @@ Not yet proven:
 - Production trace privacy. The first allowlist gate is complete, but external
   production trace rollout still needs a deployment-specific attribute review.
 - Broad real-world quality statistics. Current evals now include 30
-  product-like deterministic scenarios, but not human-rated real customer
-  outcomes or provider-quality visual statistics.
+  product-like deterministic scenarios and an offline visual proxy over 6
+  committed banners, but not human-rated real customer outcomes or
+  provider-quality visual statistics.
 
 ## Target Architecture
 
@@ -126,7 +127,7 @@ flowchart LR
 | Latency | Mock path p95 <= 2 seconds; OpenAI path p95 <= 30 seconds; FLUX2/GPU path measured and documented separately. |
 | Copy quality | Across 10-20 representative samples: Korean text presence 100%, product-name inclusion >= 90%, prohibited-claim violations 0. |
 | Retrieval quality | Retrieval eval set category hit rate >= 80%; prohibited-claims guidance hit rate 100%. |
-| Image quality | Product-preservation checklist pass rate >= 80%; Korean overlay rendering failures 0. Deterministic public-sample preservation first gate: pass rate 1.00, minimum top-region pixel match 1.00. Paid OpenAI image-edit first gate failed and is documented as model-quality evidence, not hidden. The next provider-quality gate now requires multi-sample ROI color/hash/edge preservation, latency, redaction, and text-contamination checks. |
+| Image quality | Product-preservation checklist pass rate >= 80%; Korean overlay rendering failures 0. Deterministic public-sample preservation first gate: pass rate 1.00, minimum top-region pixel match 1.00. Offline visual proxy gate passes 6 committed banners and includes a blank-image negative regression. Paid OpenAI image-edit first gate failed and is documented as model-quality evidence, not hidden. The next provider-quality gate now requires multi-sample ROI color/hash/edge preservation, latency, redaction, and text-contamination checks. |
 | Error handling | Backend failures map to Korean `AdBackendError`; unknown backend, unsupported reference image, and missing API key fail clearly. |
 | Regression guard | `pytest`, `ruff`, API smoke, retrieval eval, and workflow eval commands are documented and reproducible. |
 
@@ -153,7 +154,7 @@ flowchart LR
 | M4 Real product analysis | Replace mock product analysis with a real VLM-backed analyzer while preserving redaction policy. | Complete first analyzer gate: OpenAI Responses Vision adapter, ADR, no-network tests, env/compose wiring, one redacted live smoke, 10-case synthetic reference eval, pass rate 1.00, p95 latency 13.15s. |
 | M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields, and `docs/evidence/cost-guard-summary.json`. |
 | M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, Streamlit reviewer screenshots at `docs/evidence/streamlit-reviewer-flow.md`, real-sample preservation evidence at `docs/evidence/real-sample-preservation.md`, paid OpenAI image-edit failure evidence at `docs/evidence/openai-image-edit-preservation.md`, README links, reproducible command map. |
-| M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, live worker outage/restore smoke, explicit retry/timeout/cancel non-support, 30-scenario product-like eval, first trace/log privacy allowlist gate, and first cost guard are complete. Next evidence should cover provider-quality image-edit gate plus stronger generated-asset quality review. |
+| M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, live worker outage/restore smoke, explicit retry/timeout/cancel non-support, 30-scenario product-like eval, offline visual proxy gate, first trace/log privacy allowlist gate, and first cost guard are complete. Next evidence should cover the paid provider-quality image-edit gate plus human/provider visual quality review. |
 
 ## Failure Conditions
 

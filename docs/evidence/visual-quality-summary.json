@@ -1,0 +1,155 @@
+{
+  "visual_quality_eval": "passed",
+  "scope": "committed_banner_asset_proxy_gate",
+  "sample_count": 6,
+  "passed_count": 6,
+  "pass_rate": 1.0,
+  "thresholds": {
+    "min_width": 768,
+    "min_height": 768,
+    "min_luminance_stddev": 35.0,
+    "min_edge_density": 0.015,
+    "min_unique_colors_128": 128,
+    "min_bottom_region_luminance_range": 150
+  },
+  "items": [
+    {
+      "source": "demo_gallery",
+      "label": "디저트 카페 - 딸기 크림 크루아상",
+      "path": "docs/evidence/assets/demo-gallery/demo-01.png",
+      "passed": true,
+      "metrics": {
+        "width": 1024,
+        "height": 1024,
+        "luminance_stddev": 72.866599,
+        "edge_density": 0.024577,
+        "unique_colors_128": 915,
+        "bottom_region_luminance_range": 230
+      },
+      "checks": {
+        "min_width": true,
+        "min_height": true,
+        "square_or_portrait_safe": true,
+        "luminance_stddev": true,
+        "edge_density": true,
+        "unique_colors_128": true,
+        "bottom_region_luminance_range": true
+      }
+    },
+    {
+      "source": "demo_gallery",
+      "label": "베이커리 - 말차 푸딩",
+      "path": "docs/evidence/assets/demo-gallery/demo-02.png",
+      "passed": true,
+      "metrics": {
+        "width": 1024,
+        "height": 1024,
+        "luminance_stddev": 72.834352,
+        "edge_density": 0.023668,
+        "unique_colors_128": 888,
+        "bottom_region_luminance_range": 230
+      },
+      "checks": {
+        "min_width": true,
+        "min_height": true,
+        "square_or_portrait_safe": true,
+        "luminance_stddev": true,
+        "edge_density": true,
+        "unique_colors_128": true,
+        "bottom_region_luminance_range": true
+      }
+    },
+    {
+      "source": "demo_gallery",
+      "label": "꽃집 - 플라워 박스",
+      "path": "docs/evidence/assets/demo-gallery/demo-03.png",
+      "passed": true,
+      "metrics": {
+        "width": 1024,
+        "height": 1024,
+        "luminance_stddev": 72.73187,
+        "edge_density": 0.024866,
+        "unique_colors_128": 928,
+        "bottom_region_luminance_range": 230
+      },
+      "checks": {
+        "min_width": true,
+        "min_height": true,
+        "square_or_portrait_safe": true,
+        "luminance_stddev": true,
+        "edge_density": true,
+        "unique_colors_128": true,
+        "bottom_region_luminance_range": true
+      }
+    },
+    {
+      "source": "real_sample_preservation",
+      "label": "Dessert plate",
+      "path": "docs/evidence/assets/real-sample-preservation/banners/dessert-plate_banner.png",
+      "passed": true,
+      "metrics": {
+        "width": 768,
+        "height": 768,
+        "luminance_stddev": 58.400976,
+        "edge_density": 0.053289,
+        "unique_colors_128": 9576,
+        "bottom_region_luminance_range": 252
+      },
+      "checks": {
+        "min_width": true,
+        "min_height": true,
+        "square_or_portrait_safe": true,
+        "luminance_stddev": true,
+        "edge_density": true,
+        "unique_colors_128": true,
+        "bottom_region_luminance_range": true
+      }
+    },
+    {
+      "source": "real_sample_preservation",
+      "label": "Matcha pudding",
+      "path": "docs/evidence/assets/real-sample-preservation/banners/matcha-pudding_banner.png",
+      "passed": true,
+      "metrics": {
+        "width": 768,
+        "height": 768,
+        "luminance_stddev": 60.409806,
+        "edge_density": 0.080361,
+        "unique_colors_128": 9566,
+        "bottom_region_luminance_range": 248
+      },
+      "checks": {
+        "min_width": true,
+        "min_height": true,
+        "square_or_portrait_safe": true,
+        "luminance_stddev": true,
+        "edge_density": true,
+        "unique_colors_128": true,
+        "bottom_region_luminance_range": true
+      }
+    },
+    {
+      "source": "real_sample_preservation",
+      "label": "Flower box",
+      "path": "docs/evidence/assets/real-sample-preservation/banners/flower-box_banner.png",
+      "passed": true,
+      "metrics": {
+        "width": 768,
+        "height": 768,
+        "luminance_stddev": 79.081867,
+        "edge_density": 0.127255,
+        "unique_colors_128": 9266,
+        "bottom_region_luminance_range": 241
+      },
+      "checks": {
+        "min_width": true,
+        "min_height": true,
+        "square_or_portrait_safe": true,
+        "luminance_stddev": true,
+        "edge_density": true,
+        "unique_colors_128": true,
+        "bottom_region_luminance_range": true
+      }
+    }
+  ]
+}

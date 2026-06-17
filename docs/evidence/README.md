@@ -20,7 +20,7 @@ deployment readiness, privacy boundaries, and model-backed product analysis.
 docker compose config -q
 ```
 
-Latest local regression snapshot: `219 passed, 1 warning`.
+Latest local regression snapshot: `222 passed, 1 warning`.
 
 ## Evidence Map
 
@@ -33,6 +33,7 @@ Latest local regression snapshot: `219 passed, 1 warning`.
 | AgentOps observability | [`agentops-phoenix.md`](agentops-phoenix.md), [`assets/phoenix-workflow-trace.png`](assets/phoenix-workflow-trace.png), [`assets/phoenix-trace-detail.png`](assets/phoenix-trace-detail.png) | OTEL console smoke, Phoenix OTLP trace export, UI screenshots, trace count verification, trace/log privacy allowlist tests | `WORKFLOW_TRACING=otel WORKFLOW_TRACE_EXPORT=console .venv/bin/python scripts/otel_trace_smoke.py` |
 | Workflow eval and failure report | [`workflow-eval-summary.json`](workflow-eval-summary.json) | 3 demo samples, average score 1.00, failure_count 0, failure_cases present | `.venv/bin/python scripts/eval_demo_samples.py --output docs/evidence/workflow-eval-summary.json` |
 | Product-like workflow eval | [`product-like-workflow-eval.md`](product-like-workflow-eval.md), [`product-like-workflow-eval-summary.json`](product-like-workflow-eval-summary.json) | 30 product-like scenarios, average score 1.00, failure_count 0 | `.venv/bin/python scripts/eval_product_like_samples.py --output docs/evidence/product-like-workflow-eval-summary.json` |
+| Visual quality proxy | [`visual-quality.md`](visual-quality.md), [`visual-quality-summary.json`](visual-quality-summary.json) | Offline proxy passed: 6 committed banner assets, pass rate 1.00, blank-image negative regression covered | `.venv/bin/python scripts/eval_visual_quality.py --output docs/evidence/visual-quality-summary.json` |
 | Cost guard | [`cost-guard.md`](cost-guard.md), [`cost-guard-summary.json`](cost-guard-summary.json) | Offline cost estimate passed: `gpt-image-2`, 627 image tokens, estimated cost `$0.01881` under `$0.02`; live image-edit smoke supports `--max-estimated-cost-usd` | `.venv/bin/python scripts/cost_guard_smoke.py --model-id gpt-image-2 --image-total-tokens 627 --max-estimated-cost-usd 0.02 --output docs/evidence/cost-guard-summary.json` |
 | Demo gallery | [`demo-gallery.md`](demo-gallery.md), [`demo-gallery-manifest.json`](demo-gallery-manifest.json), [`assets/demo-gallery/`](assets/demo-gallery/) | 3 deterministic reviewer-visible banners generated from the local workflow with Korean overlay rendering | `.venv/bin/python scripts/build_demo_gallery.py --date 2026-06-16` |
 | Streamlit reviewer flow | [`streamlit-reviewer-flow.md`](streamlit-reviewer-flow.md), [`assets/streamlit-reviewer-input.png`](assets/streamlit-reviewer-input.png), [`assets/streamlit-reviewer-result.png`](assets/streamlit-reviewer-result.png) | Local reviewer flow shows input form, revision request, generated banner, revised copy, and download action | See the API, Streamlit, and Playwright capture steps in the evidence note |
@@ -70,5 +71,5 @@ Latest local regression snapshot: `219 passed, 1 warning`.
 
 - Run the strengthened provider-quality gate with `gpt-image-2` and
   `quality=medium` only if a second paid image-edit iteration is approved.
-- Add human visual review or stronger automated visual rubrics before making
+- Add human visual review or provider-quality visual statistics before making
   broader generated-asset quality claims.

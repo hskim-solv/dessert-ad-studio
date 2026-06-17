@@ -45,6 +45,8 @@ The machine-readable summary is stored at
 
 ## Remaining Gap
 
-The next quality gate should add human review or stronger automated visual
-rubrics for generated assets. The paid provider-quality image-edit gate remains
-separate and requires explicit approval before another live model run.
+The first offline visual proxy gate is now covered by
+[`visual-quality.md`](visual-quality.md). The paid provider-quality image-edit
+gate remains separate and requires explicit approval before another live model
+run. Broader generated-asset quality claims still need human review or
+provider-quality visual statistics.

@@ -304,7 +304,7 @@ docs/runbooks/gcp-flux2-validation.md
 ## Roadmap
 
 1. Run the strengthened `gpt-image-2` + `quality=medium` provider-quality image-edit gate only if a second paid iteration is approved.
-2. Add human visual review or stronger automated visual rubrics for generated assets.
+2. Add human visual review or provider-quality visual statistics for generated assets.
 3. Keep FastMCP/A2A as optional thin wrappers after the workflow/API evidence is stable.
 
 FastMCP is intentionally deferred. It can later expose the studio as agent-callable tools such as `generate_dessert_ad`, generation log lookup, result retrieval, and template scoring.
