@@ -79,8 +79,13 @@ Next paid provider-quality run, if approved:
   --reference-set public-samples \
   --model-id gpt-image-2 \
   --quality medium \
+  --max-estimated-cost-usd 0.20 \
   --date 2026-06-17
 ```
+
+The `--max-estimated-cost-usd` guard uses the token usage returned by the image
+API. If pricing for the selected model is unavailable and no override is set,
+the budget gate fails closed instead of silently passing.
 
 ## Privacy Boundary
 

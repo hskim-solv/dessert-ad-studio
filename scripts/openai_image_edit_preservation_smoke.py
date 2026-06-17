@@ -23,6 +23,7 @@ from PIL import Image, ImageFilter, ImageStat
 
 from dessert_ad_studio.backends.base import ImageResult
 from dessert_ad_studio.backends.openai_image import OpenAIImageBackend
+from dessert_ad_studio.costing import cost_guard_passed, estimate_openai_image_cost
 from dessert_ad_studio.prompts import build_image_prompt
 from dessert_ad_studio.schemas import GenerationRequest
 
@@ -91,6 +92,7 @@ def build_live_image_edit_preservation_summary(
     model_id: str | None = None,
     quality: str | None = None,
     image_generator: ImageGenerator | None = None,
+    max_estimated_cost_usd: float | None = None,
 ) -> dict[str, Any]:
     return build_provider_quality_gate_summary(
         samples=(
@@ -107,6 +109,7 @@ def build_live_image_edit_preservation_summary(
         model_id=model_id,
         quality=quality,
         image_generator=image_generator,
+        max_estimated_cost_usd=max_estimated_cost_usd,
     )
 
 
@@ -120,6 +123,7 @@ def build_provider_quality_gate_summary(
     quality: str | None = None,
     image_generator: ImageGenerator | None = None,
     thresholds: dict[str, float] | None = None,
+    max_estimated_cost_usd: float | None = None,
 ) -> dict[str, Any]:
     if not samples:
         raise ValueError("samples must not be empty")
@@ -157,15 +161,31 @@ def build_provider_quality_gate_summary(
         result["metrics"]["roi_average_hash_similarity"] for result in sample_results
     ]
     roi_edge_scores = [result["metrics"]["roi_edge_similarity"] for result in sample_results]
+    model_name = model_id or getattr(backend, "model_id", None) or "injected"
+    quality_name = quality or getattr(backend, "quality", None) or "injected"
+    usage = _aggregate_usage(sample_results)
+    cost = estimate_openai_image_cost(
+        model_id=model_name,
+        usage=usage,
+        max_budget_usd=max_estimated_cost_usd,
+    )
+    cost_guard = {
+        "passed": cost_guard_passed(cost),
+        "max_estimated_cost_usd": max_estimated_cost_usd,
+        "estimated": cost["estimated"],
+    }
+    gate_passed = provider_gate_passed and cost_guard["passed"]
 
     summary = {
-        "openai_image_edit_preservation": "passed" if provider_gate_passed else "failed",
+        "openai_image_edit_preservation": "passed" if gate_passed else "failed",
         "evidence_date": evidence_date,
-        "model_id": model_id or getattr(backend, "model_id", None) or "injected",
-        "quality": quality or getattr(backend, "quality", None) or "injected",
+        "model_id": model_name,
+        "quality": quality_name,
         "used_reference": True,
         "elapsed_ms": total_elapsed_ms,
-        "usage": _aggregate_usage(sample_results),
+        "usage": usage,
+        "cost": cost,
+        "cost_guard": cost_guard,
         "thresholds": active_thresholds,
         "provider_quality_gate": {
             "passed": provider_gate_passed,
@@ -516,6 +536,17 @@ def _sha256_text(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
+def _optional_float_env(name: str) -> float | None:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return None
+    try:
+        value = float(raw)
+    except ValueError:
+        return None
+    return value if value >= 0 else None
+
+
 def main() -> int:
     load_dotenv()
     if not os.getenv("OPENAI_API_KEY", "").strip():
@@ -537,6 +568,12 @@ def main() -> int:
     parser.add_argument("--date", default=date.today().isoformat())
     parser.add_argument("--model-id", default=os.getenv("IMAGE_MODEL_ID"))
     parser.add_argument("--quality", default=os.getenv("IMAGE_QUALITY"))
+    parser.add_argument(
+        "--max-estimated-cost-usd",
+        type=float,
+        default=_optional_float_env("OPENAI_MAX_ESTIMATED_COST_USD"),
+        help="Fail the smoke if estimated OpenAI image cost exceeds this budget.",
+    )
     args = parser.parse_args()
 
     if args.reference_set == "public-samples":
@@ -547,6 +584,7 @@ def main() -> int:
             evidence_date=args.date,
             model_id=args.model_id,
             quality=args.quality,
+            max_estimated_cost_usd=args.max_estimated_cost_usd,
         )
     else:
         summary = build_live_image_edit_preservation_summary(
@@ -556,6 +594,7 @@ def main() -> int:
             evidence_date=args.date,
             model_id=args.model_id,
             quality=args.quality,
+            max_estimated_cost_usd=args.max_estimated_cost_usd,
         )
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0 if summary["openai_image_edit_preservation"] == "passed" else 1

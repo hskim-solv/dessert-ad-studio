@@ -152,6 +152,10 @@ Copy `.env.example` to `.env` and edit local values. Do not commit `.env`.
 | `PRODUCT_ANALYSIS_MODEL_ID` | any vision-capable Responses model id | `gpt-5.4-mini` |
 | `IMAGE_MODEL_ID` | any GPT image model id | `gpt-image-1-mini` |
 | `IMAGE_QUALITY` | `low`, `medium`, `high` | `low` |
+| `OPENAI_MAX_ESTIMATED_COST_USD` | optional per-run smoke budget | unset |
+| `OPENAI_COPY_INPUT_USD_PER_1M_TOKENS` | optional text input price override | unset |
+| `OPENAI_COPY_OUTPUT_USD_PER_1M_TOKENS` | optional text output price override | unset |
+| `OPENAI_IMAGE_USD_PER_1M_TOKENS` | optional image token price override | unset |
 
 Real OpenAI backends need `OPENAI_API_KEY` in `.env`.
 `PRODUCT_ANALYSIS_BACKEND=openai` sends the product request and optional
@@ -299,10 +303,10 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Align Kubernetes with async operations by adding a worker/Redis/Postgres overlay or explicitly keeping K8s as a sync API skeleton.
-2. Run the strengthened `gpt-image-2` + `quality=medium` provider-quality image-edit gate only if a second paid iteration is approved.
-3. Add a 30+ case real evaluation pack with retrieval grounding, visual review rubric, failure taxonomy, latency p95, and cost summary.
-4. Add trace/log attribute allowlist tests and async reliability checks for burst jobs, worker failure, retries, timeout behavior, and history consistency.
+1. Run the strengthened `gpt-image-2` + `quality=medium` provider-quality image-edit gate only if a second paid iteration is approved.
+2. Add live worker failure-injection evidence for the Kubernetes async overlay.
+3. Add human visual review or stronger automated visual rubrics for generated assets.
+4. Add retry/timeout/cancel behavior or explicit non-support evidence for async jobs.
 5. Keep FastMCP/A2A as optional thin wrappers after the workflow/API evidence is stable.
 
 FastMCP is intentionally deferred. It can later expose the studio as agent-callable tools such as `generate_dessert_ad`, generation log lookup, result retrieval, and template scoring.

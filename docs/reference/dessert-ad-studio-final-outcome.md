@@ -139,7 +139,7 @@ flowchart LR
 | Reproducibility | Lets reviewers rerun the same demo. | Sample inputs, fixed outputs, documented commands. |
 | Security/privacy | Avoids persisting raw photo, prompt, API response, or secrets. | Redacted trace/log allowlist tests and `.env` guard. |
 | Maintainability | Keeps backend swaps and workflow changes controlled. | Backend contract, ADRs, tests, contract reviewer. |
-| Cost/operations | Controls paid model calls and runtime failures. | Usage logging, smoke scripts, model config. |
+| Cost/operations | Controls paid model calls and runtime failures. | Usage logging, smoke scripts, per-run estimated cost guard, model config. |
 | Portfolio evidence | Makes the hiring signal visible. | README, screenshots, architecture diagram, demo gallery. |
 
 ## Intermediate Milestones
@@ -150,9 +150,9 @@ flowchart LR
 | M2 Hybrid retrieval | Compare Qdrant/pgvector/Chroma or a no-adoption baseline before choosing. | Complete: `docs/adr/0007-pgvector-marketing-context-retrieval.md`, `docs/evidence/pgvector-retrieval.md`, pgvector hybrid precision 1.00 vs keyword baseline precision 0.75 on the current 10-sample eval set. |
 | M3 Service workflow hardening | Make generation observable and resumable enough for real UX. | Complete: Redis/RQ job queue, `/generation-jobs` status API, redacted Postgres history, Korean reference-image async rejection, API tests, Redis/RQ smoke, Postgres history smoke, full containerized API/worker smoke with Triton scorer, and Streamlit polling/history UX. |
 | M4 Real product analysis | Replace mock product analysis with a real VLM-backed analyzer while preserving redaction policy. | Complete first analyzer gate: OpenAI Responses Vision adapter, ADR, no-network tests, env/compose wiring, one redacted live smoke, 10-case synthetic reference eval, pass rate 1.00, p95 latency 13.15s. |
-| M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields. |
+| M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields, and `docs/evidence/cost-guard-summary.json`. |
 | M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, Streamlit reviewer screenshots at `docs/evidence/streamlit-reviewer-flow.md`, real-sample preservation evidence at `docs/evidence/real-sample-preservation.md`, paid OpenAI image-edit failure evidence at `docs/evidence/openai-image-edit-preservation.md`, README links, reproducible command map. |
-| M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, 30-scenario product-like eval, and first trace/log privacy allowlist gate are complete. Next evidence should cover provider-quality image-edit gate and live worker failure injection. |
+| M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, 30-scenario product-like eval, first trace/log privacy allowlist gate, and first cost guard are complete. Next evidence should cover provider-quality image-edit gate and live worker failure injection. |
 
 ## Failure Conditions
 
@@ -208,8 +208,8 @@ The project is complete when it can be described accurately as:
 The immediate M6 portfolio-packaging gate is complete, but the adversarial
 review moved the project into M7 hardening. Live K8s base-stack proof is now
 captured, the K8s async overlay smoke is complete, the first async reliability
-matrix is complete, the 30-scenario product-like eval is complete, and the first
-trace/log privacy allowlist gate is complete. The next non-paid milestone
-should add live worker failure-injection evidence or a cost guard. The
-strengthened `gpt-image-2` + `quality=medium` provider-quality image-edit gate
-still needs explicit paid-run approval.
+matrix is complete, the 30-scenario product-like eval is complete, the first
+trace/log privacy allowlist gate is complete, and the first cost guard is
+complete. The next non-paid milestone should add live worker failure-injection
+evidence. The strengthened `gpt-image-2` + `quality=medium` provider-quality
+image-edit gate still needs explicit paid-run approval.

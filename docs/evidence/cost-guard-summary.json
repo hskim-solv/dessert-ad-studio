@@ -1,0 +1,39 @@
+{
+  "cost_guard_smoke": "passed",
+  "scope": "offline_cost_estimate_no_api_call",
+  "evidence_date": "2026-06-17",
+  "model_id": "gpt-image-2",
+  "usage": {
+    "total_tokens": 627
+  },
+  "cost": {
+    "estimated": true,
+    "currency": "USD",
+    "total_usd": 0.01881,
+    "pricing_basis": "USD per 1M tokens",
+    "pricing_source": {
+      "url": "https://openai.com/api/pricing/",
+      "checked_date": "2026-06-17",
+      "override_env_supported": true
+    },
+    "line_items": [
+      {
+        "model_id": "gpt-image-2",
+        "usage_type": "image_total_tokens_conservative",
+        "tokens": 627,
+        "usd_per_1m_tokens": 30.0,
+        "cost_usd": 0.01881
+      }
+    ],
+    "budget": {
+      "max_usd": 0.02,
+      "passed": true,
+      "over_by_usd": 0.0
+    }
+  },
+  "cost_guard": {
+    "passed": true,
+    "max_estimated_cost_usd": 0.02,
+    "estimated": true
+  }
+}

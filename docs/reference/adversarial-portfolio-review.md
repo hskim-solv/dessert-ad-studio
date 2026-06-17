@@ -28,7 +28,7 @@ Scope limits:
 | Medium | `RAG` and `pgvector` can be overread as production semantic retrieval, while the current vector lane is a curated guide store with deterministic hash embeddings and keyword reranking. | Accept with clarification | Use `curated retrieval eval` and `pgvector storage/query lane` language unless a real embedding model and broader corpus are added. |
 | Medium | Trace/privacy evidence is safe for local/demo usage, but not yet a production trace privacy guarantee. Some metadata included filenames and artifact paths. | Accepted and first gate closed | Workflow trace/log and image-failure log allowlist tests now prove raw prompt summaries, product inputs, reference filenames, generated copy, and image paths are excluded from persistent surfaces. Keep production trace rollout gated on another deployment-specific attribute review. |
 | Medium | Async job evidence is a good start but mostly happy-path smoke. | Investigate | Add burst jobs, worker failure, retry/failure state, timeout, cancellation or explicit non-support, duplicate polling, and Postgres consistency checks. |
-| Medium | Cost evidence records usage, but does not yet estimate dollars or enforce a budget. | Accept with clarification | Keep `paid runs are approval-gated`; add cost estimate summaries and an optional budget guard before claiming cost control. |
+| Medium | Cost evidence recorded usage, but did not estimate dollars or enforce a budget. | Accepted and first gate closed | Offline cost guard now records estimated USD, pricing source, budget result, env override support, and fail-closed behavior for unknown rates when a budget is set. Keep `paid runs are approval-gated`; account-level billing limits still belong in the OpenAI dashboard. |
 | Low | A2A/FastMCP can distract from the core service story. | Accept | Keep A2A as an optional spike/appendix. Do not let A2A/FastMCP outrank core workflow, eval, deployment, and reliability work. |
 | Low | Some evidence documents contain historical full-suite counts that are now stale. | Accept | Add a single evidence freshness section and make older docs explicit historical snapshots. |
 
@@ -43,7 +43,7 @@ Scope limits:
 | P4 | Real evaluation pack. | First product-like gate complete: 30 deterministic workflow scenarios with reproducible summary JSON. Human rubric, real samples, p95 latency/cost, and stronger visual checks remain pending. |
 | P5 | Trace/log privacy hardening. | First gate complete: allowlist tests cover workflow trace/log attributes, image-failure usage logs, and OTEL smoke output. Production external-trace rollout still requires deployment-specific attribute review. |
 | P6 | Async reliability matrix. | First deterministic gate complete for burst submit, workflow failure state, queue enqueue failure, duplicate polling, worker startup wait, and K8s async smoke. Retry/timeout/cancel and live worker failure injection remain pending. |
-| P7 | Cost guard. | Per-run estimated cost in summaries and optional budget threshold for paid smoke scripts. |
+| P7 | Cost guard. | First gate complete: `docs/evidence/cost-guard-summary.json` records `gpt-image-2` cost estimate `$0.01881` under a `$0.02` budget, and the live image-edit smoke supports `--max-estimated-cost-usd`. |
 
 ## Immediate Reframe
 

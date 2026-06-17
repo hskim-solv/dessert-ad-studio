@@ -115,6 +115,80 @@ def test_build_provider_quality_gate_summary_checks_multiple_samples_and_redacts
     assert "b64_json" not in serialized
 
 
+def test_provider_quality_gate_summary_includes_cost_guard(
+    tmp_path: Path,
+) -> None:
+    reference_path = tmp_path / "reference.png"
+    _write_reference(reference_path)
+    output_dir = tmp_path / "outputs"
+    summary_path = tmp_path / "provider-summary.json"
+
+    summary = build_provider_quality_gate_summary(
+        samples=(
+            ReferenceSample(
+                slug="budgeted",
+                product_name="말차 푸딩",
+                reference_path=reference_path,
+                roi=(0.12, 0.08, 0.88, 0.78),
+            ),
+        ),
+        output_dir=output_dir,
+        summary_path=summary_path,
+        evidence_date="2026-06-17",
+        model_id="gpt-image-2",
+        quality="medium",
+        image_generator=_fake_image_generator,
+        max_estimated_cost_usd=0.01,
+    )
+
+    assert summary["provider_quality_gate"]["passed"] is True
+    assert summary["cost"]["estimated"] is True
+    assert summary["cost"]["total_usd"] == 0.00369
+    assert summary["cost"]["budget"] == {
+        "max_usd": 0.01,
+        "passed": True,
+        "over_by_usd": 0.0,
+    }
+    assert summary["cost_guard"]["passed"] is True
+    assert summary["openai_image_edit_preservation"] == "passed"
+
+
+def test_provider_quality_gate_fails_when_cost_budget_is_exceeded(
+    tmp_path: Path,
+) -> None:
+    reference_path = tmp_path / "reference.png"
+    _write_reference(reference_path)
+    output_dir = tmp_path / "outputs"
+    summary_path = tmp_path / "provider-summary.json"
+
+    summary = build_provider_quality_gate_summary(
+        samples=(
+            ReferenceSample(
+                slug="over-budget",
+                product_name="말차 푸딩",
+                reference_path=reference_path,
+                roi=(0.12, 0.08, 0.88, 0.78),
+            ),
+        ),
+        output_dir=output_dir,
+        summary_path=summary_path,
+        evidence_date="2026-06-17",
+        model_id="gpt-image-2",
+        quality="medium",
+        image_generator=_fake_image_generator,
+        max_estimated_cost_usd=0.001,
+    )
+
+    assert summary["provider_quality_gate"]["passed"] is True
+    assert summary["cost_guard"]["passed"] is False
+    assert summary["cost"]["budget"] == {
+        "max_usd": 0.001,
+        "passed": False,
+        "over_by_usd": 0.00269,
+    }
+    assert summary["openai_image_edit_preservation"] == "failed"
+
+
 def test_provider_quality_gate_fails_for_low_roi_similarity_and_text_risk(
     tmp_path: Path,
 ) -> None:
