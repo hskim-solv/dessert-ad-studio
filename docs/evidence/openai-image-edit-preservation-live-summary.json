@@ -1,0 +1,54 @@
+{
+  "openai_image_edit_preservation": "failed",
+  "evidence_date": "2026-06-17",
+  "model_id": "gpt-image-1-mini",
+  "quality": "low",
+  "used_reference": true,
+  "elapsed_ms": 15231,
+  "usage": {
+    "total_tokens": 627
+  },
+  "reference_image": {
+    "source": "docs/evidence/assets/real-sample-preservation/references/matcha-pudding.png",
+    "sha256": "c0475ccec6c51d4293c048e973119e0ed39cdc2a4e3dc0c26b26b0eeffcc1300",
+    "committed_public_sample": true
+  },
+  "generated_image": {
+    "exists": true,
+    "committed": false,
+    "path": "redacted_outputs_path",
+    "sha256": "05e6a056f17e707f36f1ecd1709b649988c5620431a4a64aa4277adff68d0c27",
+    "bytes": 1218551
+  },
+  "prompt": {
+    "length": 233,
+    "sha256": "d8a41df10595f51a1d3def29f192e2af15633632d00c6bab6c36e8894b97741b"
+  },
+  "metrics": {
+    "generated_exists": true,
+    "reference_size": [
+      768,
+      768
+    ],
+    "generated_size": [
+      1024,
+      1024
+    ],
+    "generated_nonblank": true,
+    "color_histogram_similarity": 0.23496,
+    "average_hash_similarity": 0.546875
+  },
+  "checklist": {
+    "generated_file_exists": true,
+    "generated_nonblank": true,
+    "generated_size_1024": true,
+    "color_histogram_similarity_ge_0_25": false
+  },
+  "checklist_passed": false,
+  "privacy_boundary": {
+    "raw_prompt_committed": false,
+    "raw_model_response_committed": false,
+    "generated_image_committed": false,
+    "reference_image_public_sample": true
+  }
+}
