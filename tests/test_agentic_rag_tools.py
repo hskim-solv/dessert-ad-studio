@@ -8,6 +8,7 @@ from dessert_ad_studio.agentic_rag import (
     build_agentic_rag_initial_state,
 )
 from dessert_ad_studio.agentic_tools import (
+    build_sql_production_access_audit_policy,
     run_internal_api_tool,
     run_sql_query_tool,
     run_web_search_tool,
@@ -130,6 +131,52 @@ def test_sql_query_tool_rejects_non_allowlisted_queries_with_policy_summary() ->
         "row_count": 0,
         "error": "query_id_not_allowed",
     }
+
+
+def test_sql_production_access_audit_policy_is_redacted_and_fail_closed() -> None:
+    policy = build_sql_production_access_audit_policy()
+
+    assert policy == {
+        "status": "first_gate_complete",
+        "production_db_credentials_configured": False,
+        "credentialed_connection_smoke": "pending_user_approval",
+        "access_mode": "read_only_query_id_allowlist",
+        "required_database_role": "agentic_rag_readonly",
+        "network_boundary": "private_network_or_tunnel_required",
+        "ssl_required": True,
+        "raw_sql_allowed": False,
+        "mutation_statements_allowed": False,
+        "allowlisted_query_ids": ["template_policy_summary"],
+        "row_limit": 25,
+        "statement_timeout_ms": 250,
+        "audit_event_schema": [
+            "event_id",
+            "run_id_hash",
+            "actor_id_hash",
+            "query_id",
+            "purpose",
+            "policy_decision",
+            "row_count",
+            "duration_ms",
+            "created_at",
+        ],
+        "audit_redaction": {
+            "raw_sql_committed": False,
+            "row_values_committed": False,
+            "raw_user_inputs_committed": False,
+            "secrets_committed": False,
+        },
+        "retention_status": "pending_user_project_entity_scope",
+    }
+
+
+def test_sql_production_access_audit_policy_returns_isolated_copy() -> None:
+    policy = build_sql_production_access_audit_policy()
+    policy["audit_redaction"]["secrets_committed"] = True
+
+    fresh_policy = build_sql_production_access_audit_policy()
+
+    assert fresh_policy["audit_redaction"]["secrets_committed"] is False
 
 
 def test_agentic_tool_suite_adr_and_mcp_server_are_recorded() -> None:

@@ -228,8 +228,8 @@ def _storyboard_shots() -> tuple[StoryboardShot, ...]:
             visual="Show provider-quality failure and final outcome pending rows.",
             narration=(
                 "Provider-quality OpenAI image editing is not claimed as proven; "
-                "live web search, production DB access/audit, production MCP "
-                "auth, cloud deployment, and the final recorded video remain pending."
+                "live web search, credentialed production DB smoke, production "
+                "MCP auth, cloud deployment, and the final recorded video remain pending."
             ),
             evidence=(
                 "docs/evidence/openai-image-edit-preservation.md",

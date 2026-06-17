@@ -49,7 +49,8 @@ def test_agentic_rag_eval_report_script_writes_reviewer_report(tmp_path: Path) -
     assert summary["guardrails"]["raw_inputs_absent"] is True
     assert summary["limits"]["ragas_live_gate"] == "pending_paid_api_approval"
     assert summary["limits"]["local_sql_runtime_policy"] == "first_gate_complete"
-    assert summary["limits"]["production_db_access_audit"] == "pending_runtime_security_policy"
+    assert summary["limits"]["production_db_access_audit_policy"] == "first_gate_complete"
+    assert summary["limits"]["credentialed_production_db_smoke"] == "pending_user_approval"
     assert summary["limits"]["mcp_loopback_transport_auth_boundary"] == "first_gate_complete"
     assert (
         summary["limits"]["production_mcp_auth_remote_client"] == "pending_runtime_security_policy"
@@ -61,7 +62,8 @@ def test_agentic_rag_eval_report_script_writes_reviewer_report(tmp_path: Path) -
     assert "promptfoo" in report
     assert "Ragas live metrics remain pending" in report
     assert (
-        "The local SQL runtime policy and MCP\n"
-        "loopback transport/auth boundary first gates are complete"
+        "The local SQL runtime\n"
+        "policy, production DB access/audit policy, and MCP loopback transport/auth\n"
+        "boundary first gates are complete"
     ) in report
     assert "docs/evidence/agentic-rag-eval-guardrail-summary.json" in report

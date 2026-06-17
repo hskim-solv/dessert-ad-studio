@@ -53,7 +53,8 @@
     "ragas_live_gate": "pending_paid_api_approval",
     "live_web_search": "pending_runtime_security_policy",
     "local_sql_runtime_policy": "first_gate_complete",
-    "production_db_access_audit": "pending_runtime_security_policy",
+    "production_db_access_audit_policy": "first_gate_complete",
+    "credentialed_production_db_smoke": "pending_user_approval",
     "mcp_loopback_transport_auth_boundary": "first_gate_complete",
     "production_mcp_auth_remote_client": "pending_runtime_security_policy"
   },

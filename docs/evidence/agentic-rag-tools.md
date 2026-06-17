@@ -18,6 +18,9 @@ docs/adr/0017-agentic-rag-tool-suite.md
 - `web_search`: local curated snapshot summary, no live network call.
 - `sql_query`: in-memory SQLite allowlisted query, no arbitrary SQL, read-only
   policy summary, row limit, and timeout budget.
+- Production DB access/audit policy: read-only role, private network/SSL
+  boundary, query-id allowlist, audit event schema, and redaction contract
+  recorded without credentials or a production connection.
 - `internal_api`: in-process `preview_generation_policy` contract.
 - `document_retrieval`: existing keyword marketing-context retriever.
 - MCP server: `mcp_servers/dessert_ad_studio_server.py` with FastMCP tool
@@ -50,6 +53,10 @@ Current result:
 - SQL mode: `sqlite_allowlisted_query`
 - SQL policy: read-only, query-id allowlist only, raw SQL disabled, mutation
   statements disabled, row limit `25`, timeout `250ms`
+- Production DB access/audit policy: `first_gate_complete`; credentialed
+  connection smoke `pending_user_approval`; required role
+  `agentic_rag_readonly`; raw SQL, row values, raw user inputs, and secrets are
+  excluded from committed audit evidence.
 - internal API mode: `in_process_contract`
 - MCP package smoke: `passed`
 - MCP version: `1.28.0`
@@ -85,9 +92,13 @@ Focused tests:
 
 ## Limits
 
-This is not yet live web search or production DB access. The SQL runtime policy
-first gate is local SQLite only; production credentials, audit logging,
-retention, and DB role policy remain pending. The MCP proof imports the package,
-calls the FastMCP-wrapped local tools, and records a loopback-only
-`streamable-http` transport/auth boundary; it does not select a production auth
-provider or run a remote client auth/transport smoke.
+This is not yet live web search or credentialed production DB traffic. The SQL
+runtime policy first gate is local SQLite only, and the production DB
+access/audit policy first gate records the required read-only role, network/SSL
+boundary, query allowlist, audit event fields, and redaction contract before any
+credential is used. Production DB credential injection, connection smoke,
+approved audit-retention duration, and user/project/entity retention scope
+remain pending. The MCP proof imports the package, calls the FastMCP-wrapped
+local tools, and records a loopback-only `streamable-http` transport/auth
+boundary; it does not select a production auth provider or run a remote client
+auth/transport smoke.

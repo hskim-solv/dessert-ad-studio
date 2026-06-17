@@ -14,6 +14,9 @@ from dessert_ad_studio.agentic_rag import (  # noqa: E402
     build_agentic_rag_graph,
     build_agentic_rag_initial_state,
 )
+from dessert_ad_studio.agentic_tools import (  # noqa: E402
+    build_sql_production_access_audit_policy,
+)
 from dessert_ad_studio.schemas import GenerationRequest  # noqa: E402
 
 
@@ -47,6 +50,7 @@ def build_agentic_rag_tools_summary(*, evidence_date: str) -> dict[str, Any]:
         "tool_result_keys": sorted(tool_results.keys()),
         "web_search": tool_results["web_search"],
         "sql_query": tool_results["sql_query"],
+        "production_db_access_audit_policy": build_sql_production_access_audit_policy(),
         "internal_api": tool_results["internal_api"],
         "document_retrieval": {
             "retriever_backend": result["marketing_context"]["retriever_backend"],

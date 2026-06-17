@@ -44,6 +44,40 @@
     "min_score_threshold": 0.62,
     "policy_guardrail_count": 3
   },
+  "production_db_access_audit_policy": {
+    "status": "first_gate_complete",
+    "production_db_credentials_configured": false,
+    "credentialed_connection_smoke": "pending_user_approval",
+    "access_mode": "read_only_query_id_allowlist",
+    "required_database_role": "agentic_rag_readonly",
+    "network_boundary": "private_network_or_tunnel_required",
+    "ssl_required": true,
+    "raw_sql_allowed": false,
+    "mutation_statements_allowed": false,
+    "allowlisted_query_ids": [
+      "template_policy_summary"
+    ],
+    "row_limit": 25,
+    "statement_timeout_ms": 250,
+    "audit_event_schema": [
+      "event_id",
+      "run_id_hash",
+      "actor_id_hash",
+      "query_id",
+      "purpose",
+      "policy_decision",
+      "row_count",
+      "duration_ms",
+      "created_at"
+    ],
+    "audit_redaction": {
+      "raw_sql_committed": false,
+      "row_values_committed": false,
+      "raw_user_inputs_committed": false,
+      "secrets_committed": false
+    },
+    "retention_status": "pending_user_project_entity_scope"
+  },
   "internal_api": {
     "tool": "internal_api",
     "mode": "in_process_contract",

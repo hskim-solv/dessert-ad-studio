@@ -91,8 +91,9 @@ Known gaps:
   local eval/guardrail plus promptfoo package gate are proven, and reviewer
   approval UI plus in-process post-approval worker resume, mock-only redacted
   SQLite cross-process resume, and bidirectional WebSocket approval have local
-  first gates, and the retention boundary policy is recorded. Live web search,
-  production DB access/audit policy, production MCP auth provider/remote client
+  first gates, and the retention boundary plus production DB access/audit
+  policy first gates are recorded. Live web search, credentialed production DB
+  connection/audit-retention smoke, production MCP auth provider/remote client
   smoke, live-provider cross-process resume, approved production storage,
   deployment-specific external trace retention, and Ragas live evaluator
   execution are still pending.
@@ -364,7 +365,7 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Extend the Agentic RAG control plane from local graph/tool-suite/SSE/WebSocket/SQLite/replay/trace/run-metrics/reviewer-approval/resume plus mock-only redacted cross-process resume, bidirectional approval, and retention-boundary first gates to live-provider cross-process resume, approved production storage, and deployment-specific external trace retention.
+1. Extend the Agentic RAG control plane from local graph/tool-suite/SSE/WebSocket/SQLite/replay/trace/run-metrics/reviewer-approval/resume plus mock-only redacted cross-process resume, bidirectional approval, retention-boundary, and production DB access/audit policy first gates to live-provider cross-process resume, credentialed production DB smoke if approved, approved production storage, and deployment-specific external trace retention.
 2. Add Ragas live evaluator execution only after paid eval approval and trace/result payload review.
 3. Decide the paid image-edit latency strategy: keep the 30s production-style threshold and leave provider-quality unproven, relax the portfolio evidence threshold with explicit rationale, or try a different model/quality before any full three-sample paid gate.
 4. Add human visual review or provider-quality visual statistics for generated assets.

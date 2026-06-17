@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import sqlite3
 from typing import Any
 
@@ -29,6 +30,38 @@ SQL_QUERY_POLICY = {
     "mutation_statements_allowed": False,
     "row_limit": 25,
     "timeout_ms": 250,
+}
+SQL_PRODUCTION_ACCESS_AUDIT_POLICY = {
+    "status": "first_gate_complete",
+    "production_db_credentials_configured": False,
+    "credentialed_connection_smoke": "pending_user_approval",
+    "access_mode": "read_only_query_id_allowlist",
+    "required_database_role": "agentic_rag_readonly",
+    "network_boundary": "private_network_or_tunnel_required",
+    "ssl_required": True,
+    "raw_sql_allowed": False,
+    "mutation_statements_allowed": False,
+    "allowlisted_query_ids": ["template_policy_summary"],
+    "row_limit": 25,
+    "statement_timeout_ms": 250,
+    "audit_event_schema": [
+        "event_id",
+        "run_id_hash",
+        "actor_id_hash",
+        "query_id",
+        "purpose",
+        "policy_decision",
+        "row_count",
+        "duration_ms",
+        "created_at",
+    ],
+    "audit_redaction": {
+        "raw_sql_committed": False,
+        "row_values_committed": False,
+        "raw_user_inputs_committed": False,
+        "secrets_committed": False,
+    },
+    "retention_status": "pending_user_project_entity_scope",
 }
 
 
@@ -102,6 +135,10 @@ def run_sql_query_tool(*, query_id: str) -> dict[str, Any]:
         "min_score_threshold": float(row[1]),
         "policy_guardrail_count": int(row[2]),
     }
+
+
+def build_sql_production_access_audit_policy() -> dict[str, Any]:
+    return deepcopy(SQL_PRODUCTION_ACCESS_AUDIT_POLICY)
 
 
 def run_internal_api_tool(*, request_summary: dict[str, Any]) -> dict[str, Any]:

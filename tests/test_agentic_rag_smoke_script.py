@@ -319,6 +319,38 @@ def test_agentic_rag_tools_smoke_writes_redacted_summary(tmp_path: Path) -> None
         "row_limit": 25,
         "timeout_ms": 250,
     }
+    assert summary["production_db_access_audit_policy"] == {
+        "status": "first_gate_complete",
+        "production_db_credentials_configured": False,
+        "credentialed_connection_smoke": "pending_user_approval",
+        "access_mode": "read_only_query_id_allowlist",
+        "required_database_role": "agentic_rag_readonly",
+        "network_boundary": "private_network_or_tunnel_required",
+        "ssl_required": True,
+        "raw_sql_allowed": False,
+        "mutation_statements_allowed": False,
+        "allowlisted_query_ids": ["template_policy_summary"],
+        "row_limit": 25,
+        "statement_timeout_ms": 250,
+        "audit_event_schema": [
+            "event_id",
+            "run_id_hash",
+            "actor_id_hash",
+            "query_id",
+            "purpose",
+            "policy_decision",
+            "row_count",
+            "duration_ms",
+            "created_at",
+        ],
+        "audit_redaction": {
+            "raw_sql_committed": False,
+            "row_values_committed": False,
+            "raw_user_inputs_committed": False,
+            "secrets_committed": False,
+        },
+        "retention_status": "pending_user_project_entity_scope",
+    }
     assert summary["internal_api"]["mode"] == "in_process_contract"
     assert summary["document_retrieval"]["retriever_backend"] == "keyword"
     assert summary["mcp_server_scaffold"] == "mcp_servers/dessert_ad_studio_server.py"
