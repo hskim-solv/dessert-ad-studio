@@ -48,6 +48,8 @@ Verified:
   redacted span attributes and API stream tracer wiring.
 - Reviewer-facing offline Agentic RAG eval report that consolidates golden
   eval, retrieval, chunking, pgvector, promptfoo, and guardrail evidence.
+- Demo video storyboard with an 8-shot, 180-second recording plan that references
+  committed reviewer assets and keeps provider-quality image editing unproven.
 - Local Agentic RAG eval gates: deterministic Ragas-compatible proxy metrics,
   real promptfoo package smoke, and GitHub Actions CI steps for both paths.
 - AI agent team operating model with main-writer ownership, read-only scouts,

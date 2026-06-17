@@ -1,0 +1,53 @@
+{
+  "demo_video_storyboard": "passed",
+  "scope": "offline_reviewer_demo_video_plan_no_paid_api_call",
+  "evidence_date": "2026-06-17",
+  "shot_count": 8,
+  "estimated_duration_seconds": 180,
+  "actual_video_file_committed": false,
+  "provider_quality_claimed": false,
+  "referenced_artifacts": [
+    "README.md",
+    "docs/evidence/assets/architecture.svg",
+    "docs/reference/dessert-ad-studio-final-outcome.md",
+    "docs/evidence/streamlit-reviewer-flow.md",
+    "docs/evidence/assets/streamlit-reviewer-input.png",
+    "docs/evidence/assets/streamlit-reviewer-result.png",
+    "docs/evidence/demo-gallery.md",
+    "docs/evidence/assets/demo-gallery/demo-01.png",
+    "docs/evidence/assets/demo-gallery/demo-02.png",
+    "docs/evidence/assets/demo-gallery/demo-03.png",
+    "docs/evidence/agentic-rag-graph.md",
+    "docs/evidence/agentic-rag-streaming.md",
+    "docs/evidence/agentic-rag-sqlite-checkpoint.md",
+    "docs/evidence/agentic-rag-approval.md",
+    "docs/evidence/agentic-rag-tools.md",
+    "docs/evidence/rag-baseline.md",
+    "docs/evidence/rag-chunking-comparison.md",
+    "docs/evidence/pgvector-retrieval.md",
+    "docs/evidence/agentic-rag-eval-report.md",
+    "docs/evidence/agentic-rag-run-metrics.md",
+    "docs/evidence/agentic-rag-trace.md",
+    "docs/evidence/agentops-phoenix.md",
+    "docs/evidence/assets/phoenix-workflow-trace.png",
+    "docs/evidence/assets/phoenix-trace-detail.png",
+    "docs/evidence/k8s-deployment.md",
+    "docs/evidence/async-reliability-matrix.md",
+    "docs/evidence/generation-jobs.md",
+    "docs/evidence/openai-image-edit-preservation.md",
+    "docs/evidence/provider-gate-postmortem.md"
+  ],
+  "missing_artifacts": [],
+  "coverage": {
+    "agentic_rag_control_plane": true,
+    "streaming_and_hitl": true,
+    "eval_report": true,
+    "provider_quality_failure_disclosed": true
+  },
+  "privacy_boundary": {
+    "raw_customer_data_committed": false,
+    "raw_prompt_committed": false,
+    "raw_model_response_committed": false,
+    "paid_api_call_count": 0
+  }
+}
