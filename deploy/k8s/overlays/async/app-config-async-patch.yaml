@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  GENERATION_QUEUE_BACKEND: rq
+  GENERATION_QUEUE_NAME: ad-generation
+  REDIS_URL: redis://redis:6379/0
+  GENERATION_JOB_RESULT_TTL_SECONDS: "3600"
+  GENERATION_JOB_FAILURE_TTL_SECONDS: "86400"
+  GENERATION_HISTORY_BACKEND: postgres
+  MARKETING_CONTEXT_BACKEND: keyword

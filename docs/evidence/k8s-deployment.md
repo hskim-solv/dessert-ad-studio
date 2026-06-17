@@ -26,6 +26,8 @@ collection.
 - NGINX Ingress with host-based UI/API routing.
 - GPU overlay for Triton GPU scheduling evidence.
 - AgentOps overlay with API -> OpenTelemetry Collector -> Phoenix trace routing.
+- Async overlay with Redis/RQ worker, pgvector/Postgres job history, API async
+  env wiring, and redacted generation-job smoke evidence.
 
 ## Local Render Verification
 
@@ -76,6 +78,25 @@ otel_collector_deployment=True
 api_otlp_endpoint=True
 k8sattributes=True
 phoenix_traces_endpoint=True
+doc_count=20
+```
+
+Async overlay:
+
+```bash
+kubectl kustomize deploy/k8s/overlays/async >/tmp/dessert-k8s-async.yaml
+```
+
+Result:
+
+```text
+render_async=passed
+worker_deployment=True
+redis_deployment=True
+pgvector_deployment=True
+pgvector_init_sql=True
+api_queue_backend=rq
+api_history_backend=postgres
 doc_count=20
 ```
 
@@ -176,13 +197,13 @@ compose_configs=passed
 Focused regression tests:
 
 ```bash
-.venv/bin/pytest tests/test_api.py tests/test_otel_trace_smoke.py tests/test_evaluation.py -q
+.venv/bin/pytest tests/test_api.py tests/test_otel_trace_smoke.py tests/test_evaluation.py tests/test_k8s_manifests.py -q
 ```
 
 Result:
 
 ```text
-40 passed
+53 passed
 ```
 
 OpenTelemetry smoke:
@@ -291,14 +312,65 @@ The redacted machine-readable summary is committed at
 - Port-forwarded API smoke passes with `skip_generate=false`, which exercises
   the `/generate` path through the Triton template scorer.
 
+## Async Overlay Live Smoke Path
+
+Added on 2026-06-17:
+
+```bash
+kubectl --context kind-dessert-ad-studio apply -k deploy/k8s/overlays/async
+kubectl --context kind-dessert-ad-studio -n dessert-ad-studio rollout status deploy/redis --timeout=600s
+kubectl --context kind-dessert-ad-studio -n dessert-ad-studio rollout status deploy/pgvector --timeout=600s
+kubectl --context kind-dessert-ad-studio -n dessert-ad-studio rollout status deploy/worker --timeout=600s
+kubectl --context kind-dessert-ad-studio -n dessert-ad-studio rollout status deploy/api --timeout=600s
+kubectl --context kind-dessert-ad-studio -n dessert-ad-studio port-forward svc/api 18081:8000
+API_BASE_URL=http://127.0.0.1:18081 GENERATION_JOB_SMOKE_TIMEOUT_SECONDS=120 \
+  .venv/bin/python scripts/generation_job_smoke.py
+```
+
+Before the final smoke, `dessert-ad-studio-api:latest` was rebuilt and loaded
+into `kind` so the API and worker used the current checkout.
+
+Ready check:
+
+```text
+generation_history_backend=postgres
+generation_queue_backend=rq
+template_scorer=triton-template-scorer
+```
+
+Generation job smoke result:
+
+```text
+status=succeeded
+queue_backend=rq
+copy_options_count=3
+template_scorer=triton-template-scorer
+has_image_path=True
+image_path_sha256 only
+```
+
+Post-smoke pod state:
+
+```text
+api       1/1 Running 0
+worker    1/1 Running 0
+redis     1/1 Running 0
+pgvector  1/1 Running 0
+triton    1/1 Running 0
+```
+
+The redacted machine-readable summary is committed at
+`docs/evidence/k8s-async-smoke-summary.json`.
+
 ## What This Does Not Prove Yet
 
 - The base `ReadWriteOnce` outputs PVC is local/test friendly but is not a
   multi-node artifact strategy. Production scaling should use object storage or
   a dedicated `ReadWriteMany` overlay/storage class.
-- The live proof covers the synchronous API/UI/Triton base stack. It does not
-  yet include the async worker/Redis/Postgres path demonstrated by Docker
-  Compose.
+- The async overlay live proof covers one local/test `kind` run of Redis/RQ
+  worker plus Postgres history. It does not yet prove multi-replica queue
+  behavior, worker failure recovery, retry policy, cancellation, or timeout
+  behavior under load.
 - `kind` does not include metrics-server by default, so HPA rendering is proven
   but live CPU autoscaling behavior is not.
 - Production hardening such as TLS, image registry pinning, auth, network policy,

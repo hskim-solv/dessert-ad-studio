@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  template:
+    spec:
+      containers:
+        - name: api
+          env:
+            - name: PGVECTOR_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-auth
+                  key: POSTGRES_PASSWORD
+            - name: PGVECTOR_DSN
+              value: postgresql://dessert:$(PGVECTOR_PASSWORD)@pgvector:5432/dessert_ad_studio
+            - name: GENERATION_HISTORY_DSN
+              value: postgresql://dessert:$(PGVECTOR_PASSWORD)@pgvector:5432/dessert_ad_studio

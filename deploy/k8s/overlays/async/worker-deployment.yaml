@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: worker
+          image: dessert-ad-studio-api:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - python
+            - scripts/run_generation_worker.py
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          envFrom:
+            - configMapRef:
+                name: app-config
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-api
+                  key: OPENAI_API_KEY
+                  optional: true
+            - name: PGVECTOR_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-auth
+                  key: POSTGRES_PASSWORD
+            - name: PGVECTOR_DSN
+              value: postgresql://dessert:$(PGVECTOR_PASSWORD)@pgvector:5432/dessert_ad_studio
+            - name: GENERATION_HISTORY_DSN
+              value: postgresql://dessert:$(PGVECTOR_PASSWORD)@pgvector:5432/dessert_ad_studio
+            - name: GENERATION_WORKER_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          readinessProbe:
+            exec:
+              command:
+                - python
+                - -c
+                - "import os; from redis import Redis; Redis.from_url(os.getenv('REDIS_URL', 'redis://redis:6379/0')).ping()"
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            exec:
+              command:
+                - python
+                - -c
+                - "import os; from redis import Redis; Redis.from_url(os.getenv('REDIS_URL', 'redis://redis:6379/0')).ping()"
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: outputs
+              mountPath: /app/outputs
+              subPath: outputs
+            - name: outputs
+              mountPath: /app/logs
+              subPath: logs
+      volumes:
+        - name: outputs
+          persistentVolumeClaim:
+            claimName: outputs

@@ -1,6 +1,6 @@
 # Generation Jobs Evidence
 
-Date: 2026-06-15, updated 2026-06-16
+Date: 2026-06-15, updated 2026-06-17
 
 ## Scope
 
@@ -17,6 +17,8 @@ workflow:
   `GENERATION_HISTORY_BACKEND=memory`.
 - Docker Compose uses Redis/RQ for transient jobs and Postgres for redacted job
   history.
+- Kubernetes async overlay now uses the same Redis/RQ worker and Postgres
+  history path for local/test `kind` evidence.
 
 ## Local Storage Boundary
 
@@ -200,6 +202,7 @@ Verified on 2026-06-15 and 2026-06-16:
 | Worker log redaction | worker logs job id only, not raw request args |
 | Postgres history smoke | `queued -> running -> succeeded`, loaded from `generation_jobs` |
 | Full Docker API/worker smoke | passed through containerized API + worker with Triton scorer, Redis/RQ queue, and Postgres history |
+| Kubernetes async overlay smoke | passed on `kind-dessert-ad-studio`: API ready with `generation_queue_backend=rq`, `generation_history_backend=postgres`, worker/Redis/pgvector pods ready, and `scripts/generation_job_smoke.py` returned `status=succeeded` |
 
 The inline test path proves the API contract and redaction contract without
 needing Redis/Postgres fixtures. The Redis/RQ smoke proves the queue adapter and
@@ -220,6 +223,5 @@ This is the first operationally credible job/status path:
 - Redis/RQ is present as a real worker boundary in Docker Compose, while tests
   stay deterministic through the inline adapter.
 
-The full Docker API/worker smoke with Triton enabled and the Streamlit
-polling/history UX are now complete. The next proof point moves to M4 real
-product analysis.
+The full Docker API/worker smoke with Triton enabled, the Streamlit
+polling/history UX, and the Kubernetes async overlay smoke are now complete.

@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: dessert-ad-studio
+resources:
+  - ../../base
+  - postgres-auth.yaml
+  - pgvector.yaml
+  - redis.yaml
+  - worker-deployment.yaml
+patches:
+  - path: app-config-async-patch.yaml
+  - path: api-async-patch.yaml
+configMapGenerator:
+  - name: pgvector-init-sql
+    files:
+      - init/001_marketing_context.sql
+      - init/002_generation_jobs.sql
+generatorOptions:
+  disableNameSuffixHash: true

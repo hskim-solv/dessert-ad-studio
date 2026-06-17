@@ -62,13 +62,16 @@ Verified:
   live `kind` base-stack smoke with Triton model sync plus full `/generate`.
 - First trace/log privacy allowlist gate for workflow traces, generation logs,
   image-failure usage logs, and OTEL smoke output.
+- Kubernetes async overlay and live `kind` smoke for Redis/RQ worker plus
+  Postgres generation history.
 
 Not yet proven:
 
 - Provider-quality image editing. The first paid OpenAI image-edit gate failed;
   a stronger `gpt-image-2` + `quality=medium` gate is prepared but not run.
-- Kubernetes async operation. Current live Kubernetes evidence covers the
-  synchronous API/UI/Triton base stack, not the worker/Redis/Postgres path.
+- Production async operation. Kubernetes now has a local/test async overlay
+  smoke, but not a multi-replica reliability matrix or production storage
+  policy.
 - Production trace privacy. The first allowlist gate is complete, but external
   production trace rollout still needs a deployment-specific attribute review.
 - Broad quality statistics. Current evals are useful regression gates but still
@@ -144,7 +147,7 @@ flowchart LR
 | M4 Real product analysis | Replace mock product analysis with a real VLM-backed analyzer while preserving redaction policy. | Complete first analyzer gate: OpenAI Responses Vision adapter, ADR, no-network tests, env/compose wiring, one redacted live smoke, 10-case synthetic reference eval, pass rate 1.00, p95 latency 13.15s. |
 | M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields. |
 | M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, Streamlit reviewer screenshots at `docs/evidence/streamlit-reviewer-flow.md`, real-sample preservation evidence at `docs/evidence/real-sample-preservation.md`, paid OpenAI image-edit failure evidence at `docs/evidence/openai-image-edit-preservation.md`, README links, reproducible command map. |
-| M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof and the first trace/log privacy allowlist gate are complete. Next evidence should cover provider-quality image-edit gate, larger eval pack, K8s async alignment, and async reliability matrix. |
+| M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, and the first trace/log privacy allowlist gate are complete. Next evidence should cover provider-quality image-edit gate, larger eval pack, and async reliability matrix. |
 
 ## Failure Conditions
 
@@ -199,7 +202,7 @@ The project is complete when it can be described accurately as:
 
 The immediate M6 portfolio-packaging gate is complete, but the adversarial
 review moved the project into M7 hardening. Live K8s base-stack proof is now
-captured, and the first trace/log privacy allowlist gate is complete. The next
-milestone should either align Kubernetes with the worker/Redis/Postgres async
-path or run the strengthened `gpt-image-2` + `quality=medium` provider-quality
-image-edit gate if a second paid iteration is approved.
+captured, the K8s async overlay smoke is complete, and the first trace/log
+privacy allowlist gate is complete. The next non-paid milestone should build
+the async reliability matrix. The strengthened `gpt-image-2` + `quality=medium`
+provider-quality image-edit gate still needs explicit paid-run approval.

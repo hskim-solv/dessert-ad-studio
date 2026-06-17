@@ -1,0 +1,73 @@
+{
+  "date": "2026-06-17",
+  "context": "kind-dessert-ad-studio",
+  "namespace": "dessert-ad-studio",
+  "kustomize_path": "deploy/k8s/overlays/async",
+  "checks": {
+    "render_async_overlay": true,
+    "kubectl_apply": true,
+    "rollout_api": true,
+    "rollout_worker": true,
+    "rollout_redis": true,
+    "rollout_pgvector": true,
+    "api_readyz": true,
+    "generation_job_smoke": true,
+    "worker_restart_count_after_startup_wait": 0,
+    "pgvector_data_pvc_bound": true
+  },
+  "readyz": {
+    "status": "ready",
+    "copy_backend": "mock",
+    "image_backend": "mock",
+    "product_analysis_backend": "mock",
+    "marketing_context_backend": "keyword",
+    "generation_history_backend": "postgres",
+    "generation_queue_backend": "rq",
+    "template_scorer": "triton-template-scorer"
+  },
+  "generation_job": {
+    "status": "succeeded",
+    "queue_backend": "rq",
+    "queue_job_id_present": true,
+    "copy_options_count": 3,
+    "template_scorer": "triton-template-scorer",
+    "has_image_path": true,
+    "image_path_sha256_present": true,
+    "request_summary_redacted": true,
+    "response_summary_redacted": true
+  },
+  "pod_state": {
+    "api": {
+      "ready": "1/1",
+      "status": "Running",
+      "restarts": 0
+    },
+    "worker": {
+      "ready": "1/1",
+      "status": "Running",
+      "restarts": 0
+    },
+    "redis": {
+      "ready": "1/1",
+      "status": "Running",
+      "restarts": 0
+    },
+    "pgvector": {
+      "ready": "1/1",
+      "status": "Running",
+      "restarts": 0
+    },
+    "triton": {
+      "ready": "1/1",
+      "status": "Running",
+      "restarts": 0
+    }
+  },
+  "privacy_boundary": {
+    "raw_reference_image_committed": false,
+    "raw_prompt_committed": false,
+    "raw_generated_copy_committed": false,
+    "raw_image_path_committed": false,
+    "postgres_auth_secret_is_local_demo_placeholder": true
+  }
+}

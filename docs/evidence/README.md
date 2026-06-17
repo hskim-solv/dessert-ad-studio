@@ -20,7 +20,7 @@ deployment readiness, privacy boundaries, and model-backed product analysis.
 docker compose config -q
 ```
 
-Latest local regression snapshot: `196 passed, 1 warning`.
+Latest local regression snapshot: `199 passed, 1 warning`.
 
 ## Evidence Map
 
@@ -37,7 +37,7 @@ Latest local regression snapshot: `196 passed, 1 warning`.
 | OpenAI image-edit preservation | [`openai-image-edit-preservation.md`](openai-image-edit-preservation.md), [`openai-image-edit-preservation-live-summary.json`](openai-image-edit-preservation-live-summary.json) | Paid live edit completed under the initial single-sample gate and failed: color similarity 0.234960 vs 0.25 threshold; script now supports strengthened multi-sample provider-quality gate | `.venv/bin/python scripts/openai_image_edit_preservation_smoke.py --reference-set public-samples --model-id gpt-image-2 --quality medium --date 2026-06-17` |
 | Adversarial portfolio review | [`../reference/adversarial-portfolio-review.md`](../reference/adversarial-portfolio-review.md) | Three independent subagents identified overclaiming and converted it into an M7 hardening roadmap | Review-only artifact; no paid/API calls |
 | Architecture preview | [`assets/architecture.svg`](assets/architecture.svg) | README-ready architecture image maps UX, workflow, RAG/eval/ops/deploy/privacy layers | `rsvg-convert docs/evidence/assets/architecture.svg -o /tmp/dessert-ad-studio-architecture.png` |
-| Kubernetes deployability | [`k8s-deployment.md`](k8s-deployment.md), [`k8s-live-smoke-summary.json`](k8s-live-smoke-summary.json) | Base, GPU, and AgentOps overlays render; live `kind` smoke passed base apply, Triton model sync, pod readiness, port-forward, and full API `/generate` | `.venv/bin/python scripts/k8s_live_smoke.py --context kind-dessert-ad-studio --timeout 900 --summary docs/evidence/k8s-live-smoke-summary.json` |
+| Kubernetes deployability | [`k8s-deployment.md`](k8s-deployment.md), [`k8s-live-smoke-summary.json`](k8s-live-smoke-summary.json), [`k8s-async-smoke-summary.json`](k8s-async-smoke-summary.json) | Base, GPU, AgentOps, and async overlays render; live `kind` smokes passed base API/Triton `/generate` and async Redis/RQ worker plus Postgres history | `.venv/bin/python scripts/k8s_live_smoke.py --context kind-dessert-ad-studio --timeout 900 --summary docs/evidence/k8s-live-smoke-summary.json` |
 | OpenAI product analysis | [`product-analysis-openai.md`](product-analysis-openai.md), [`product-analysis-openai-live-summary.json`](product-analysis-openai-live-summary.json), [`product-analysis-openai-eval-results.json`](product-analysis-openai-eval-results.json) | Live smoke passed; 10-case synthetic reference eval pass rate 1.00, p95 latency 13.15s | `.venv/bin/python scripts/openai_product_analysis_smoke.py --eval --eval-count 10 --output docs/evidence/product-analysis-openai-eval-results.json` |
 
 ## Decision Records

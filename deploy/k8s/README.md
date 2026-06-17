@@ -10,6 +10,7 @@ Minimal Kubernetes manifests for proving that Dessert Ad Studio can be deployed 
 - resource requests/limits and API HPA
 - optional GPU overlay for Triton
 - optional AgentOps overlay with OpenTelemetry Collector and Phoenix
+- optional async overlay with Redis/RQ worker and Postgres/pgvector job history
 - NGINX Ingress routing for API and UI hosts
 
 ## Build Images
@@ -74,6 +75,18 @@ the AgentOps overlay is ephemeral and intended for local/demo evidence. Do not
 use it for real customer inputs without reviewing trace attributes, retention,
 and redaction policy.
 
+For the async job path:
+
+```bash
+kubectl apply -k deploy/k8s/overlays/async
+```
+
+This overlay adds Redis, pgvector/Postgres, a `worker` Deployment running
+`scripts/run_generation_worker.py`, and API environment wiring for
+`GENERATION_QUEUE_BACKEND=rq` plus `GENERATION_HISTORY_BACKEND=postgres`.
+The included `postgres-auth` Secret uses a local-demo placeholder and must be
+replaced before non-local use.
+
 ## Check
 
 Render locally without a cluster:
@@ -82,6 +95,7 @@ Render locally without a cluster:
 kubectl kustomize deploy/k8s/base
 kubectl kustomize deploy/k8s/overlays/gpu
 kubectl kustomize deploy/k8s/overlays/agentops
+kubectl kustomize deploy/k8s/overlays/async
 ```
 
 Check a running base stack:
@@ -90,6 +104,16 @@ Check a running base stack:
 kubectl -n dessert-ad-studio get pods
 kubectl -n dessert-ad-studio port-forward svc/api 8000:8000
 python scripts/api_smoke.py --base-url http://127.0.0.1:8000
+```
+
+Check a running async stack:
+
+```bash
+kubectl -n dessert-ad-studio rollout status deploy/redis
+kubectl -n dessert-ad-studio rollout status deploy/pgvector
+kubectl -n dessert-ad-studio rollout status deploy/worker
+kubectl -n dessert-ad-studio port-forward svc/api 8000:8000
+API_BASE_URL=http://127.0.0.1:8000 python scripts/generation_job_smoke.py
 ```
 
 Full generation requires the Triton model PVC to contain the repository layout
@@ -123,4 +147,5 @@ Open:
 http://localhost:6006
 ```
 
-See `docs/evidence/k8s-deployment.md` for captured render evidence.
+See `docs/evidence/k8s-deployment.md` for captured render and live smoke
+evidence.

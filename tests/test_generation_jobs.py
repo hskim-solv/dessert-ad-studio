@@ -145,3 +145,34 @@ def test_generation_worker_adds_repo_root_to_python_path(monkeypatch) -> None:
     module._ensure_repo_root_on_path()
 
     assert sys.path[0] == str(repo_root)
+
+
+def test_generation_worker_waits_for_redis_until_ready(monkeypatch) -> None:
+    from redis.exceptions import RedisError
+
+    repo_root = Path(__file__).resolve().parents[1]
+    script_path = repo_root / "scripts" / "run_generation_worker.py"
+    spec = importlib.util.spec_from_file_location(
+        "_test_run_generation_worker_wait",
+        script_path,
+    )
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    class FlakyRedis:
+        attempts = 0
+
+        def ping(self) -> bool:
+            self.attempts += 1
+            if self.attempts == 1:
+                raise RedisError("not ready")
+            return True
+
+    fake_redis = FlakyRedis()
+    monkeypatch.setattr(module, "sleep", lambda _: None)
+
+    module._wait_for_redis(fake_redis, timeout_seconds=1, interval_seconds=0)
+
+    assert fake_redis.attempts == 2
