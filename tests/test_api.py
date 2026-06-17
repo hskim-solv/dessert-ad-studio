@@ -492,6 +492,65 @@ def test_agentic_rag_run_approval_records_redacted_reviewer_decision(
         assert raw_value not in serialized
 
 
+def test_agentic_rag_run_approval_uses_redacted_cross_process_resume_without_pending_context(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import api.main as api_main
+
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path / "outputs"))
+    monkeypatch.setenv("GENERATION_LOG_PATH", str(tmp_path / "generations.jsonl"))
+    monkeypatch.setenv(
+        "AGENTIC_RAG_CHECKPOINT_DB",
+        str(tmp_path / "agentic-rag-checkpoints.sqlite"),
+    )
+    monkeypatch.setattr(api_main, "_agentic_rag_requires_paid_provider", lambda deps: True)
+    payload = {
+        **base_payload(),
+        "product_name": "비공개 말차 푸딩",
+        "user_constraints": "VIP 고객에게만 보일 문구",
+    }
+
+    with client.stream("POST", "/agentic-rag/runs/stream", json=payload) as response:
+        body = response.read().decode("utf-8")
+
+    assert response.status_code == 200
+    run_id = _parse_sse_events(body)[0]["data"]["run_id"]
+    with api_main._AGENTIC_RAG_PENDING_APPROVAL_RUNS_LOCK:
+        api_main._AGENTIC_RAG_PENDING_APPROVAL_RUNS.clear()
+
+    approval_response = client.post(
+        f"/agentic-rag/runs/{run_id}/approval",
+        json={
+            "decision": "approved",
+            "reviewer_id": "reviewer@example.com",
+            "comment": "VIP 고객 원문이 담긴 비공개 승인 메모",
+        },
+    )
+
+    assert approval_response.status_code == 200
+    approval = approval_response.json()
+    assert approval["next_action"] == "return_cited_ad_package"
+    assert approval["post_approval_worker_resumed"] is True
+    assert approval["post_approval_resume_source"] == "redacted_sqlite_replay"
+    assert approval["post_approval_worker_status"] == "succeeded"
+    assert approval["post_approval_status"] == "completed"
+    assert approval["copy_backend"] == "mock"
+    assert approval["image_backend"] == "mock"
+    assert approval["copy_option_count"] == 3
+    assert approval["used_reference"] is False
+    assert approval["raw_inputs_committed"] is False
+
+    serialized = json.dumps(approval, ensure_ascii=False)
+    for raw_value in [
+        "비공개 말차 푸딩",
+        "VIP 고객에게만 보일 문구",
+        "reviewer@example.com",
+        "VIP 고객 원문이 담긴 비공개 승인 메모",
+    ]:
+        assert raw_value not in serialized
+
+
 def test_agentic_rag_run_approval_rejects_non_approval_run(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

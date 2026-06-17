@@ -1,0 +1,23 @@
+{
+  "agentic_rag_cross_process_resume_smoke": "passed",
+  "scope": "local_redacted_sqlite_replay_resume_no_paid_api_call",
+  "evidence_date": "2026-06-17",
+  "run_id_prefix": "agr",
+  "checkpointing_enabled": true,
+  "approval_route_status": "needs_approval",
+  "approval_route_next_action": "wait_for_human_approval",
+  "resume_policy_mode": "mock_generation_worker",
+  "pending_context_cleared_before_approval": true,
+  "approval_decision_status": "approved",
+  "approval_next_action": "return_cited_ad_package",
+  "post_approval_worker_resumed": true,
+  "post_approval_resume_source": "redacted_sqlite_replay",
+  "post_approval_worker_status": "succeeded",
+  "post_approval_status": "completed",
+  "copy_backend": "mock",
+  "image_backend": "mock",
+  "copy_option_count": 3,
+  "used_reference": false,
+  "audit_persisted": false,
+  "raw_inputs_committed": false
+}

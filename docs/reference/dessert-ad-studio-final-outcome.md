@@ -179,6 +179,11 @@ Verified:
   reviewer/comment hashes, decision metadata, and same-process post-approval
   worker status. Evidence is recorded in
   [`docs/evidence/agentic-rag-approval.md`](../evidence/agentic-rag-approval.md).
+- First Agentic RAG cross-process resume gate: a mock/local approval-routed run
+  persists `resume_policy_mode=mock_generation_worker`, clears the in-memory
+  pending context before approval, and resumes from redacted SQLite replay
+  without raw inputs or paid API calls. Evidence is recorded in
+  [`docs/evidence/agentic-rag-cross-process-resume.md`](../evidence/agentic-rag-cross-process-resume.md).
 - First Agentic RAG reviewer approval UI gate: replay-backed approval-routed
   runs can be shown in Streamlit under `agentic_rag_runs`, approved or rejected
   through the existing API, and merged back into UI state with only redacted
@@ -186,25 +191,27 @@ Verified:
   Evidence is recorded in
   [`docs/evidence/agentic-rag-reviewer-ui.md`](../evidence/agentic-rag-reviewer-ui.md).
 - First Agentic RAG retention boundary gate: ADR 0018 adopts redacted replay
-  with same-process ephemeral raw context and records that durable raw request
-  storage, cross-process resume store, production approval audit retention, and
-  external trace payload retention require explicit user decision. Evidence is
-  recorded in
+  with same-process ephemeral raw context plus mock-only redacted SQLite replay
+  resume, and records that durable raw request storage, live-provider
+  cross-process resume store, production approval audit retention, and external
+  trace payload retention require explicit user decision. Evidence is recorded in
   [`docs/evidence/agentic-rag-retention-policy.md`](../evidence/agentic-rag-retention-policy.md).
 
 Not yet proven:
 
 - Full LangGraph production orchestration. The first offline graph, SSE, local
-  SQLite checkpoint, local replay, local graph trace, and local run-metrics
-  gates plus local approval API, reviewer approval UI, and same-process
-  post-approval worker resume first gates are complete. The retention boundary
-  policy is defined, but durable cross-process resume, an approved production
-  storage implementation, deployment-specific external trace retention, and live
-  provider token/cost telemetry remain pending.
+  SQLite checkpoint, local replay, local graph trace, local run-metrics, local
+  approval API, reviewer approval UI, same-process post-approval worker resume,
+  and mock-only redacted SQLite cross-process resume first gates are complete.
+  The retention boundary policy is defined, but live-provider cross-process
+  resume, an approved production storage implementation, deployment-specific
+  external trace retention, and live provider token/cost telemetry remain
+  pending.
 - Full production streaming. SSE, WebSocket, bidirectional approval, local
-  SQLite replay, and retention boundary policy first gates are complete; durable
-  cross-process resume, approved production replay/audit storage, and production
-  stream trace integration remain pending.
+  SQLite replay, mock-only cross-process resume, and retention boundary policy
+  first gates are complete; live-provider cross-process resume, approved
+  production replay/audit storage, and production stream trace integration
+  remain pending.
 - Actual Ragas live execution in CI. Promptfoo package execution is now bounded
   and part of default CI, but evaluator-LLM Ragas live metrics remain
   paid/API-key gated.
@@ -305,9 +312,9 @@ flowchart LR
 | M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields, and `docs/evidence/cost-guard-summary.json`. |
 | M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, Streamlit reviewer screenshots at `docs/evidence/streamlit-reviewer-flow.md`, demo video storyboard at `docs/evidence/demo-video-storyboard.md`, real-sample preservation evidence at `docs/evidence/real-sample-preservation.md`, paid OpenAI image-edit failure evidence at `docs/evidence/openai-image-edit-preservation.md`, README links, reproducible command map. |
 | M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, live worker outage/restore smoke, explicit retry/timeout/cancel non-support, 30-scenario product-like eval, offline visual proxy gate, paid provider-quality failure evidence, provider-gate postmortem, one-sample canary CLI, first trace/log privacy allowlist gate, first cost guard, and offline text-contamination proxy calibration are complete. Next evidence should cover a post-calibration paid canary, latency remediation, plus human/provider visual quality review. |
-| M8 Agentic RAG graph | Add the LangGraph control plane without discarding existing workflow evidence. | First gate complete: ADR 0012/0014/0017/0018, `langgraph` and `langgraph-checkpoint-sqlite` dependencies, typed state schema, deterministic planner/tool-suite/retriever/citation/guardrail/worker/reflection/HITL/finalize nodes, conditional approval route, local mock worker route through the existing generation workflow, redacted cited ad package summary, local web/SQL/internal API tool summaries, FastMCP import/tool-call smoke, in-memory and local SQLite checkpoint proof, redacted smoke summaries, focused tests, local FastAPI SSE wiring, local SQLite replay summary, local OpenInference graph-node trace proof, local run metrics for latency/token/cost/tool success/failure plus failed-run analysis and redacted graceful fallback summary, local approval API first gate, local reviewer approval UI first gate, same-process post-approval worker resume first gate, and retention boundary policy. Pending: live web search, production SQL policy, production MCP transport/auth, durable cross-process resume, approved production storage implementation, deployment-specific trace retention evidence, and live provider token/cost telemetry. |
+| M8 Agentic RAG graph | Add the LangGraph control plane without discarding existing workflow evidence. | First gate complete: ADR 0012/0014/0017/0018, `langgraph` and `langgraph-checkpoint-sqlite` dependencies, typed state schema, deterministic planner/tool-suite/retriever/citation/guardrail/worker/reflection/HITL/finalize nodes, conditional approval route, local mock worker route through the existing generation workflow, redacted cited ad package summary, local web/SQL/internal API tool summaries, FastMCP import/tool-call smoke, in-memory and local SQLite checkpoint proof, redacted smoke summaries, focused tests, local FastAPI SSE wiring, local SQLite replay summary, local OpenInference graph-node trace proof, local run metrics for latency/token/cost/tool success/failure plus failed-run analysis and redacted graceful fallback summary, local approval API first gate, local reviewer approval UI first gate, same-process post-approval worker resume first gate, mock-only redacted SQLite cross-process resume first gate, and retention boundary policy. Pending: live web search, production SQL policy, production MCP transport/auth, live-provider cross-process resume, approved production storage implementation, deployment-specific trace retention evidence, and live provider token/cost telemetry. |
 | M9 Agentic RAG eval/guardrail gate | Prove answer/ad package faithfulness, citation quality, and tool safety. | First gate complete: 13-case local golden dataset, Ragas-compatible deterministic summary fields, faithfulness/answer relevancy/context precision/context recall proxy scores 1.00, prompt-injection HITL route, 7-tool allowlist/budget tests, redaction checks, fast-gate command, real promptfoo package smoke, reviewer-facing offline eval report, and GitHub Actions CI steps for both the compatibility script and promptfoo package gate. ADR 0016 keeps Ragas live metrics behind paid/API-key approval. Pending: run Ragas live gate only after paid eval approval. |
-| M10 Streaming and reviewer approval | Make long-running graph execution reviewable in real time. | First gate complete: ADR 0013/0018, async FastAPI `POST /agentic-rag/runs/stream`, WebSocket `/agentic-rag/runs/ws`, SSE `text/event-stream`, 9 redacted node progress events/messages including local tool suite and worker completion, durable `agr-*` run id, local SQLite replay endpoint, paid-provider approval route tests, bidirectional WebSocket approval/resume, redacted approval decision API summary, Streamlit reviewer approval UI first gate, same-process post-approval worker resume, local failed-run graceful fallback summary, and retention boundary policy. Pending: durable cross-process resume, approved production replay/audit storage, and deployment-specific incident/fallback retention states. |
+| M10 Streaming and reviewer approval | Make long-running graph execution reviewable in real time. | First gate complete: ADR 0013/0018, async FastAPI `POST /agentic-rag/runs/stream`, WebSocket `/agentic-rag/runs/ws`, SSE `text/event-stream`, 9 redacted node progress events/messages including local tool suite and worker completion, durable `agr-*` run id, local SQLite replay endpoint, paid-provider approval route tests, bidirectional WebSocket approval/resume, redacted approval decision API summary, Streamlit reviewer approval UI first gate, same-process post-approval worker resume, mock-only redacted SQLite cross-process resume, local failed-run graceful fallback summary, and retention boundary policy. Pending: live-provider cross-process resume, approved production replay/audit storage, and deployment-specific incident/fallback retention states. |
 | M11 Cloud/demo packaging | Show deployability beyond local/kind evidence. | In progress: offline Agentic RAG eval report is complete at `docs/evidence/agentic-rag-eval-report.md`; demo video storyboard is complete at `docs/evidence/demo-video-storyboard.md`. Pending: one selected AWS/GCP/Azure deployment path, architecture diagram update, and final recorded demo video. |
 
 ## Failure Conditions
@@ -343,7 +350,7 @@ These decisions still need explicit selection before implementation:
 | Agent team operating model | Decided: main writer plus read-only scouts by default; opt-in disjoint writer lanes for large milestones | See ADR 0015. Reevaluate if a milestone splits into 3+ independent implementation lanes. |
 | Agent eval stack | Decided: offline promptfoo regression first, optional Ragas live semantic gate | See ADR 0016. Local compatibility gate and real promptfoo package gate are complete and wired into CI; run Ragas only with paid eval approval. |
 | Agent tool suite | Decided: local deterministic tool suite first, FastMCP local smoke | See ADR 0017. Live web search, production SQL, and production MCP transport/auth require separate runtime/security evidence. |
-| Retention boundary | Decided: redacted replay with same-process ephemeral raw context | See ADR 0018. Durable raw request storage, cross-process resume, production approval audit retention, and external trace payload retention require explicit user decision. |
+| Retention boundary | Decided: redacted replay with same-process ephemeral raw context plus mock-only resume policy | See ADR 0018. Durable raw request storage, live-provider cross-process resume, production approval audit retention, and external trace payload retention require explicit user decision. |
 | Serving optimization lane | Keep Triton/ONNX proof | Add vLLM/TensorRT/SGLang only with a targeted benchmark and role-specific portfolio reason. |
 | MCP/A2A | MCP local smoke added as thin wrapper; A2A remains later | Promote MCP to served transport only after auth/runtime boundaries are defined. |
 
@@ -385,8 +392,9 @@ human/provider generated-asset quality review. A one-sample `--sample-slug`
 canary is available before another paid full-gate iteration.
 
 The next architectural milestone is to extend the local graph/SSE/checkpoint/
-trace/run-metrics/reviewer-approval/resume gates plus the retention boundary to
-durable cross-process resume, approved production storage, production MCP
+trace/run-metrics/reviewer-approval/resume gates plus mock-only redacted
+cross-process resume and the retention boundary to live-provider cross-process
+resume, approved production storage, production MCP
 transport/auth, and provider-backed token/cost telemetry while preserving the
 current evidence base. Paid provider-quality image-edit remediation remains a
 downstream tool-quality track; the next paid step is a post-calibration

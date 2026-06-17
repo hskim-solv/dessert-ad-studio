@@ -115,6 +115,7 @@ class AgenticRagState(TypedDict, total=False):
     worker_result: dict[str, Any]
     cited_ad_package: AgenticRagCitedAdPackage
     graceful_fallback: AgenticRagGracefulFallback
+    resume_policy: dict[str, Any]
     reflection: dict[str, Any]
     status: AgenticRagStatus
     next_action: AgenticRagNextAction
@@ -130,6 +131,11 @@ class AgenticRagReplaySummary(TypedDict, total=False):
     node_trace: list[str]
     approval_required: bool
     approval_reasons: list[str]
+    campaign_purpose: CampaignPurpose
+    tone: Tone
+    template_hint: TemplateHint
+    has_price_text: bool
+    has_reference_image: bool
     retriever_backend: str
     retrieved_docs_count: int
     citation_count: int
@@ -146,6 +152,7 @@ class AgenticRagReplaySummary(TypedDict, total=False):
     fallback_retry_attempts: int
     fallback_retry_budget: int
     fallback_last_error_type: str
+    resume_policy_mode: str
     raw_error_committed: bool
     raw_inputs_committed: bool
 
@@ -313,6 +320,18 @@ def load_agentic_rag_sqlite_replay_summary(
     if isinstance(latest_state.get("node_trace"), list):
         summary["node_trace"] = list(latest_state["node_trace"])
 
+    request_summary = latest_state.get("request_summary")
+    if isinstance(request_summary, dict):
+        for key in (
+            "campaign_purpose",
+            "tone",
+            "template_hint",
+            "has_price_text",
+            "has_reference_image",
+        ):
+            if key in request_summary:
+                summary[key] = request_summary[key]
+
     approval = latest_state.get("approval")
     if isinstance(approval, dict):
         summary["approval_required"] = bool(approval.get("required", False))
@@ -353,6 +372,10 @@ def load_agentic_rag_sqlite_replay_summary(
         summary["fallback_retry_budget"] = int(graceful_fallback.get("retry_budget", 0))
         summary["fallback_last_error_type"] = str(graceful_fallback.get("last_error_type", ""))
         summary["raw_error_committed"] = bool(graceful_fallback.get("raw_error_committed", False))
+
+    resume_policy = latest_state.get("resume_policy")
+    if isinstance(resume_policy, dict):
+        summary["resume_policy_mode"] = str(resume_policy.get("mode", ""))
 
     return summary
 

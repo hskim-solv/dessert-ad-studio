@@ -32,19 +32,24 @@ def test_agentic_rag_retention_policy_smoke_writes_summary(tmp_path: Path) -> No
     summary = json.loads(output_path.read_text(encoding="utf-8"))
 
     assert summary["agentic_rag_retention_policy_smoke"] == "passed"
-    assert summary["scope"] == "policy_gate_no_runtime_retention_change"
+    assert summary["scope"] == "policy_gate_no_raw_input_store"
     assert summary["evidence_date"] == "2026-06-17"
     assert summary["adr"] == "docs/adr/0018-agentic-rag-retention-boundary.md"
-    assert summary["decision"] == "redacted_replay_with_ephemeral_raw_context"
+    assert (
+        summary["decision"] == "redacted_replay_with_ephemeral_raw_context_and_mock_resume_policy"
+    )
     assert summary["replay_retention"]["artifact"] == "local_sqlite_redacted_checkpoints"
     assert summary["replay_retention"]["raw_inputs_allowed"] is False
     assert summary["approval_retention"]["persistent_audit_claim"] is False
     assert summary["resume_retention"]["same_process_ephemeral_context"] is True
-    assert summary["resume_retention"]["durable_cross_process_resume"] == "pending_user_decision"
+    assert summary["resume_retention"]["mock_redacted_sqlite_replay_resume"] is True
+    assert (
+        summary["resume_retention"]["live_provider_cross_process_resume"] == "pending_user_decision"
+    )
     assert summary["trace_retention"]["raw_model_inputs_allowed"] is False
     assert summary["requires_user_decision_before"] == [
         "durable_raw_request_storage",
-        "cross_process_resume_store",
+        "live_provider_cross_process_resume_store",
         "production_approval_audit_retention",
         "external_trace_payload_retention",
     ]

@@ -72,5 +72,6 @@ Focused tests:
   artifact.
 - Reviewer approval UI now has a separate local first gate in
   `docs/evidence/agentic-rag-reviewer-ui.md`.
-- Bidirectional in-stream approval, durable cross-process resume, production
-  approval audit retention, and production storage policy remain pending.
+- Bidirectional in-stream approval has a separate local first gate; live-provider
+  cross-process resume, production approval audit retention, and production
+  storage policy remain pending.

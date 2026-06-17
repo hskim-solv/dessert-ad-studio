@@ -226,6 +226,56 @@ def test_agentic_rag_run_metrics_smoke_writes_redacted_summary(tmp_path: Path) -
         assert raw_value not in serialized
 
 
+def test_agentic_rag_cross_process_resume_smoke_writes_redacted_summary(
+    tmp_path: Path,
+) -> None:
+    output_path = tmp_path / "agentic-rag-cross-process-resume-summary.json"
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "scripts/agentic_rag_cross_process_resume_smoke.py",
+            "--output",
+            str(output_path),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=60,
+    )
+
+    assert completed.returncode == 0, completed.stderr + completed.stdout
+    summary = json.loads(output_path.read_text(encoding="utf-8"))
+
+    assert summary["agentic_rag_cross_process_resume_smoke"] == "passed"
+    assert summary["scope"] == "local_redacted_sqlite_replay_resume_no_paid_api_call"
+    assert summary["checkpointing_enabled"] is True
+    assert summary["approval_route_status"] == "needs_approval"
+    assert summary["approval_route_next_action"] == "wait_for_human_approval"
+    assert summary["resume_policy_mode"] == "mock_generation_worker"
+    assert summary["pending_context_cleared_before_approval"] is True
+    assert summary["approval_decision_status"] == "approved"
+    assert summary["approval_next_action"] == "return_cited_ad_package"
+    assert summary["post_approval_worker_resumed"] is True
+    assert summary["post_approval_resume_source"] == "redacted_sqlite_replay"
+    assert summary["post_approval_worker_status"] == "succeeded"
+    assert summary["post_approval_status"] == "completed"
+    assert summary["copy_backend"] == "mock"
+    assert summary["image_backend"] == "mock"
+    assert summary["copy_option_count"] == 3
+    assert summary["raw_inputs_committed"] is False
+
+    serialized = json.dumps(summary, ensure_ascii=False)
+    for raw_value in [
+        "비공개 말차 푸딩",
+        "VIP 고객",
+        "reviewer@example.com",
+        "비공개 승인 메모",
+    ]:
+        assert raw_value not in serialized
+
+
 def test_agentic_rag_tools_smoke_writes_redacted_summary(tmp_path: Path) -> None:
     output_path = tmp_path / "agentic-rag-tools-summary.json"
 

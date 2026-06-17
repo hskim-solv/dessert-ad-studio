@@ -77,6 +77,7 @@ Focused tests:
   stream-to-approval workflow.
 - Post-approval worker resume uses same-process ephemeral request context.
 - It does not persist production approval audit records.
-- Bidirectional in-stream approval, durable cross-process resume, production
-  approval retention, production replay retention, and production storage policy
-  remain pending.
+- Bidirectional in-stream approval and mock-only redacted cross-process resume
+  have separate local first gates; live-provider cross-process resume,
+  production approval retention, production replay retention, and production
+  storage policy remain pending.

@@ -469,6 +469,26 @@ def _agentic_rag_requires_paid_provider(dependencies: GenerationWorkflowDependen
     return any(name != "mock" for name in backend_names)
 
 
+def _agentic_rag_resume_policy(
+    dependencies: GenerationWorkflowDependencies,
+    request: GenerationRequest,
+) -> dict[str, Any]:
+    backend_names = {
+        dependencies.copy_backend.name,
+        dependencies.image_backend.name,
+        dependencies.product_analyzer.name,
+    }
+    if backend_names == {"mock"} and request.reference_image_b64 is None:
+        return {
+            "mode": "mock_generation_worker",
+            "raw_inputs_committed": False,
+        }
+    return {
+        "mode": "ephemeral_context_only",
+        "raw_inputs_committed": False,
+    }
+
+
 async def _agentic_rag_sse_events(
     request: GenerationRequest,
     dependencies: GenerationWorkflowDependencies,
@@ -497,6 +517,7 @@ async def _agentic_rag_run_events(
         estimated_cost_usd=0.0,
         approval_cost_threshold_usd=0.0,
     )
+    state["resume_policy"] = _agentic_rag_resume_policy(dependencies, request)
 
     checkpointer_context = (
         open_agentic_rag_sqlite_checkpointer(checkpoint_db)
@@ -977,6 +998,23 @@ def _approve_agentic_rag_run(
         for key in ("copy_backend", "image_backend", "copy_option_count", "used_reference"):
             if key in worker_result:
                 post_approval[key] = worker_result[key]
+        post_approval["post_approval_resume_source"] = "same_process_ephemeral_context"
+    elif approved:
+        worker_result = _redacted_cross_process_resume_worker_result(replay)
+        if worker_result is not None:
+            next_action = "return_cited_ad_package"
+            post_approval.update(
+                {
+                    "post_approval_worker_resumed": True,
+                    "post_approval_resume_source": "redacted_sqlite_replay",
+                    "post_approval_status": "completed",
+                    "post_approval_worker_status": worker_result["status"],
+                    "copy_backend": worker_result["copy_backend"],
+                    "image_backend": worker_result["image_backend"],
+                    "copy_option_count": worker_result["copy_option_count"],
+                    "used_reference": worker_result["used_reference"],
+                }
+            )
 
     return {
         "run_id": run_id,
@@ -993,6 +1031,36 @@ def _approve_agentic_rag_run(
         "raw_inputs_committed": False,
         **post_approval,
     }
+
+
+def _redacted_cross_process_resume_worker_result(
+    replay: dict[str, Any],
+) -> dict[str, Any] | None:
+    if replay.get("resume_policy_mode") != "mock_generation_worker":
+        return None
+    request = _redacted_generation_request_from_replay(replay)
+    output_dir = Path(os.getenv("OUTPUT_DIR", "outputs")) / "agentic-rag-redacted-resume"
+    dependencies = GenerationWorkflowDependencies(
+        template_scorer=LocalTemplateScorer(),
+        copy_backend=MockAdBackend(output_dir=output_dir),
+        image_backend=MockAdBackend(output_dir=output_dir),
+        product_analyzer=MockProductAnalyzer(),
+        marketing_context_retriever=KeywordMarketingContextRetriever(),
+        log_path=Path(os.getenv("GENERATION_LOG_PATH", "logs/generations.jsonl")),
+        logger_factory=_BestEffortGenerationLogger,
+        workflow_tracer=build_workflow_tracer(),
+    )
+    return build_generation_workflow_executor(request, dependencies)({})
+
+
+def _redacted_generation_request_from_replay(replay: dict[str, Any]) -> GenerationRequest:
+    return GenerationRequest(
+        campaign_purpose=replay.get("campaign_purpose", "new_menu"),
+        product_name="dessert",
+        tone=replay.get("tone", "clean"),
+        template_hint=replay.get("template_hint", "minimal_premium"),
+        price_text="redacted" if replay.get("has_price_text", False) else None,
+    )
 
 
 def _optional_sha256(value: str | None) -> str | None:

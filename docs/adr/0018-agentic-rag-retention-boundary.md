@@ -6,9 +6,10 @@
 ## 배경 (Context)
 
 Agentic RAG control plane은 local SQLite replay, HITL approval, reviewer UI,
-same-process post-approval worker resume까지 첫 증거를 만들었다. 다음 단계는
-production replay retention, approval audit retention, cross-process resume,
-external trace retention을 주장할 수 있는지 결정하는 것이다.
+same-process post-approval worker resume, mock-only redacted SQLite replay
+resume까지 첫 증거를 만들었다. 다음 단계는 production replay retention,
+approval audit retention, live-provider cross-process resume, external trace
+retention을 주장할 수 있는지 결정하는 것이다.
 
 하지만 raw product name, raw prompt, raw reviewer comment, reference image,
 provider response를 durable storage에 넣는 순간 storage location, retention,
@@ -28,7 +29,7 @@ deletion, user/project/entity scope가 필요하다. 이 저장 정책은 broad 
 
 ## 후보 비교 (Comparison)
 
-| 기준 | 후보 A: redacted replay + ephemeral raw context | 후보 B: durable raw request store | 후보 C: no replay/resume retention |
+| 기준 | 후보 A: redacted replay + ephemeral raw context + mock resume policy | 후보 B: durable raw request store | 후보 C: no replay/resume retention |
 |---|---|---|---|
 | 민감정보 통제 | 높음. SQLite/evidence에는 hash, boolean, status만 남긴다. | 낮음. raw request/comment/image retention 정책이 선행되어야 한다. | 높음. 저장하지 않지만 기능 증거도 약하다. |
 | 재현성 | 높음. local/CI에서 summary artifact로 검증 가능하다. | 중간. DB/object storage와 cleanup 정책이 필요하다. | 높음. 추가 runtime 없음. |
@@ -38,20 +39,23 @@ deletion, user/project/entity scope가 필요하다. 이 저장 정책은 broad 
 
 ## 결정 (Decision)
 
-`redacted replay + ephemeral raw context`를 채택한다.
+`redacted replay + ephemeral raw context + mock-only resume policy`를 채택한다.
 
 현재 production claim은 다음으로 제한한다.
 
 - Local SQLite replay는 redacted checkpoint만 보존한다.
 - Approval summary는 reviewer/comment hash와 decision/status metadata만 보존한다.
 - Post-approval resume은 same-process ephemeral request context로만 수행한다.
+- API process가 재시작되어 same-process context가 사라진 경우에도,
+  `resume_policy.mode=mock_generation_worker`인 local/mock run은 redacted SQLite
+  replay summary에서만 worker summary를 재개할 수 있다.
 - External trace에는 raw model input, raw image, raw provider response를 저장하지
   않는다.
 
 다음 항목은 사용자 결정 전까지 pending이다.
 
 - durable raw request storage
-- cross-process resume store
+- live-provider cross-process resume store
 - production approval audit retention
 - external trace payload retention
 
@@ -59,7 +63,8 @@ deletion, user/project/entity scope가 필요하다. 이 저장 정책은 broad 
 
 - 이 선택으로 감수하는 것:
   - API process가 재시작되면 approval 대기 run의 raw request context는 사라진다.
-  - durable cross-process resume은 아직 production claim이 아니다.
+  - mock/local run은 redacted replay에서 재개할 수 있지만, live-provider
+    cross-process resume은 아직 production claim이 아니다.
   - production approval audit retention은 summary-level evidence만 있고 운영 보존
     정책은 없다.
 - 재평가 트리거:

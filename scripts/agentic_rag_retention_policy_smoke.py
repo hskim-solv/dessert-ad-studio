@@ -19,10 +19,10 @@ RAW_SENTINELS = (
 def build_agentic_rag_retention_policy_summary(*, evidence_date: str) -> dict[str, Any]:
     summary = {
         "agentic_rag_retention_policy_smoke": "passed",
-        "scope": "policy_gate_no_runtime_retention_change",
+        "scope": "policy_gate_no_raw_input_store",
         "evidence_date": evidence_date,
         "adr": ADR_PATH,
-        "decision": "redacted_replay_with_ephemeral_raw_context",
+        "decision": "redacted_replay_with_ephemeral_raw_context_and_mock_resume_policy",
         "replay_retention": {
             "artifact": "local_sqlite_redacted_checkpoints",
             "raw_inputs_allowed": False,
@@ -43,7 +43,8 @@ def build_agentic_rag_retention_policy_summary(*, evidence_date: str) -> dict[st
         },
         "resume_retention": {
             "same_process_ephemeral_context": True,
-            "durable_cross_process_resume": "pending_user_decision",
+            "mock_redacted_sqlite_replay_resume": True,
+            "live_provider_cross_process_resume": "pending_user_decision",
             "raw_request_persistence_allowed": False,
         },
         "trace_retention": {
@@ -53,7 +54,7 @@ def build_agentic_rag_retention_policy_summary(*, evidence_date: str) -> dict[st
         },
         "requires_user_decision_before": [
             "durable_raw_request_storage",
-            "cross_process_resume_store",
+            "live_provider_cross_process_resume_store",
             "production_approval_audit_retention",
             "external_trace_payload_retention",
         ],
