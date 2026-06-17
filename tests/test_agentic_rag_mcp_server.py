@@ -32,6 +32,14 @@ def test_fastmcp_server_imports_and_tools_return_redacted_summaries() -> None:
     assert web["mode"] == "local_curated_snapshot"
     assert sql["tool"] == "sql_query"
     assert sql["query_id"] == "template_policy_summary"
+    assert sql["policy"] == {
+        "read_only": True,
+        "allowlisted_query_ids": ["template_policy_summary"],
+        "raw_sql_allowed": False,
+        "mutation_statements_allowed": False,
+        "row_limit": 25,
+        "timeout_ms": 250,
+    }
     assert internal["tool"] == "internal_api"
     assert internal["endpoint"] == "preview_generation_policy"
     assert internal["requires_reference_image"] is True

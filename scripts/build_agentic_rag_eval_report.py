@@ -97,7 +97,8 @@ def build_agentic_rag_eval_report_summary(*, evidence_date: str) -> dict[str, An
         "limits": {
             "ragas_live_gate": "pending_paid_api_approval",
             "live_web_search": "pending_runtime_security_policy",
-            "production_sql_policy": "pending_runtime_security_policy",
+            "local_sql_runtime_policy": "first_gate_complete",
+            "production_db_access_audit": "pending_runtime_security_policy",
             "production_mcp_transport_auth": "pending_runtime_security_policy",
         },
         "privacy_boundary": {
@@ -169,9 +170,11 @@ external MCP transports.
 ## Limits
 
 Ragas live metrics remain pending until paid/API-key approval. Live web search,
-production SQL policy, and production MCP transport/auth also remain pending
-runtime-security work. This report is a reviewer-facing consolidation of the
-local deterministic gates, not a replacement for production traffic evidence.
+production DB access/audit policy, and production MCP transport/auth also
+remain pending runtime-security work. The local SQL runtime policy first gate is
+complete, but it is not production DB access. This report is a reviewer-facing
+consolidation of the local deterministic gates, not a replacement for
+production traffic evidence.
 """
 
 

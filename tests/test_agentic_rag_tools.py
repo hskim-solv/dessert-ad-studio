@@ -42,6 +42,14 @@ def test_local_agentic_tools_return_redacted_summaries() -> None:
         "tool": "sql_query",
         "mode": "sqlite_allowlisted_query",
         "query_id": "template_policy_summary",
+        "policy": {
+            "read_only": True,
+            "allowlisted_query_ids": ["template_policy_summary"],
+            "raw_sql_allowed": False,
+            "mutation_statements_allowed": False,
+            "row_limit": 25,
+            "timeout_ms": 250,
+        },
         "row_count": 3,
         "min_score_threshold": 0.62,
         "policy_guardrail_count": 3,
@@ -102,6 +110,26 @@ def test_agentic_rag_graph_runs_local_tool_suite_before_retrieval_without_raw_in
     serialized = json.dumps(result, ensure_ascii=False)
     assert "비공개 말차 푸딩" not in serialized
     assert "VIP 고객에게만 보일 문구" not in serialized
+
+
+def test_sql_query_tool_rejects_non_allowlisted_queries_with_policy_summary() -> None:
+    result = run_sql_query_tool(query_id="drop_template_policy")
+
+    assert result == {
+        "tool": "sql_query",
+        "mode": "sqlite_allowlisted_query",
+        "query_id": "drop_template_policy",
+        "policy": {
+            "read_only": True,
+            "allowlisted_query_ids": ["template_policy_summary"],
+            "raw_sql_allowed": False,
+            "mutation_statements_allowed": False,
+            "row_limit": 25,
+            "timeout_ms": 250,
+        },
+        "row_count": 0,
+        "error": "query_id_not_allowed",
+    }
 
 
 def test_agentic_tool_suite_adr_and_mcp_server_are_recorded() -> None:

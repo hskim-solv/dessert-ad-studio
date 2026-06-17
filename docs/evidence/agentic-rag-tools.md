@@ -16,7 +16,8 @@ docs/adr/0017-agentic-rag-tool-suite.md
 ## Scope
 
 - `web_search`: local curated snapshot summary, no live network call.
-- `sql_query`: in-memory SQLite allowlisted query, no arbitrary SQL.
+- `sql_query`: in-memory SQLite allowlisted query, no arbitrary SQL, read-only
+  policy summary, row limit, and timeout budget.
 - `internal_api`: in-process `preview_generation_policy` contract.
 - `document_retrieval`: existing keyword marketing-context retriever.
 - MCP server: `mcp_servers/dessert_ad_studio_server.py` with FastMCP tool
@@ -47,6 +48,8 @@ Current result:
   - `generation_workflow`
 - web search mode: `local_curated_snapshot`
 - SQL mode: `sqlite_allowlisted_query`
+- SQL policy: read-only, query-id allowlist only, raw SQL disabled, mutation
+  statements disabled, row limit `25`, timeout `250ms`
 - internal API mode: `in_process_contract`
 - MCP package smoke: `passed`
 - MCP version: `1.28.0`
@@ -79,6 +82,8 @@ Focused tests:
 
 ## Limits
 
-This is not yet live web search or production SQL access. The MCP proof imports
-the package and calls the FastMCP-wrapped local tools, but it does not start a
-long-running production MCP service or test remote client auth/transport.
+This is not yet live web search or production DB access. The SQL runtime policy
+first gate is local SQLite only; production credentials, audit logging,
+retention, and DB role policy remain pending. The MCP proof imports the package
+and calls the FastMCP-wrapped local tools, but it does not start a long-running
+production MCP service or test remote client auth/transport.

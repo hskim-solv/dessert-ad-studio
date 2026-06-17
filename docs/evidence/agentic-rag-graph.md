@@ -99,5 +99,5 @@ Focused tests:
 This is not yet the full Agentic RAG system. The following remain pending:
 
 - production Postgres or multi-instance checkpointer policy
-- live web search, production SQL access, and proven MCP package execution
+- live web search, production DB access/audit, and production MCP transport/auth
 - production/live citation assembly over generated ad packages

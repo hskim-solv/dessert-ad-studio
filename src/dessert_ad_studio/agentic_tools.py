@@ -22,6 +22,14 @@ TEMPLATE_POLICY_ROWS = (
     ("cozy_cafe", 0.62, "discount_claims_need_price_context"),
     ("bold_launch", 0.71, "new_menu_claims_need_menu_context"),
 )
+SQL_QUERY_POLICY = {
+    "read_only": True,
+    "allowlisted_query_ids": ["template_policy_summary"],
+    "raw_sql_allowed": False,
+    "mutation_statements_allowed": False,
+    "row_limit": 25,
+    "timeout_ms": 250,
+}
 
 
 def run_web_search_tool(*, query: str) -> dict[str, Any]:
@@ -53,6 +61,7 @@ def run_sql_query_tool(*, query_id: str) -> dict[str, Any]:
             "tool": "sql_query",
             "mode": "sqlite_allowlisted_query",
             "query_id": query_id,
+            "policy": SQL_QUERY_POLICY,
             "row_count": 0,
             "error": "query_id_not_allowed",
         }
@@ -88,6 +97,7 @@ def run_sql_query_tool(*, query_id: str) -> dict[str, Any]:
         "tool": "sql_query",
         "mode": "sqlite_allowlisted_query",
         "query_id": query_id,
+        "policy": SQL_QUERY_POLICY,
         "row_count": int(row[0]),
         "min_score_threshold": float(row[1]),
         "policy_guardrail_count": int(row[2]),

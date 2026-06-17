@@ -58,6 +58,8 @@ external MCP transports.
 ## Limits
 
 Ragas live metrics remain pending until paid/API-key approval. Live web search,
-production SQL policy, and production MCP transport/auth also remain pending
-runtime-security work. This report is a reviewer-facing consolidation of the
-local deterministic gates, not a replacement for production traffic evidence.
+production DB access/audit policy, and production MCP transport/auth also
+remain pending runtime-security work. The local SQL runtime policy first gate is
+complete, but it is not production DB access. This report is a reviewer-facing
+consolidation of the local deterministic gates, not a replacement for
+production traffic evidence.

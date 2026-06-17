@@ -311,6 +311,14 @@ def test_agentic_rag_tools_smoke_writes_redacted_summary(tmp_path: Path) -> None
     assert summary["tool_result_keys"] == ["internal_api", "sql_query", "web_search"]
     assert summary["web_search"]["mode"] == "local_curated_snapshot"
     assert summary["sql_query"]["mode"] == "sqlite_allowlisted_query"
+    assert summary["sql_query"]["policy"] == {
+        "read_only": True,
+        "allowlisted_query_ids": ["template_policy_summary"],
+        "raw_sql_allowed": False,
+        "mutation_statements_allowed": False,
+        "row_limit": 25,
+        "timeout_ms": 250,
+    }
     assert summary["internal_api"]["mode"] == "in_process_contract"
     assert summary["document_retrieval"]["retriever_backend"] == "keyword"
     assert summary["mcp_server_scaffold"] == "mcp_servers/dessert_ad_studio_server.py"

@@ -92,10 +92,10 @@ Known gaps:
   approval UI plus in-process post-approval worker resume, mock-only redacted
   SQLite cross-process resume, and bidirectional WebSocket approval have local
   first gates, and the retention boundary policy is recorded. Live web search,
-  production SQL policy, production MCP transport/auth, live-provider
-  cross-process resume, approved production storage, deployment-specific
-  external trace retention, and Ragas live evaluator execution are still
-  pending.
+  production DB access/audit policy, production MCP transport/auth,
+  live-provider cross-process resume, approved production storage,
+  deployment-specific external trace retention, and Ragas live evaluator
+  execution are still pending.
 - Current eval sets are demo-scale and need a larger real/product-like scenario
   matrix before broader quality claims.
 

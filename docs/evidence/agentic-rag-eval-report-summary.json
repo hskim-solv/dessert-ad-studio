@@ -52,7 +52,8 @@
   "limits": {
     "ragas_live_gate": "pending_paid_api_approval",
     "live_web_search": "pending_runtime_security_policy",
-    "production_sql_policy": "pending_runtime_security_policy",
+    "local_sql_runtime_policy": "first_gate_complete",
+    "production_db_access_audit": "pending_runtime_security_policy",
     "production_mcp_transport_auth": "pending_runtime_security_policy"
   },
   "privacy_boundary": {

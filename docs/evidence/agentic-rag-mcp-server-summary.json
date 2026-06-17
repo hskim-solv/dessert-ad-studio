@@ -25,6 +25,16 @@
       "tool": "sql_query",
       "mode": "sqlite_allowlisted_query",
       "query_id": "template_policy_summary",
+      "policy": {
+        "read_only": true,
+        "allowlisted_query_ids": [
+          "template_policy_summary"
+        ],
+        "raw_sql_allowed": false,
+        "mutation_statements_allowed": false,
+        "row_limit": 25,
+        "timeout_ms": 250
+      },
       "row_count": 3,
       "min_score_threshold": 0.62,
       "policy_guardrail_count": 3
