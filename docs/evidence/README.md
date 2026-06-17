@@ -20,13 +20,14 @@ deployment readiness, privacy boundaries, and model-backed product analysis.
 docker compose config -q
 ```
 
-Latest local regression snapshot: `268 passed`.
+Latest local regression snapshot: `269 passed`.
 
 ## Evidence Map
 
 | Signal | Evidence | Current result | Reproduce |
 |---|---|---|---|
 | Retrieval baseline | [`rag-baseline.md`](rag-baseline.md), [`rag-baseline-results.json`](rag-baseline-results.json) | 10 samples, category hit rate 1.00, prohibited-claims hit rate 1.00, precision 0.75 | `.venv/bin/python scripts/eval_marketing_context.py --output docs/evidence/rag-baseline-results.json` |
+| RAG chunking comparison | [`rag-chunking-comparison.md`](rag-chunking-comparison.md), [`rag-chunking-comparison-results.json`](rag-chunking-comparison-results.json) | Offline chunking first gate passed: whole-document vs field-aware chunks over 5 guide docs and 10 eval cases; selected `field_aware`, category hit rate 0.90, required safety category hit rate 1.00, deterministic local embedding, raw inputs absent | `.venv/bin/python scripts/eval_rag_chunking_strategies.py --date 2026-06-17 --output docs/evidence/rag-chunking-comparison-results.json` |
 | Hybrid vector retrieval | [`pgvector-retrieval.md`](pgvector-retrieval.md), [`pgvector-baseline-results.json`](pgvector-baseline-results.json), [`pgvector-db-smoke-results.json`](pgvector-db-smoke-results.json) | pgvector hybrid preserves hit rate 1.00 and improves precision to 1.00 on the current 10-sample set | `.venv/bin/python scripts/eval_pgvector_marketing_context.py --output docs/evidence/pgvector-baseline-results.json` |
 | Agentic RAG graph first gate | [`agentic-rag-graph.md`](agentic-rag-graph.md), [`agentic-rag-graph-summary.json`](agentic-rag-graph-summary.json) | Offline LangGraph control plane passed: typed state, local tool-suite node, conditional HITL route, keyword retrieval, 3 citations, 8 approval checkpoints, local mock worker execution, 9 worker checkpoints, retry/reflection test coverage, redacted summary artifact | `.venv/bin/python scripts/agentic_rag_graph_smoke.py --date 2026-06-17 --output docs/evidence/agentic-rag-graph-summary.json` |
 | Agentic RAG SQLite checkpoint | [`agentic-rag-sqlite-checkpoint.md`](agentic-rag-sqlite-checkpoint.md), [`agentic-rag-sqlite-checkpoint-summary.json`](agentic-rag-sqlite-checkpoint-summary.json) | Local SQLite checkpointer passed: `langgraph-checkpoint-sqlite`, 8 persisted checkpoints, reopened connection lists 8 checkpoints, worker route completed, raw inputs absent from checkpoint file | `.venv/bin/python scripts/agentic_rag_sqlite_checkpoint_smoke.py --date 2026-06-17 --output docs/evidence/agentic-rag-sqlite-checkpoint-summary.json` |

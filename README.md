@@ -30,7 +30,8 @@ Small business owners often need SNS banners, menu images, and promotion copy, b
 Verified:
 
 - Deterministic Korean overlay and demo banner generation.
-- Curated marketing retrieval eval plus a measured pgvector storage/query lane.
+- Curated marketing retrieval eval, offline chunking comparison, and a measured
+  pgvector storage/query lane.
 - Offline LangGraph control-plane first gate with typed state, conditional
   HITL routing, local tool-suite node, keyword retrieval, citations, checkpoint
   evidence, local mock worker execution, retry/reflection test coverage, and

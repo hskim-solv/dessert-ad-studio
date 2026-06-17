@@ -1,0 +1,185 @@
+{
+  "rag_chunking_comparison": "passed",
+  "scope": "offline_marketing_context_chunking_no_paid_api_call",
+  "evidence_date": "2026-06-17",
+  "document_count": 5,
+  "eval_case_count": 10,
+  "embedding_backend": "deterministic_local_hash_embedding",
+  "selected_strategy": "field_aware",
+  "selected_metrics": {
+    "category_hit_rate": 0.9,
+    "required_category_hit_rate": 1.0,
+    "average_top_k_chunks": 4.0,
+    "chunk_count": 15,
+    "average_chunks_per_doc": 3.0
+  },
+  "strategies": [
+    {
+      "name": "whole_document",
+      "metrics": {
+        "category_hit_rate": 0.9,
+        "required_category_hit_rate": 1.0,
+        "average_top_k_chunks": 4.0,
+        "chunk_count": 5,
+        "average_chunks_per_doc": 1.0
+      },
+      "case_count": 10,
+      "case_summaries": [
+        {
+          "label_sha256": "e2ebbbb50f1ae83b9a5334d5f6b7133245cd6eab4ac0bca3aed583db74ad6ba4",
+          "expected_category_count": 3,
+          "hit_category_count": 3,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "7977d73b5c499d215bd4c2409169cb04e7b15b1042be0a2419f854ba720336b0",
+          "expected_category_count": 4,
+          "hit_category_count": 3,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "931a274d5d7a794df9de73ebc4f052c83bc6847afc79057ced5fbf5cc9b34edc",
+          "expected_category_count": 2,
+          "hit_category_count": 2,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "df0c8a039ec272e018bd9d13a5babad29197bf4b9ca85a22b348f3134a5210bf",
+          "expected_category_count": 3,
+          "hit_category_count": 3,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "85f722a67b7693a7b0bdc567a5537664552c2eccab141ad103433341a0670410",
+          "expected_category_count": 3,
+          "hit_category_count": 3,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "ecf8de11f920e3fe16bc68d818e6fd6718b6c2fe3d02570ce69f167e31cfb0b2",
+          "expected_category_count": 3,
+          "hit_category_count": 3,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "b0cd794c72793b12422c806c6bc821fe7e5d13f90975659a5e9070b28c5fce2c",
+          "expected_category_count": 2,
+          "hit_category_count": 2,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "47292ab1ac574dd95a91c0f23380e23e0c8da48f1b55ecd1c52cbae66196a6ee",
+          "expected_category_count": 2,
+          "hit_category_count": 2,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "a6ea333458c7e61c5ef06b18518e38750ac945231ad9bf71312743211d53680b",
+          "expected_category_count": 3,
+          "hit_category_count": 3,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "052f26c603747498846ddfe263af26abc69daeed354355b51a0899ddee93c808",
+          "expected_category_count": 3,
+          "hit_category_count": 3,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        }
+      ]
+    },
+    {
+      "name": "field_aware",
+      "metrics": {
+        "category_hit_rate": 0.9,
+        "required_category_hit_rate": 1.0,
+        "average_top_k_chunks": 4.0,
+        "chunk_count": 15,
+        "average_chunks_per_doc": 3.0
+      },
+      "case_count": 10,
+      "case_summaries": [
+        {
+          "label_sha256": "e2ebbbb50f1ae83b9a5334d5f6b7133245cd6eab4ac0bca3aed583db74ad6ba4",
+          "expected_category_count": 3,
+          "hit_category_count": 3,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "7977d73b5c499d215bd4c2409169cb04e7b15b1042be0a2419f854ba720336b0",
+          "expected_category_count": 4,
+          "hit_category_count": 3,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "931a274d5d7a794df9de73ebc4f052c83bc6847afc79057ced5fbf5cc9b34edc",
+          "expected_category_count": 2,
+          "hit_category_count": 2,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "df0c8a039ec272e018bd9d13a5babad29197bf4b9ca85a22b348f3134a5210bf",
+          "expected_category_count": 3,
+          "hit_category_count": 3,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "85f722a67b7693a7b0bdc567a5537664552c2eccab141ad103433341a0670410",
+          "expected_category_count": 3,
+          "hit_category_count": 3,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "ecf8de11f920e3fe16bc68d818e6fd6718b6c2fe3d02570ce69f167e31cfb0b2",
+          "expected_category_count": 3,
+          "hit_category_count": 3,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "b0cd794c72793b12422c806c6bc821fe7e5d13f90975659a5e9070b28c5fce2c",
+          "expected_category_count": 2,
+          "hit_category_count": 2,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "47292ab1ac574dd95a91c0f23380e23e0c8da48f1b55ecd1c52cbae66196a6ee",
+          "expected_category_count": 2,
+          "hit_category_count": 2,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "a6ea333458c7e61c5ef06b18518e38750ac945231ad9bf71312743211d53680b",
+          "expected_category_count": 3,
+          "hit_category_count": 3,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        },
+        {
+          "label_sha256": "052f26c603747498846ddfe263af26abc69daeed354355b51a0899ddee93c808",
+          "expected_category_count": 3,
+          "hit_category_count": 3,
+          "required_category_hit": true,
+          "top_k_chunks": 4
+        }
+      ]
+    }
+  ],
+  "raw_inputs_committed": false
+}

@@ -107,7 +107,8 @@ Verified:
 - Deterministic preservation/composition path for public samples.
 - Korean text rendering through deterministic overlay instead of image-model
   text rendering.
-- Curated retrieval baseline plus a measured pgvector storage/query lane.
+- Curated retrieval baseline, offline chunking comparison, and a measured
+  pgvector storage/query lane.
 - Redis/RQ and Postgres job/history path in Docker Compose.
 - Local/demo AgentOps trace evidence, Kubernetes Kustomize render evidence, and
   live `kind` base-stack smoke with Triton model sync plus full `/generate`.
@@ -278,6 +279,7 @@ flowchart LR
 | Stage | Goal | Completion evidence |
 |---|---|---|
 | M1 RAG baseline eval | Prove the current keyword retriever is useful before adding vector DB. | Complete: `docs/evidence/rag-baseline.md`, eval JSON, category hit rate 1.00, prohibited-claims hit rate 1.00. |
+| M1.5 RAG chunking comparison | Compare chunking strategies before claiming production RAG ingestion quality. | Complete first gate: `docs/evidence/rag-chunking-comparison.md`, whole-document vs field-aware chunks, deterministic local embedding, selected `field_aware`, category hit rate 0.90, prohibited-claims hit rate 1.00, raw inputs absent. |
 | M2 Hybrid retrieval | Compare Qdrant/pgvector/Chroma or a no-adoption baseline before choosing. | Complete: `docs/adr/0007-pgvector-marketing-context-retrieval.md`, `docs/evidence/pgvector-retrieval.md`, pgvector hybrid precision 1.00 vs keyword baseline precision 0.75 on the current 10-sample eval set. |
 | M3 Service workflow hardening | Make generation observable and resumable enough for real UX. | Complete: Redis/RQ job queue, `/generation-jobs` status API, redacted Postgres history, Korean reference-image async rejection, API tests, Redis/RQ smoke, Postgres history smoke, full containerized API/worker smoke with Triton scorer, and Streamlit polling/history UX. |
 | M4 Real product analysis | Replace mock product analysis with a real VLM-backed analyzer while preserving redaction policy. | Complete first analyzer gate: OpenAI Responses Vision adapter, ADR, no-network tests, env/compose wiring, one redacted live smoke, 10-case synthetic reference eval, pass rate 1.00, p95 latency 13.15s. |
