@@ -72,7 +72,9 @@ Verified:
 Not yet proven:
 
 - Provider-quality image editing. The first paid OpenAI image-edit gate failed;
-  a stronger `gpt-image-2` + `quality=medium` gate is prepared but not run.
+  the strengthened `gpt-image-2` + `quality=medium` gate also failed. ROI
+  preservation checks passed, but latency, text-contamination, and cost guard
+  checks failed.
 - Production async operation. Kubernetes now has a local/test async overlay
   smoke, first reliability matrix, single worker outage/restore evidence, and
   explicit retry/timeout/cancel non-support evidence, but not multi-worker
@@ -127,7 +129,7 @@ flowchart LR
 | Latency | Mock path p95 <= 2 seconds; OpenAI path p95 <= 30 seconds; FLUX2/GPU path measured and documented separately. |
 | Copy quality | Across 10-20 representative samples: Korean text presence 100%, product-name inclusion >= 90%, prohibited-claim violations 0. |
 | Retrieval quality | Retrieval eval set category hit rate >= 80%; prohibited-claims guidance hit rate 100%. |
-| Image quality | Product-preservation checklist pass rate >= 80%; Korean overlay rendering failures 0. Deterministic public-sample preservation first gate: pass rate 1.00, minimum top-region pixel match 1.00. Offline visual proxy gate passes 6 committed banners and includes a blank-image negative regression. Paid OpenAI image-edit first gate failed and is documented as model-quality evidence, not hidden. The next provider-quality gate now requires multi-sample ROI color/hash/edge preservation, latency, redaction, and text-contamination checks. |
+| Image quality | Product-preservation checklist pass rate >= 80%; Korean overlay rendering failures 0. Deterministic public-sample preservation first gate: pass rate 1.00, minimum top-region pixel match 1.00. Offline visual proxy gate passes 6 committed banners and includes a blank-image negative regression. Paid OpenAI image-edit gates failed and are documented as model-quality evidence, not hidden. The latest `gpt-image-2`/`medium` run passed ROI color/hash/edge preservation checks but failed latency, text-contamination, and cost guard checks. |
 | Error handling | Backend failures map to Korean `AdBackendError`; unknown backend, unsupported reference image, and missing API key fail clearly. |
 | Regression guard | `pytest`, `ruff`, API smoke, retrieval eval, and workflow eval commands are documented and reproducible. |
 
@@ -154,7 +156,7 @@ flowchart LR
 | M4 Real product analysis | Replace mock product analysis with a real VLM-backed analyzer while preserving redaction policy. | Complete first analyzer gate: OpenAI Responses Vision adapter, ADR, no-network tests, env/compose wiring, one redacted live smoke, 10-case synthetic reference eval, pass rate 1.00, p95 latency 13.15s. |
 | M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields, and `docs/evidence/cost-guard-summary.json`. |
 | M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, Streamlit reviewer screenshots at `docs/evidence/streamlit-reviewer-flow.md`, real-sample preservation evidence at `docs/evidence/real-sample-preservation.md`, paid OpenAI image-edit failure evidence at `docs/evidence/openai-image-edit-preservation.md`, README links, reproducible command map. |
-| M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, live worker outage/restore smoke, explicit retry/timeout/cancel non-support, 30-scenario product-like eval, offline visual proxy gate, first trace/log privacy allowlist gate, and first cost guard are complete. Next evidence should cover the paid provider-quality image-edit gate plus human/provider visual quality review. |
+| M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, live worker outage/restore smoke, explicit retry/timeout/cancel non-support, 30-scenario product-like eval, offline visual proxy gate, paid provider-quality failure evidence, first trace/log privacy allowlist gate, and first cost guard are complete. Next evidence should cover remediation for the failed provider gate plus human/provider visual quality review. |
 
 ## Failure Conditions
 
@@ -212,7 +214,8 @@ review moved the project into M7 hardening. Live K8s base-stack proof is now
 captured, the K8s async overlay smoke is complete, the first async reliability
 matrix is complete, the 30-scenario product-like eval is complete, the first
 trace/log privacy allowlist gate is complete, the first cost guard is complete,
-live worker outage/restore evidence is complete, and retry/timeout/cancel
-non-support is explicit. The remaining portfolio gap is stronger generated-asset
-quality review. The strengthened `gpt-image-2` + `quality=medium`
-provider-quality image-edit gate still needs explicit paid-run approval.
+live worker outage/restore evidence is complete, retry/timeout/cancel
+non-support is explicit, and the strengthened paid provider-quality image-edit
+gate has failed with redacted evidence. The remaining portfolio gap is
+remediation for provider-quality image editing plus human/provider
+generated-asset quality review.

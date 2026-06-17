@@ -2,38 +2,42 @@
 
 Date: 2026-06-17
 
-This is a paid live smoke for the OpenAI image-edit path using a committed
-public sample reference image. It sends the public matcha-pudding reference
-image to OpenAI, writes the generated output only under ignored `outputs/`, and
-commits only a redacted metric summary.
+This is paid live smoke evidence for the OpenAI image-edit path using committed
+public sample reference images. It sends public references to OpenAI, writes the
+generated output only under ignored `outputs/`, and commits only a redacted
+metric summary.
 
-## Result
+## Latest Result
 
 - Result: `failed`
-- Model: `gpt-image-1-mini`
-- Quality: `low`
-- Reference image: public sample `docs/evidence/assets/real-sample-preservation/references/matcha-pudding.png`
-- Elapsed: `15,231 ms`
-- Usage: `627 total_tokens`
-- Generated file: exists, `1024x1024`, nonblank, not committed
-- Color histogram similarity: `0.234960`
-- Average hash similarity: `0.546875`
-- Checklist failure: color histogram similarity did not meet the initial `>= 0.25` gate
+- Model: `gpt-image-2`
+- Quality: `medium`
+- Reference set: 3 committed public samples
+- Elapsed: `197,305 ms`
+- Usage: `8,860 total_tokens`
+- Estimated cost: `$0.2658`
+- Budget guard: failed, over `$0.20` by `$0.0658`
+- Provider-quality pass rate: `0.00` (`0/3`)
+- Generated files: all exist, all `1024x1024`, all nonblank, not committed
+- ROI preservation: all samples passed color histogram, average hash, and edge
+  similarity thresholds
+- Checklist failures: all samples exceeded the `30,000 ms` latency threshold and
+  failed the text-contamination heuristic
 
-This first run used the initial single-sample smoke gate. The current script
-now also supports a stronger provider-quality gate for the next paid iteration.
+The strengthened run improved measurable ROI preservation but still does not
+prove provider-quality image editing. It reinforces the production boundary:
+image models should produce or edit visuals, while Korean marketing copy should
+be rendered deterministically by the overlay layer.
 
-The generated image preserved the broad cup/pudding structure enough for a
-moderate structural hash score, but it also rendered visible model-generated
-text in the image. That supports the existing production design choice: image
-models should produce or edit visuals, while Korean marketing copy is rendered
-deterministically by the overlay layer.
+## Historical Initial Run
+
+The first paid run used `gpt-image-1-mini`, `quality=low`, and one
+matcha-pudding public sample. It failed the initial single-sample gate with
+color histogram similarity `0.234960` against the `>= 0.25` threshold.
 
 ## Strengthened Provider-Quality Gate
 
-The strengthened gate is intended for the next paid model/prompt iteration, not
-for the historical summary above. It keeps the default command to one paid
-sample, and only runs the three public references when
+The strengthened gate runs the three public references when
 `--reference-set public-samples` is passed.
 
 Hard checks:
@@ -72,7 +76,7 @@ This command costs real money and requires `OPENAI_API_KEY`:
 The command is expected to exit non-zero when the live gate fails. It still
 writes the redacted summary for review.
 
-Next paid provider-quality run, if approved:
+Latest paid provider-quality run:
 
 ```bash
 .venv/bin/python scripts/openai_image_edit_preservation_smoke.py \
@@ -86,6 +90,9 @@ Next paid provider-quality run, if approved:
 The `--max-estimated-cost-usd` guard uses the token usage returned by the image
 API. If pricing for the selected model is unavailable and no override is set,
 the budget gate fails closed instead of silently passing.
+
+The latest run exceeded the `$0.20` budget after usage was returned. This guard
+is therefore a post-response evidence gate, not a pre-spend hard cap.
 
 ## Privacy Boundary
 

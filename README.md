@@ -34,8 +34,9 @@ Verified:
 
 Known gaps:
 
-- The first paid OpenAI image-edit provider gate failed; the deterministic
-  preservation path passes, but provider-quality image editing is still pending.
+- Paid OpenAI image-edit provider gates have failed; the deterministic
+  preservation path and offline visual proxy pass, but provider-quality image
+  editing is not proven.
 - Kubernetes base evidence covers the synchronous API/UI/Triton path; the
   async worker/Redis/Postgres operational path is still Docker Compose only.
 - Current eval sets are demo-scale and need a larger real/product-like scenario
@@ -185,7 +186,7 @@ The Streamlit reviewer flow screenshots are in
 [`docs/evidence/streamlit-reviewer-flow.md`](docs/evidence/streamlit-reviewer-flow.md).
 Real-sample deterministic preservation evidence is in
 [`docs/evidence/real-sample-preservation.md`](docs/evidence/real-sample-preservation.md).
-The first paid OpenAI image-edit preservation gate and the strengthened
+The paid OpenAI image-edit preservation failures and the strengthened
 provider-quality gate definition are documented in
 [`docs/evidence/openai-image-edit-preservation.md`](docs/evidence/openai-image-edit-preservation.md).
 The README architecture image is
@@ -303,7 +304,7 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Run the strengthened `gpt-image-2` + `quality=medium` provider-quality image-edit gate only if a second paid iteration is approved.
+1. Diagnose the failed paid `gpt-image-2` + `quality=medium` provider-quality gate before any further paid iteration.
 2. Add human visual review or provider-quality visual statistics for generated assets.
 3. Keep FastMCP/A2A as optional thin wrappers after the workflow/API evidence is stable.
 

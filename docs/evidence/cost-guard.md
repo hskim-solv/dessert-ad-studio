@@ -59,6 +59,11 @@ available through:
 The pricing source recorded in the summary is
 <https://openai.com/api/pricing/>, checked on 2026-06-17.
 
+The paid provider-quality run on 2026-06-17 returned `8,860 total_tokens`,
+estimated `$0.2658`, and failed the `$0.20` budget guard. This confirms the
+live gate fails closed in evidence after usage is returned, but it is not a
+pre-spend hard cap. Hard spend limits must be set in the OpenAI dashboard.
+
 ## Remaining Gap
 
 This is a per-run guard, not account-level spend enforcement. OpenAI project
