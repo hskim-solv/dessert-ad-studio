@@ -27,7 +27,21 @@ def transport_auth_policy() -> dict:
         "local_loopback_only": True,
         "production_auth_required": True,
         "production_auth_status": "pending_auth_provider_selection",
-        "remote_client_contract": "pending_transport_auth_smoke",
+        "remote_client_contract": "first_gate_complete",
+        "remote_client_smoke": "pending_user_approval",
+        "allowed_auth_schemes": ["oauth2_bearer", "service_account_bearer"],
+        "auth_header_required": True,
+        "token_redaction": {
+            "raw_token_committed": False,
+            "authorization_header_committed": False,
+            "token_hash_required": True,
+        },
+        "client_policy": {
+            "tls_required": True,
+            "origin_allowlist_required": True,
+            "tool_allowlist_required": True,
+            "max_request_body_bytes": 65536,
+        },
         "raw_inputs_committed": False,
     }
 

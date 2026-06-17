@@ -54,18 +54,19 @@ def test_agentic_rag_eval_report_script_writes_reviewer_report(tmp_path: Path) -
     assert summary["limits"]["credentialed_production_db_smoke"] == "pending_user_approval"
     assert summary["limits"]["local_sql_runtime_policy"] == "first_gate_complete"
     assert summary["limits"]["mcp_loopback_transport_auth_boundary"] == "first_gate_complete"
-    assert (
-        summary["limits"]["production_mcp_auth_remote_client"] == "pending_runtime_security_policy"
-    )
+    assert summary["limits"]["mcp_remote_client_auth_contract"] == "first_gate_complete"
+    assert summary["limits"]["production_mcp_auth_provider_selection"] == "pending_user_approval"
+    assert summary["limits"]["production_mcp_remote_client_smoke"] == "pending_user_approval"
     assert summary["privacy_boundary"]["raw_inputs_committed"] is False
 
     assert "# Agentic RAG Eval Report" in report
     assert "Faithfulness" in report
     assert "promptfoo" in report
     assert "Ragas live metrics remain pending" in report
+    compact_report = " ".join(report.split())
     assert (
-        "The live web search runtime policy, local SQL runtime policy, production\n"
-        "DB access/audit policy, and MCP loopback transport/auth boundary first gates\n"
-        "are complete"
-    ) in report
+        "The live web search runtime policy, local SQL runtime policy, production "
+        "DB access/audit policy, MCP loopback transport/auth boundary, and MCP remote "
+        "client auth contract first gates are complete"
+    ) in compact_report
     assert "docs/evidence/agentic-rag-eval-guardrail-summary.json" in report

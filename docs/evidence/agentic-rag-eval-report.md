@@ -58,11 +58,12 @@ external MCP transports.
 ## Limits
 
 Ragas live metrics remain pending until paid/API-key approval. Live web search
-provider smoke, credentialed production DB connection smoke, and production MCP
-auth/remote client smoke also remain pending user-approved runtime-security
-work. The live web search runtime policy, local SQL runtime policy, production
-DB access/audit policy, and MCP loopback transport/auth boundary first gates
-are complete, but they are not live production traffic, approved production
-audit retention, or production MCP auth. This report is a reviewer-facing
-consolidation of the local deterministic gates, not a replacement for
-production traffic evidence.
+provider smoke, credentialed production DB connection smoke, production MCP auth
+provider selection, and production MCP remote client smoke also remain pending
+user-approved runtime-security work. The live web search runtime policy, local
+SQL runtime policy, production DB access/audit policy, MCP loopback
+transport/auth boundary, and MCP remote client auth contract first gates are
+complete, but they are not live production traffic, approved production audit
+retention, or production MCP auth provider proof. This report is a
+reviewer-facing consolidation of the local deterministic gates, not a
+replacement for production traffic evidence.

@@ -69,6 +69,9 @@ Current result:
 - MCP served transport policy: `streamable-http`, loopback-only `127.0.0.1`,
   manual command `python -m mcp_servers.dessert_ad_studio_server`
 - MCP production auth status: `pending_auth_provider_selection`
+- MCP remote client auth contract: `first_gate_complete`; accepted auth scheme
+  families are `oauth2_bearer` and `service_account_bearer`; authorization
+  headers and raw tokens are excluded from committed evidence.
 - MCP tools:
   - `search_marketing_guides`
   - `query_template_policy`
@@ -109,5 +112,6 @@ audit event fields, and redaction contract before any credential is used.
 Production DB credential injection, connection smoke, approved audit-retention
 duration, and user/project/entity retention scope remain pending. The MCP proof
 imports the package, calls the FastMCP-wrapped local tools, and records a
-loopback-only `streamable-http` transport/auth boundary; it does not select a
-production auth provider or run a remote client auth/transport smoke.
+loopback-only `streamable-http` transport/auth boundary plus a remote client
+auth contract. It does not select a production auth provider or run a remote
+client auth/transport smoke.

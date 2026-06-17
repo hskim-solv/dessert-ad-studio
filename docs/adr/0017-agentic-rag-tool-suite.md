@@ -76,9 +76,10 @@ allowlist, audit event schema, redaction contract를 먼저 고정한다.
   - production DB access/audit은 policy first gate만 proven이다. Credentialed
     connection smoke, production audit store, approved retention duration,
     user/project/entity retention scope는 아직 사용자 결정이 필요하다.
-  - MCP server는 local import/tool-call smoke와 loopback-only served
-    transport/auth boundary까지만 proven이다. Production auth provider와 remote
-    client contract는 별도 evidence가 필요하다.
+  - MCP server는 local import/tool-call smoke, loopback-only served
+    transport/auth boundary, remote client auth contract까지만 proven이다.
+    Production auth provider 선택과 remote client smoke는 별도 evidence가
+    필요하다.
 - 재평가 트리거:
   - MCP tool server를 served transport demo에 포함해야 할 때.
   - production DB credential, DB role, audit, retention policy가 정해질 때.

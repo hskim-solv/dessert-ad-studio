@@ -56,7 +56,24 @@
     "local_loopback_only": true,
     "production_auth_required": true,
     "production_auth_status": "pending_auth_provider_selection",
-    "remote_client_contract": "pending_transport_auth_smoke",
+    "remote_client_contract": "first_gate_complete",
+    "remote_client_smoke": "pending_user_approval",
+    "allowed_auth_schemes": [
+      "oauth2_bearer",
+      "service_account_bearer"
+    ],
+    "auth_header_required": true,
+    "token_redaction": {
+      "raw_token_committed": false,
+      "authorization_header_committed": false,
+      "token_hash_required": true
+    },
+    "client_policy": {
+      "tls_required": true,
+      "origin_allowlist_required": true,
+      "tool_allowlist_required": true,
+      "max_request_body_bytes": 65536
+    },
     "raw_inputs_committed": false
   },
   "raw_inputs_committed": false

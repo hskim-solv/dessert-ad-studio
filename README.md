@@ -91,12 +91,13 @@ Known gaps:
   local eval/guardrail plus promptfoo package gate are proven, and reviewer
   approval UI plus in-process post-approval worker resume, mock-only redacted
   SQLite cross-process resume, and bidirectional WebSocket approval have local
-  first gates, and the retention boundary plus live web search and production
-  DB access/audit policy first gates are recorded. Live web search provider
-  smoke, credentialed production DB connection/audit-retention smoke,
-  production MCP auth provider/remote client smoke, live-provider cross-process
-  resume, approved production storage, deployment-specific external trace
-  retention, and Ragas live evaluator execution are still pending.
+  first gates, and the retention boundary plus live web search, production DB
+  access/audit policy, and MCP remote client auth contract first gates are
+  recorded. Live web search provider smoke, credentialed production DB
+  connection/audit-retention smoke, production MCP auth provider selection and
+  remote client smoke, live-provider cross-process resume, approved production
+  storage, deployment-specific external trace retention, and Ragas live
+  evaluator execution are still pending.
 - Current eval sets are demo-scale and need a larger real/product-like scenario
   matrix before broader quality claims.
 
@@ -166,8 +167,8 @@ Use A2A when another agent needs to discover and call Dessert Ad Studio as a rem
 agent capability. Use the normal REST API for app/frontend calls. FastMCP now has
 a local server at `mcp_servers/dessert_ad_studio_server.py` with package
 import/tool-call smoke coverage and a loopback-only `streamable-http`
-transport/auth boundary; production auth provider selection and remote client
-smoke remain pending.
+transport/auth boundary plus a remote client auth contract; production auth
+provider selection and remote client smoke remain pending.
 
 Run Streamlit:
 
@@ -374,4 +375,5 @@ docs/runbooks/gcp-flux2-validation.md
 FastMCP is still a thin wrapper, not the core product path. The current server
 exposes local `search_marketing_guides`, `query_template_policy`, and
 `preview_generation_policy` tools with a loopback-only `streamable-http`
-boundary; production MCP auth provider and remote client smoke remain pending.
+boundary plus a remote client auth contract; production MCP auth provider and
+remote client smoke remain pending.

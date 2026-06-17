@@ -102,7 +102,9 @@ def build_agentic_rag_eval_report_summary(*, evidence_date: str) -> dict[str, An
             "production_db_access_audit_policy": "first_gate_complete",
             "credentialed_production_db_smoke": "pending_user_approval",
             "mcp_loopback_transport_auth_boundary": "first_gate_complete",
-            "production_mcp_auth_remote_client": "pending_runtime_security_policy",
+            "mcp_remote_client_auth_contract": "first_gate_complete",
+            "production_mcp_auth_provider_selection": "pending_user_approval",
+            "production_mcp_remote_client_smoke": "pending_user_approval",
         },
         "privacy_boundary": {
             "raw_inputs_committed": False,
@@ -173,14 +175,15 @@ external MCP transports.
 ## Limits
 
 Ragas live metrics remain pending until paid/API-key approval. Live web search
-provider smoke, credentialed production DB connection smoke, and production MCP
-auth/remote client smoke also remain pending user-approved runtime-security
-work. The live web search runtime policy, local SQL runtime policy, production
-DB access/audit policy, and MCP loopback transport/auth boundary first gates
-are complete, but they are not live production traffic, approved production
-audit retention, or production MCP auth. This report is a reviewer-facing
-consolidation of the local deterministic gates, not a replacement for
-production traffic evidence.
+provider smoke, credentialed production DB connection smoke, production MCP auth
+provider selection, and production MCP remote client smoke also remain pending
+user-approved runtime-security work. The live web search runtime policy, local
+SQL runtime policy, production DB access/audit policy, MCP loopback
+transport/auth boundary, and MCP remote client auth contract first gates are
+complete, but they are not live production traffic, approved production audit
+retention, or production MCP auth provider proof. This report is a
+reviewer-facing consolidation of the local deterministic gates, not a
+replacement for production traffic evidence.
 """
 
 
