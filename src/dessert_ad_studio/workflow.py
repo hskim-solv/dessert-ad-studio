@@ -12,6 +12,11 @@ from dessert_ad_studio.marketing_context import (
     MarketingContextRetriever,
 )
 from dessert_ad_studio.observability import NoopWorkflowTracer, WorkflowTracer
+from dessert_ad_studio.privacy import (
+    redacted_image_path,
+    redacted_log_path,
+    redacted_reference_image_name,
+)
 from dessert_ad_studio.product_analysis import ProductAnalyzer
 from dessert_ad_studio.prompts import build_image_prompt
 from dessert_ad_studio.reference_image import decode_reference_image
@@ -114,7 +119,7 @@ def run_generation_workflow(
             used_reference = reference_image is not None
             metadata = {
                 "used_reference": used_reference,
-                "reference_image_name": request.reference_image_name,
+                **redacted_reference_image_name(request.reference_image_name),
             }
             span.set_attributes(metadata)
             _append_trace(trace, "decode_reference", step_started, metadata)
@@ -195,7 +200,7 @@ def run_generation_workflow(
             metadata = {
                 "image_backend": dependencies.image_backend.name,
                 "image_model_id": getattr(dependencies.image_backend, "model_id", None),
-                "image_path": image_result.path,
+                **redacted_image_path(image_result.path),
                 "image_usage": image_result.usage,
             }
             span.set_attributes(metadata)
@@ -229,17 +234,17 @@ def run_generation_workflow(
             "marketing_context_retrieved_docs_count": marketing_context.retrieved_docs_count,
             "marketing_context_categories": list(marketing_context.guide_categories),
             "used_reference": used_reference,
-            "reference_image_name": request.reference_image_name,
+            **redacted_reference_image_name(request.reference_image_name),
             "copy_usage": copy_result.usage,
             "image_usage": image_result.usage,
             "elapsed_ms": elapsed_ms,
-            "image_path": image_result.path,
+            **redacted_image_path(image_result.path),
             "workflow_trace": _trace_payload(trace),
         }
         with tracer.span("write_log", "tool") as span:
             step_started = perf_counter()
             dependencies.logger_factory(dependencies.log_path).write(log_record)
-            metadata = {"log_path": str(dependencies.log_path)}
+            metadata = redacted_log_path(str(dependencies.log_path))
             span.set_attributes(metadata)
             trace.append(
                 WorkflowTraceEntry(
@@ -259,8 +264,8 @@ def run_generation_workflow(
                 "prompt_length": len(image_prompt),
                 "used_reference": used_reference,
                 "elapsed_ms": elapsed_ms,
-                "image_path": image_result.path,
-                "log_path": str(dependencies.log_path),
+                **redacted_image_path(image_result.path),
+                **redacted_log_path(str(dependencies.log_path)),
             }
         )
 

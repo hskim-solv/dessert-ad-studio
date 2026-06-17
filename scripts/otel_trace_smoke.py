@@ -10,6 +10,7 @@ import urllib.request
 
 from dessert_ad_studio.backends.mock import MockAdBackend
 from dessert_ad_studio.observability import build_workflow_tracer, resolve_otlp_trace_endpoint
+from dessert_ad_studio.privacy import redacted_image_path
 from dessert_ad_studio.product_analysis import MockProductAnalyzer
 from dessert_ad_studio.schemas import GenerationRequest
 from dessert_ad_studio.triton import LocalTemplateScorer
@@ -74,12 +75,14 @@ def main() -> int:
             ),
         )
 
+    image_path_summary = redacted_image_path(output.response.image_path)
     print(
         "trace_smoke=passed "
         f"export={export_mode} "
         f"endpoint={endpoint} "
         f"steps={len(output.trace)} "
-        f"image_path={output.response.image_path}"
+        f"has_image_path={image_path_summary['has_image_path']} "
+        f"image_path_sha256={image_path_summary['image_path_sha256']}"
     )
     return 0
 

@@ -40,6 +40,7 @@ from dessert_ad_studio.marketing_context_pgvector import (
     PgvectorHybridMarketingContextRetriever,
 )
 from dessert_ad_studio.observability import build_workflow_tracer
+from dessert_ad_studio.privacy import redacted_image_path, redacted_reference_image_name
 from dessert_ad_studio.product_analysis import (
     MockProductAnalyzer,
     OpenAIProductAnalyzer,
@@ -203,10 +204,10 @@ class _FailureLoggingImageBackend:
                 list(marketing_context.guide_categories) if marketing_context is not None else []
             ),
             "used_reference": reference_image is not None,
-            "reference_image_name": request.reference_image_name,
+            **redacted_reference_image_name(request.reference_image_name),
             "copy_usage": copy_result.usage,
             "image_usage": None,
-            "image_path": None,
+            **redacted_image_path(None),
             "error": exc.detail,
             "elapsed_ms": (perf_counter() - self._telemetry.started) * 1000,
         }

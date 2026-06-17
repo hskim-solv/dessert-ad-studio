@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
-import hashlib
 from threading import Lock
 from typing import Any, Protocol
 
+from dessert_ad_studio.privacy import redacted_image_path, sha256_text
 from dessert_ad_studio.schemas import GenerationRequest, GenerationResponse
 
 JOB_STATUS_QUEUED = "queued"
@@ -310,7 +310,7 @@ def redacted_request_summary(request: GenerationRequest) -> dict[str, Any]:
         "has_revision_request": bool(request.revision_request),
         "has_reference_image": bool(request.reference_image_b64),
         "has_reference_image_name": bool(request.reference_image_name),
-        "product_name_sha256": hashlib.sha256(request.product_name.encode("utf-8")).hexdigest(),
+        "product_name_sha256": sha256_text(request.product_name),
     }
 
 
@@ -319,10 +319,7 @@ def redacted_response_summary(response: GenerationResponse) -> dict[str, Any]:
         "copy_options_count": len(response.copy_options),
         "selected_template": response.selected_template.template_name,
         "template_scorer": response.selected_template.scorer,
-        "has_image_path": bool(response.image_path),
-        "image_path_sha256": hashlib.sha256(response.image_path.encode("utf-8")).hexdigest()
-        if response.image_path
-        else None,
+        **redacted_image_path(response.image_path),
         "image_backend": response.image_backend,
         "copy_backend": response.copy_backend,
         "used_reference": response.used_reference,

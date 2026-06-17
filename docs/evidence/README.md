@@ -20,7 +20,7 @@ deployment readiness, privacy boundaries, and model-backed product analysis.
 docker compose config -q
 ```
 
-Latest local regression snapshot: `194 passed, 1 warning`.
+Latest local regression snapshot: `196 passed, 1 warning`.
 
 ## Evidence Map
 
@@ -29,7 +29,7 @@ Latest local regression snapshot: `194 passed, 1 warning`.
 | Retrieval baseline | [`rag-baseline.md`](rag-baseline.md), [`rag-baseline-results.json`](rag-baseline-results.json) | 10 samples, category hit rate 1.00, prohibited-claims hit rate 1.00, precision 0.75 | `.venv/bin/python scripts/eval_marketing_context.py --output docs/evidence/rag-baseline-results.json` |
 | Hybrid vector retrieval | [`pgvector-retrieval.md`](pgvector-retrieval.md), [`pgvector-baseline-results.json`](pgvector-baseline-results.json), [`pgvector-db-smoke-results.json`](pgvector-db-smoke-results.json) | pgvector hybrid preserves hit rate 1.00 and improves precision to 1.00 on the current 10-sample set | `.venv/bin/python scripts/eval_pgvector_marketing_context.py --output docs/evidence/pgvector-baseline-results.json` |
 | Async job reliability | [`generation-jobs.md`](generation-jobs.md) | Redis/RQ queue, redacted Postgres history, job status API, Streamlit polling/history UX | See focused test and smoke commands in the evidence note |
-| AgentOps observability | [`agentops-phoenix.md`](agentops-phoenix.md), [`assets/phoenix-workflow-trace.png`](assets/phoenix-workflow-trace.png), [`assets/phoenix-trace-detail.png`](assets/phoenix-trace-detail.png) | OTEL console smoke, Phoenix OTLP trace export, UI screenshots, trace count verification | `WORKFLOW_TRACING=otel WORKFLOW_TRACE_EXPORT=console .venv/bin/python scripts/otel_trace_smoke.py` |
+| AgentOps observability | [`agentops-phoenix.md`](agentops-phoenix.md), [`assets/phoenix-workflow-trace.png`](assets/phoenix-workflow-trace.png), [`assets/phoenix-trace-detail.png`](assets/phoenix-trace-detail.png) | OTEL console smoke, Phoenix OTLP trace export, UI screenshots, trace count verification, trace/log privacy allowlist tests | `WORKFLOW_TRACING=otel WORKFLOW_TRACE_EXPORT=console .venv/bin/python scripts/otel_trace_smoke.py` |
 | Workflow eval and failure report | [`workflow-eval-summary.json`](workflow-eval-summary.json) | 3 demo samples, average score 1.00, failure_count 0, failure_cases present | `.venv/bin/python scripts/eval_demo_samples.py --output docs/evidence/workflow-eval-summary.json` |
 | Demo gallery | [`demo-gallery.md`](demo-gallery.md), [`demo-gallery-manifest.json`](demo-gallery-manifest.json), [`assets/demo-gallery/`](assets/demo-gallery/) | 3 deterministic reviewer-visible banners generated from the local workflow with Korean overlay rendering | `.venv/bin/python scripts/build_demo_gallery.py --date 2026-06-16` |
 | Streamlit reviewer flow | [`streamlit-reviewer-flow.md`](streamlit-reviewer-flow.md), [`assets/streamlit-reviewer-input.png`](assets/streamlit-reviewer-input.png), [`assets/streamlit-reviewer-result.png`](assets/streamlit-reviewer-result.png) | Local reviewer flow shows input form, revision request, generated banner, revised copy, and download action | See the API, Streamlit, and Playwright capture steps in the evidence note |
@@ -56,6 +56,8 @@ Latest local regression snapshot: `194 passed, 1 warning`.
 - Raw customer photos are excluded from durable evidence artifacts.
 - Raw prompts, raw model responses, generated copy text, and secrets are not
   stored in job history or eval summaries.
+- Workflow trace/log and image-failure usage log surfaces store reference
+  filenames, image paths, and log paths as `has_*` plus `*_sha256` fields.
 - OpenAI product-analysis evidence stores only redacted checklist counts,
   booleans, latency, backend/model id, and pass/fail fields.
 - AgentOps/Phoenix evidence is scoped to local/demo workflows. Production use
@@ -65,5 +67,5 @@ Latest local regression snapshot: `194 passed, 1 warning`.
 
 - Run the strengthened provider-quality gate with `gpt-image-2` and
   `quality=medium` only if a second paid image-edit iteration is approved.
-- Add trace/log allowlist tests, async reliability checks, and a larger
-  product-like eval pack before making broader production-quality claims.
+- Add async reliability checks and a larger product-like eval pack before making
+  broader production-quality claims.

@@ -1,5 +1,9 @@
+import base64
+import io
 import json
 from pathlib import Path
+
+from PIL import Image
 
 from dessert_ad_studio.backends.base import CopyResult, ImageResult
 from dessert_ad_studio.backends.mock import MockAdBackend
@@ -24,6 +28,22 @@ def request_payload() -> GenerationRequest:
         template_hint="minimal_premium",
         price_text="5,500원",
         user_constraints="깔끔한 프리미엄 느낌",
+    )
+
+
+def sensitive_request_payload() -> GenerationRequest:
+    buffer = io.BytesIO()
+    Image.new("RGB", (16, 16), color=(120, 200, 160)).save(buffer, format="PNG")
+    return GenerationRequest(
+        campaign_purpose="new_menu",
+        product_name="비공개 말차 푸딩",
+        tone="clean",
+        template_hint="minimal_premium",
+        price_text="5,500원",
+        user_constraints="VIP 고객에게만 보일 문구",
+        revision_request="비공개 할인 강조",
+        reference_image_b64=base64.b64encode(buffer.getvalue()).decode("ascii"),
+        reference_image_name="secret-reference.png",
     )
 
 
@@ -53,7 +73,8 @@ def test_workflow_returns_generation_response_and_trace(tmp_path: Path) -> None:
         "generate_image",
         "write_log",
     ]
-    assert output.trace[-1].metadata["log_path"].endswith("generations.jsonl")
+    assert output.trace[-1].metadata["has_log_path"] is True
+    assert len(output.trace[-1].metadata["log_path_sha256"]) == 64
 
 
 class FakeTemplateScorer:
@@ -324,4 +345,45 @@ def test_workflow_emits_openinference_spans(tmp_path: Path) -> None:
     ]
     assert records[6].attributes["copy_backend"] == "fake-copy"
     assert records[7].attributes["image_backend"] == "fake-image"
-    assert records[-1].attributes["log_path"].endswith("generations.jsonl")
+    assert records[-1].attributes["has_log_path"] is True
+    assert len(records[-1].attributes["log_path_sha256"]) == 64
+
+
+def test_workflow_trace_and_log_use_privacy_allowlist(tmp_path: Path) -> None:
+    tracer = InMemoryWorkflowTracer()
+    log_path = tmp_path / "generations.jsonl"
+    deps = GenerationWorkflowDependencies(
+        template_scorer=FakeTemplateScorer(),
+        copy_backend=FakeCopyBackend(),
+        image_backend=FakeImageBackend(),
+        product_analyzer=FakeProductAnalyzer(),
+        log_path=log_path,
+        workflow_tracer=tracer,
+    )
+
+    output = run_generation_workflow(sensitive_request_payload(), deps)
+    log_record = json.loads(log_path.read_text(encoding="utf-8"))
+    persistent_payload = {
+        "workflow_trace": [entry.metadata for entry in output.trace],
+        "span_attributes": [record.attributes for record in tracer.records()],
+        "log_record": log_record,
+    }
+    serialized = json.dumps(persistent_payload, ensure_ascii=False)
+
+    for raw_value in [
+        "비공개 말차 푸딩",
+        "VIP 고객에게만 보일 문구",
+        "비공개 할인 강조",
+        "secret-reference.png",
+        "/tmp/fake-ad.png",
+        "헤드라인",
+        "본문",
+    ]:
+        assert raw_value not in serialized
+    assert '"reference_image_name":' not in serialized
+    assert '"image_path":' not in serialized
+    assert "prompt_summary" not in serialized
+    assert log_record["has_reference_image_name"] is True
+    assert len(log_record["reference_image_name_sha256"]) == 64
+    assert log_record["has_image_path"] is True
+    assert len(log_record["image_path_sha256"]) == 64

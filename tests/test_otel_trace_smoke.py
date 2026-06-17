@@ -28,6 +28,9 @@ def test_otel_trace_smoke_runs_with_console_export(tmp_path) -> None:
     assert len(stdout_lines) == 1
     assert "trace_smoke=passed" in stdout_lines[0]
     assert "export=console" in stdout_lines[0]
+    assert " image_path=" not in stdout_lines[0]
+    assert "has_image_path=True" in stdout_lines[0]
+    assert "image_path_sha256=" in stdout_lines[0]
 
 
 def test_otel_trace_smoke_fails_for_unreachable_otlp_endpoint(tmp_path) -> None:

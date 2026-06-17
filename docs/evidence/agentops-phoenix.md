@@ -22,6 +22,31 @@ covered by `scripts/eval_demo_samples.py`.
 
 ## Local Verification Completed
 
+### Trace/Log Privacy Allowlist Gate
+
+Command:
+
+```bash
+.venv/bin/pytest \
+  tests/test_workflow.py::test_workflow_trace_and_log_use_privacy_allowlist \
+  tests/test_api.py::test_image_failure_log_uses_privacy_allowlist \
+  tests/test_otel_trace_smoke.py::test_otel_trace_smoke_runs_with_console_export \
+  -q
+```
+
+Result:
+
+```text
+3 passed in 63.21s
+```
+
+This gate verifies that persistent workflow trace/log surfaces and image-failure
+usage logs do not store raw product names, user constraints, revision requests,
+reference filenames, generated copy text, raw prompt summaries, or raw image
+paths. The durable fields use `has_*` booleans and `*_sha256` identifiers
+instead. Production trace rollout still requires a deployment-specific
+attribute review before customer traffic is stored in an external trace backend.
+
 ### Compose Configuration
 
 Command:
@@ -47,7 +72,7 @@ WORKFLOW_TRACING=otel WORKFLOW_TRACE_EXPORT=console .venv/bin/python scripts/ote
 Result:
 
 ```text
-trace_smoke=passed export=console endpoint=local-console steps=7 image_path=outputs/otel-smoke/말차_푸딩_mock_ad.png
+trace_smoke=passed export=console endpoint=local-console steps=8 has_image_path=True image_path_sha256=7c253420001fbf660d27cef06ae4080dd20a4d8b8662d2707370189877f06f83
 ```
 
 ### Deterministic Eval Gate
@@ -104,7 +129,7 @@ OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:6006/v1/traces \
 Result:
 
 ```text
-trace_smoke=passed export=otlp endpoint=http://localhost:6006/v1/traces steps=7 image_path=outputs/otel-smoke/말차_푸딩_mock_ad.png
+trace_smoke=passed export=otlp endpoint=http://localhost:6006/v1/traces steps=8 has_image_path=True image_path_sha256=<sha256>
 ```
 
 Phoenix GraphQL verification:

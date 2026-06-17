@@ -578,7 +578,78 @@ def test_image_failure_still_logs_spent_copy_usage(
         "total_tokens": 33,
     }
     assert record["error"] == "이미지 생성 API 호출에 실패했습니다: boom"
-    assert record["image_path"] is None
+    assert record["has_image_path"] is False
+    assert record["image_path_sha256"] is None
+    assert record["image_usage"] is None
+
+
+def test_image_failure_log_uses_privacy_allowlist(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import api.main as api_main
+    from dessert_ad_studio.backends.base import AdBackendError, CopyResult
+    from dessert_ad_studio.schemas import CopyOption
+
+    log_path = tmp_path / "generations.jsonl"
+    monkeypatch.setenv("GENERATION_LOG_PATH", str(log_path))
+
+    class FakeCopyBackend:
+        name = "fake-copy"
+        model_id = "fake-copy-model"
+
+        def generate_copy(self, request, **kwargs):
+            return CopyResult(
+                options=[
+                    CopyOption(
+                        headline="비공개 헤드라인",
+                        body="비공개 본문",
+                        call_to_action="구매하기",
+                    )
+                ],
+                usage={"total_tokens": 33},
+            )
+
+    class FailingImageBackend:
+        name = "failing-image"
+        model_id = "failing-image-model"
+        supports_reference_image = True
+
+        def generate_image(self, request, image_prompt, reference_image=None):
+            raise AdBackendError("이미지 생성 API 호출에 실패했습니다: boom")
+
+    monkeypatch.setattr(api_main, "_copy_backend_for", lambda name, output_dir: FakeCopyBackend())
+    monkeypatch.setattr(
+        api_main, "_image_backend_for", lambda name, output_dir: FailingImageBackend()
+    )
+    payload = {
+        **base_payload(),
+        "product_name": "비공개 말차 푸딩",
+        "user_constraints": "VIP 고객에게만 보일 문구",
+        "revision_request": "비공개 할인 강조",
+        "reference_image_b64": tiny_png_b64(),
+        "reference_image_name": "secret-reference.png",
+    }
+
+    response = client.post("/generate", json=payload)
+
+    assert response.status_code == 503
+    record = json.loads(log_path.read_text(encoding="utf-8").splitlines()[-1])
+    serialized = json.dumps(record, ensure_ascii=False)
+    for raw_value in [
+        "비공개 말차 푸딩",
+        "VIP 고객에게만 보일 문구",
+        "비공개 할인 강조",
+        "secret-reference.png",
+        "비공개 헤드라인",
+        "비공개 본문",
+    ]:
+        assert raw_value not in serialized
+    assert "reference_image_name" not in record
+    assert "image_path" not in record
+    assert record["has_reference_image_name"] is True
+    assert len(record["reference_image_name_sha256"]) == 64
+    assert record["has_image_path"] is False
+    assert record["image_path_sha256"] is None
     assert record["image_usage"] is None
 
 
