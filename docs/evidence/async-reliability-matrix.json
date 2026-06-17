@@ -1,0 +1,60 @@
+{
+  "date": "2026-06-17",
+  "scope": "generation job API, inline deterministic adapter, worker startup, and K8s async smoke evidence",
+  "command": ".venv/bin/pytest tests/test_async_reliability.py tests/test_generation_jobs.py::test_generation_worker_waits_for_redis_until_ready -q",
+  "result": "5 passed, 1 warning",
+  "cases": [
+    {
+      "case": "burst_submit",
+      "status": "passed",
+      "evidence": "5 inline jobs returned succeeded status and redacted summaries"
+    },
+    {
+      "case": "workflow_failure_state",
+      "status": "passed",
+      "evidence": "accepted inline job moved to failed with response_summary null and user-facing error_detail"
+    },
+    {
+      "case": "queue_enqueue_failure",
+      "status": "passed",
+      "evidence": "queue failure returned HTTP 503 and marked the created job failed"
+    },
+    {
+      "case": "duplicate_polling",
+      "status": "passed",
+      "evidence": "two GET calls for the same job status returned identical payloads"
+    },
+    {
+      "case": "worker_startup_before_redis",
+      "status": "passed",
+      "evidence": "worker waits for Redis readiness before constructing the RQ Worker"
+    },
+    {
+      "case": "k8s_async_path",
+      "status": "passed",
+      "evidence": "kind async overlay smoke passed Redis/RQ worker plus Postgres history"
+    },
+    {
+      "case": "reference_image_async_payload",
+      "status": "explicit_non_support",
+      "evidence": "POST /generation-jobs rejects reference_image_b64 until object storage and retention policy are selected"
+    },
+    {
+      "case": "cancel_endpoint",
+      "status": "not_supported",
+      "evidence": "no cancellation API is claimed yet"
+    },
+    {
+      "case": "retry_timeout_policy",
+      "status": "pending",
+      "evidence": "retry, timeout, and dead-letter policy still need live worker failure injection"
+    }
+  ],
+  "privacy_boundary": {
+    "raw_product_name_committed": false,
+    "raw_user_constraints_committed": false,
+    "raw_generated_copy_committed": false,
+    "raw_prompt_committed": false,
+    "raw_image_path_committed": false
+  }
+}

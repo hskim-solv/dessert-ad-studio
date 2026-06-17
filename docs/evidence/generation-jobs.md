@@ -203,6 +203,7 @@ Verified on 2026-06-15 and 2026-06-16:
 | Postgres history smoke | `queued -> running -> succeeded`, loaded from `generation_jobs` |
 | Full Docker API/worker smoke | passed through containerized API + worker with Triton scorer, Redis/RQ queue, and Postgres history |
 | Kubernetes async overlay smoke | passed on `kind-dessert-ad-studio`: API ready with `generation_queue_backend=rq`, `generation_history_backend=postgres`, worker/Redis/pgvector pods ready, and `scripts/generation_job_smoke.py` returned `status=succeeded` |
+| Async reliability matrix | burst submit, workflow failure state, queue enqueue failure, duplicate polling, and worker startup wait passed; retry/timeout/cancel remain pending |
 
 The inline test path proves the API contract and redaction contract without
 needing Redis/Postgres fixtures. The Redis/RQ smoke proves the queue adapter and
