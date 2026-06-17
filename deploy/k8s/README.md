@@ -92,6 +92,18 @@ python scripts/api_smoke.py --base-url http://127.0.0.1:8000 --skip-generate
 
 The smoke uses `--skip-generate` here because the Triton model PVC must be populated before full generation is expected to pass.
 
+Fail-closed local/test context smoke:
+
+```bash
+.venv/bin/python scripts/k8s_live_smoke.py \
+  --context kind-dessert-ad-studio \
+  --kustomize-path deploy/k8s/base \
+  --namespace dessert-ad-studio
+```
+
+The script refuses unknown Kubernetes contexts unless `--allow-unsafe-context`
+is passed intentionally.
+
 For AgentOps UI evidence:
 
 ```bash

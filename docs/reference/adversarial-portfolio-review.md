@@ -37,7 +37,7 @@ Scope limits:
 | Priority | Workstream | Completion evidence |
 |---|---|---|
 | P0 | Reframe portfolio claims around verified scope. | README and final target distinguish verified, in-progress, and not-yet-proven items. |
-| P1 | Live Kubernetes deployability proof. | `kind`/cluster apply, pod readiness, ingress/port-forward smoke, full `/generate` path after Triton model sync, and documented rollback/cleanup. |
+| P1 | Live Kubernetes deployability proof. | Fail-closed live smoke automation is added in `scripts/k8s_live_smoke.py`; remaining proof is an actual `kind`/cluster apply, pod readiness, ingress/port-forward smoke, full `/generate` path after Triton model sync, and documented rollback/cleanup. |
 | P2 | Kubernetes async operations alignment. | Worker, Redis, and Postgres overlay or explicit documentation that K8s base is a sync API skeleton. |
 | P3 | Provider-quality image-edit gate. | Approved paid `gpt-image-2` + `quality=medium` run over 3 public samples with ROI preservation, text-contamination, latency, and redaction metrics. |
 | P4 | Real evaluation pack. | 30+ scenario matrix, retrieval grounding checks, human review rubric, failure taxonomy, p95 latency/cost, and reproducible summary JSON. |

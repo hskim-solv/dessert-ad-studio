@@ -297,7 +297,7 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Add live Kubernetes deployability proof: `kind` or cluster apply, pod readiness, ingress or port-forward smoke, Triton model sync, and full `/generate` path.
+1. Run `scripts/k8s_live_smoke.py` on a local/test Kubernetes context, or add a disposable `kind` bootstrap path if this machine needs to create the context.
 2. Align Kubernetes with async operations by adding a worker/Redis/Postgres overlay or explicitly keeping K8s as a sync API skeleton.
 3. Run the strengthened `gpt-image-2` + `quality=medium` provider-quality image-edit gate only if a second paid iteration is approved.
 4. Add a 30+ case real evaluation pack with retrieval grounding, visual review rubric, failure taxonomy, latency p95, and cost summary.

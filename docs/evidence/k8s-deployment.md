@@ -222,6 +222,41 @@ trace_smoke=passed export=console endpoint=local-console steps=7
 - Production hardening such as TLS, image registry pinning, auth, network policy,
   and secret management is intentionally deferred.
 
+## Live Smoke Path
+
+Added on 2026-06-17:
+
+```bash
+.venv/bin/python scripts/k8s_live_smoke.py \
+  --context kind-dessert-ad-studio \
+  --kustomize-path deploy/k8s/base \
+  --namespace dessert-ad-studio
+```
+
+The script is intentionally fail-closed. By default it refuses to apply
+manifests unless the active context looks local/test-scoped:
+
+- `kind-*`
+- `minikube`
+- `docker-desktop`
+- `rancher-desktop`
+- `k3d-*`
+
+When a safe context is available, the script applies the base Kustomize stack,
+waits for `deploy/api`, `deploy/app`, and `deploy/triton`, port-forwards
+`svc/api`, runs `scripts/api_smoke.py`, and writes a redacted summary to
+`docs/evidence/k8s-live-smoke-summary.json`.
+
+Current machine status on 2026-06-17:
+
+- `kubectl` is installed.
+- No current Kubernetes context is configured.
+- Docker CLI is installed, but no Docker server is currently available.
+- `kind`, `minikube`, and `k3d` are not installed.
+
+Therefore this repository now has the live smoke automation and guardrail, but
+the actual live cluster proof is still pending a local/test Kubernetes context.
+
 ## Reproduction Commands
 
 Build local images:
