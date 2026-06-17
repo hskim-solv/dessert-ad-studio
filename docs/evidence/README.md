@@ -20,7 +20,7 @@ deployment readiness, privacy boundaries, and model-backed product analysis.
 docker compose config -q
 ```
 
-Latest local regression snapshot: `274 passed`.
+Latest local regression snapshot: `275 passed`.
 
 ## Evidence Map
 
@@ -34,6 +34,7 @@ Latest local regression snapshot: `274 passed`.
 | Agentic RAG SSE/WebSocket streaming and replay | [`agentic-rag-streaming.md`](agentic-rag-streaming.md), [`agentic-rag-stream-summary.json`](agentic-rag-stream-summary.json), [`agentic-rag-websocket-summary.json`](agentic-rag-websocket-summary.json) | Local FastAPI SSE and WebSocket streams passed: async routes, `text/event-stream`, JSON WebSocket messages, 9 events/messages, durable `agr-*` run id, SQLite replay endpoint, 9 replay checkpoints, node progress through local tool suite and mock worker, paid-provider approval route tests, redacted event/replay payloads | `.venv/bin/python scripts/agentic_rag_stream_smoke.py --date 2026-06-17 --output docs/evidence/agentic-rag-stream-summary.json` |
 | Agentic RAG HITL approval | [`agentic-rag-approval.md`](agentic-rag-approval.md), [`agentic-rag-approval-summary.json`](agentic-rag-approval-summary.json) | Local FastAPI approval/resume first gate passed: paid-provider tripwire routes to `wait_for_human_approval`, `POST /agentic-rag/runs/{run_id}/approval` records an approved reviewer decision with redacted reviewer/comment hashes, resumes the local mock worker through same-process ephemeral context, returns `succeeded/completed`, keeps raw inputs absent, and makes no persistent audit retention claim | `.venv/bin/python scripts/agentic_rag_approval_smoke.py --date 2026-06-17 --output docs/evidence/agentic-rag-approval-summary.json` |
 | Agentic RAG reviewer approval UI | [`agentic-rag-reviewer-ui.md`](agentic-rag-reviewer-ui.md), [`agentic-rag-reviewer-ui-summary.json`](agentic-rag-reviewer-ui-summary.json) | Local Streamlit approval UI first gate passed: session key `agentic_rag_runs`, replay-backed pending run, approval decision and post-approval worker status merged into UI state with redacted reviewer/comment hashes, no raw inputs, and no paid API calls. Durable cross-process resume and production audit retention remain pending. | `.venv/bin/python scripts/agentic_rag_reviewer_ui_smoke.py --date 2026-06-17 --output docs/evidence/agentic-rag-reviewer-ui-summary.json` |
+| Agentic RAG retention boundary | [`agentic-rag-retention-policy.md`](agentic-rag-retention-policy.md), [`agentic-rag-retention-policy-summary.json`](agentic-rag-retention-policy-summary.json), [`../adr/0018-agentic-rag-retention-boundary.md`](../adr/0018-agentic-rag-retention-boundary.md) | Policy gate passed: redacted replay with same-process ephemeral raw context is adopted; SQLite replay, approval metadata, resume status, and traces disallow raw inputs; durable raw request storage, cross-process resume store, production approval audit retention, and external trace payload retention require explicit user decision | `.venv/bin/python scripts/agentic_rag_retention_policy_smoke.py --date 2026-06-17 --output docs/evidence/agentic-rag-retention-policy-summary.json` |
 | Agentic RAG graph trace | [`agentic-rag-trace.md`](agentic-rag-trace.md), [`agentic-rag-trace-summary.json`](agentic-rag-trace-summary.json) | Local OpenInference trace gate passed: 7 LangGraph node spans including `run_tool_suite`, AGENT/TOOL/RETRIEVER/CHAIN/GUARDRAIL span kinds, API stream tracer wiring, redacted attributes only | `.venv/bin/python scripts/agentic_rag_trace_smoke.py --date 2026-06-17 --output docs/evidence/agentic-rag-trace-summary.json` |
 | Agentic RAG run metrics | [`agentic-rag-run-metrics.md`](agentic-rag-run-metrics.md), [`agentic-rag-run-metrics-summary.json`](agentic-rag-run-metrics-summary.json) | Local run-metrics gate passed: 7 graph-node latency spans, 0 paid API calls, explicit 0 mock tokens/cost, 7 planned tools, 3 successful local tool results, deterministic failed-worker route with 1 retry and `inspect_failed_run`, redacted summary artifact | `.venv/bin/python scripts/agentic_rag_run_metrics_smoke.py --date 2026-06-17 --output docs/evidence/agentic-rag-run-metrics-summary.json` |
 | Agentic RAG local tool suite | [`agentic-rag-tools.md`](agentic-rag-tools.md), [`agentic-rag-tools-summary.json`](agentic-rag-tools-summary.json), [`agentic-rag-mcp-server-summary.json`](agentic-rag-mcp-server-summary.json), [`../adr/0017-agentic-rag-tool-suite.md`](../adr/0017-agentic-rag-tool-suite.md) | Local tool-suite first gate passed: planned tools cover document retrieval, web search, SQL query, internal API, citation builder, guardrail check, and generation workflow; web search uses local snapshot, SQL uses allowlisted in-memory SQLite, internal API uses in-process policy preview, FastMCP package import/tool-call smoke passed with `mcp` 1.28.0 | `.venv/bin/python scripts/agentic_rag_tools_smoke.py --date 2026-06-17 --output docs/evidence/agentic-rag-tools-summary.json` |
@@ -75,6 +76,7 @@ Latest local regression snapshot: `274 passed`.
 | Agent team operating model | [`docs/adr/0015-agent-team-operating-model.md`](../adr/0015-agent-team-operating-model.md) |
 | Agentic RAG eval runtime | [`docs/adr/0016-agentic-rag-eval-runtime.md`](../adr/0016-agentic-rag-eval-runtime.md) |
 | Agentic RAG tool suite | [`docs/adr/0017-agentic-rag-tool-suite.md`](../adr/0017-agentic-rag-tool-suite.md) |
+| Agentic RAG retention boundary | [`docs/adr/0018-agentic-rag-retention-boundary.md`](../adr/0018-agentic-rag-retention-boundary.md) |
 
 ## Privacy And Storage Boundary
 
@@ -92,9 +94,9 @@ Latest local regression snapshot: `274 passed`.
 
 - Extend the M8/M10 Agentic RAG first gates from local
   graph/tool-suite/SSE/WebSocket/SQLite/replay/trace/reviewer-approval/resume
-  proof to production stream replay retention policy,
-  Postgres or production storage policy if needed, and deployment-specific trace
-  retention policy.
+  proof plus the retention boundary policy to durable cross-process resume,
+  Postgres or production storage if approved, and deployment-specific external
+  trace retention evidence.
 - Do not claim provider-quality image editing from the paid OpenAI gate; the
   latest `gpt-image-2`/`medium` run failed latency, text-contamination, and cost
   checks.

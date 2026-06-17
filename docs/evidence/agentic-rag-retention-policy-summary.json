@@ -1,0 +1,42 @@
+{
+  "agentic_rag_retention_policy_smoke": "passed",
+  "scope": "policy_gate_no_runtime_retention_change",
+  "evidence_date": "2026-06-17",
+  "adr": "docs/adr/0018-agentic-rag-retention-boundary.md",
+  "decision": "redacted_replay_with_ephemeral_raw_context",
+  "replay_retention": {
+    "artifact": "local_sqlite_redacted_checkpoints",
+    "raw_inputs_allowed": false,
+    "default_storage": "outputs/agentic-rag-checkpoints/",
+    "committed_to_git": false,
+    "production_claim": "policy_defined_not_production_store"
+  },
+  "approval_retention": {
+    "persistent_audit_claim": false,
+    "stored_fields": [
+      "decision",
+      "reviewer_id_sha256",
+      "comment_sha256",
+      "approval_reasons",
+      "post_approval_worker_status"
+    ],
+    "raw_reviewer_inputs_allowed": false
+  },
+  "resume_retention": {
+    "same_process_ephemeral_context": true,
+    "durable_cross_process_resume": "pending_user_decision",
+    "raw_request_persistence_allowed": false
+  },
+  "trace_retention": {
+    "raw_model_inputs_allowed": false,
+    "external_trace_payload_review_required": true,
+    "production_trace_retention": "pending_deployment_policy"
+  },
+  "requires_user_decision_before": [
+    "durable_raw_request_storage",
+    "cross_process_resume_store",
+    "production_approval_audit_retention",
+    "external_trace_payload_retention"
+  ],
+  "raw_inputs_committed": false
+}
