@@ -3,8 +3,9 @@
 Date: 2026-06-17
 
 This evidence records the first local Agentic RAG golden eval and guardrail
-gate. It produces Ragas/promptfoo-compatible JSON fields without calling paid
-APIs. The same script is also run as a dedicated GitHub Actions CI step.
+gate. It produces Ragas-compatible deterministic proxy metrics and runs a real
+promptfoo package gate without calling paid APIs. Both gates run in GitHub
+Actions.
 
 Runtime adoption decision:
 
@@ -34,7 +35,8 @@ docs/adr/0016-agentic-rag-eval-runtime.md
 - tool allowlist and max tool-call budget checks
 - raw input redaction checks
 - GitHub Actions step: `Agentic RAG eval guardrail gate`
-- promptfoo package execution scaffold:
+- GitHub Actions step: `Agentic RAG promptfoo package gate`
+- promptfoo package execution:
   `evals/promptfoo/agentic-rag.yaml`
 - Ragas live gate direction: optional `eval` Python extra, paid/API-key gated
 
@@ -60,6 +62,8 @@ Current result:
 - tool budget: max tool calls `7`, no unexpected tools
 - raw inputs committed: `false`
 - CI gate: `.github/workflows/ci.yml` runs the same command on push/PR
+- promptfoo package gate: `1` passed, `0` failed, `0` errors, `9` assertions
+  passed, token usage `0`, cost `0`
 
 ## Reproduce
 
@@ -83,40 +87,44 @@ Focused tests:
 Offline promptfoo package path:
 
 ```bash
-npm install
+npm ci --no-audit --no-fund
 npm run eval:promptfoo
 ```
 
-Equivalent direct command:
+Bounded package smoke:
 
 ```bash
-npx promptfoo@0.121.17 eval -c evals/promptfoo/agentic-rag.yaml \
-  -o docs/evidence/agentic-rag-promptfoo-results.json
+.venv/bin/python scripts/agentic_rag_promptfoo_package_smoke.py \
+  --date 2026-06-17 \
+  --summary-output docs/evidence/agentic-rag-promptfoo-package-summary.json \
+  --results-output docs/evidence/agentic-rag-promptfoo-results.json \
+  --timeout-seconds 180
 ```
 
-When `promptfoo` is installed from `package.json`, the equivalent command is:
+The package smoke executes the equivalent promptfoo command:
 
 ```bash
-promptfoo eval -c evals/promptfoo/agentic-rag.yaml \
+PROMPTFOO_DISABLE_TELEMETRY=1 promptfoo eval \
+  -c evals/promptfoo/agentic-rag.yaml \
+  --no-cache --no-progress-bar --no-table \
   -o docs/evidence/agentic-rag-promptfoo-results.json
 ```
 
 The promptfoo provider executes:
 
 ```bash
-bash scripts/run_promptfoo_agentic_rag_provider.sh
+bash ../../scripts/run_promptfoo_agentic_rag_provider.sh
 ```
 
 Local package-runtime note:
 
-- `bash scripts/run_promptfoo_agentic_rag_provider.sh` produced valid redacted
-  JSON summary output. The wrapper uses `.venv/bin/python` when available and
-  falls back to `python3`/`python` for CI-like environments.
-- `npx promptfoo@0.121.17 eval -c evals/promptfoo/agentic-rag.yaml -o
-  /tmp/agentic-rag-promptfoo-results.json` was attempted on 2026-06-17 and
-  exceeded 150 seconds before completion during package/runtime startup. This is
-  why ADR 0016 keeps promptfoo as the next CI candidate rather than a proven CI
-  package-execution gate.
+- `bash ../../scripts/run_promptfoo_agentic_rag_provider.sh` runs correctly from
+  the promptfoo config base path. The wrapper resolves the repository root from
+  its own location and uses `.venv/bin/python` when available.
+- The first `npx promptfoo@0.121.17` attempt exceeded 150 seconds during
+  package startup. The fixed path uses `npm ci` plus the local
+  `node_modules/.bin/promptfoo` binary and completed locally within the bounded
+  smoke.
 
 Ragas live gate is intentionally not part of the default CI gate yet. Install
 the optional Python eval dependencies only for the paid semantic eval lane:
@@ -127,8 +135,6 @@ the optional Python eval dependencies only for the paid semantic eval lane:
 
 ## Limits
 
-This is not yet a full default-CI Ragas or promptfoo execution gate. ADR 0016
-selects offline promptfoo regression as the next package-execution gate and a
-paid/API-key-gated Ragas live gate for evaluator-LLM metrics. The current CI
-still runs the deterministic compatibility gate until promptfoo runtime and
-cache behavior are measured in CI.
+This is not yet a default-CI Ragas live execution gate. ADR 0016 keeps Ragas
+semantic evaluator metrics behind paid/API-key approval. The promptfoo package
+gate is now part of default CI and remains bounded to a local exec provider.

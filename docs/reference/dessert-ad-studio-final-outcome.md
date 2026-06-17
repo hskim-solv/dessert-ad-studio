@@ -162,14 +162,14 @@ Verified:
   1.28.0. Evidence is recorded in
   [`docs/evidence/agentic-rag-tools.md`](../evidence/agentic-rag-tools.md).
 - First Agentic RAG eval/guardrail gate: 13 local golden cases produce
-  Ragas/promptfoo-compatible JSON fields, deterministic faithfulness, answer
-  relevancy, context precision, and context recall proxy scores are `1.0`,
-  prompt-injection routes to HITL before worker execution, tool allowlist/budget
-  checks pass, raw inputs remain absent from artifacts, and the same script is
-  wired as a GitHub Actions CI step. Evidence is recorded in
+  Ragas-compatible deterministic metrics and a real promptfoo package gate.
+  Faithfulness, answer relevancy, context precision, and context recall proxy
+  scores are `1.0`; prompt-injection routes to HITL before worker execution;
+  tool allowlist/budget checks pass; raw inputs remain absent from artifacts;
+  and both the compatibility script and promptfoo package smoke are wired as
+  GitHub Actions CI steps. Evidence is recorded in
   [`docs/evidence/agentic-rag-eval-guardrail.md`](../evidence/agentic-rag-eval-guardrail.md).
-  ADR `0016-agentic-rag-eval-runtime` selects offline promptfoo package
-  execution as the next default-CI candidate and keeps Ragas live metrics behind
+  ADR `0016-agentic-rag-eval-runtime` keeps Ragas live metrics behind
   paid/API-key approval.
 
 Not yet proven:
@@ -182,12 +182,9 @@ Not yet proven:
 - Full production streaming. SSE, WebSocket, and local SQLite replay first gates are
   complete; bidirectional approval, production replay retention
   policy, and production stream trace integration remain pending.
-- Actual Ragas and promptfoo package execution in CI. ADR 0016 now selects the
-  runtime shape and adds the promptfoo config/provider scaffold, but default CI
-  still runs the compatibility gate. The first local `npx promptfoo@0.121.17`
-  package attempt exceeded 150 seconds before completion, so promptfoo
-  runtime/cache behavior must be fixed or bounded before CI promotion. Ragas
-  live metrics remain paid/API-key gated.
+- Actual Ragas live execution in CI. Promptfoo package execution is now bounded
+  and part of default CI, but evaluator-LLM Ragas live metrics remain
+  paid/API-key gated.
 - Live/production tool suite. Local web search, allowlisted SQLite SQL,
   in-process internal API, document retrieval, and local FastMCP package smoke
   are present; live web search, production SQL policy, and production MCP
@@ -282,7 +279,7 @@ flowchart LR
 | M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, Streamlit reviewer screenshots at `docs/evidence/streamlit-reviewer-flow.md`, real-sample preservation evidence at `docs/evidence/real-sample-preservation.md`, paid OpenAI image-edit failure evidence at `docs/evidence/openai-image-edit-preservation.md`, README links, reproducible command map. |
 | M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, live worker outage/restore smoke, explicit retry/timeout/cancel non-support, 30-scenario product-like eval, offline visual proxy gate, paid provider-quality failure evidence, provider-gate postmortem, one-sample canary CLI, first trace/log privacy allowlist gate, and first cost guard are complete. Next evidence should cover text/latency/cost remediation for the failed provider gate plus human/provider visual quality review. |
 | M8 Agentic RAG graph | Add the LangGraph control plane without discarding existing workflow evidence. | First gate complete: ADR 0012/0014/0017, `langgraph` and `langgraph-checkpoint-sqlite` dependencies, typed state schema, deterministic planner/tool-suite/retriever/citation/guardrail/worker/reflection/HITL/finalize nodes, conditional approval route, local mock worker route through the existing generation workflow, local web/SQL/internal API tool summaries, FastMCP import/tool-call smoke, in-memory and local SQLite checkpoint proof, redacted smoke summaries, focused tests, local FastAPI SSE wiring, local SQLite replay summary, local OpenInference graph-node trace proof, and local run metrics for latency/token/cost/tool success/failure plus failed-run analysis. Pending: live web search, production SQL policy, production MCP transport/auth, reviewer approval UI, Postgres or production storage policy if needed, production trace retention policy, and live provider token/cost telemetry. |
-| M9 Agentic RAG eval/guardrail gate | Prove answer/ad package faithfulness, citation quality, and tool safety. | First gate complete: 13-case local golden dataset, Ragas/promptfoo-compatible summary fields, deterministic faithfulness/answer relevancy/context precision/context recall proxy scores 1.00, prompt-injection HITL route, 7-tool allowlist/budget tests, redaction checks, fast-gate command, and GitHub Actions CI step. ADR 0016 complete: offline promptfoo package execution is selected as the next default-CI candidate, with Ragas live metrics behind paid/API-key approval. Pending: bound/fix promptfoo package runtime after the first local `npx` attempt exceeded 150 seconds; run Ragas live gate only after paid eval approval. |
+| M9 Agentic RAG eval/guardrail gate | Prove answer/ad package faithfulness, citation quality, and tool safety. | First gate complete: 13-case local golden dataset, Ragas-compatible deterministic summary fields, faithfulness/answer relevancy/context precision/context recall proxy scores 1.00, prompt-injection HITL route, 7-tool allowlist/budget tests, redaction checks, fast-gate command, real promptfoo package smoke, and GitHub Actions CI steps for both the compatibility script and promptfoo package gate. ADR 0016 keeps Ragas live metrics behind paid/API-key approval. Pending: run Ragas live gate only after paid eval approval. |
 | M10 Streaming and reviewer approval | Make long-running graph execution reviewable in real time. | First gate complete: ADR 0013, async FastAPI `POST /agentic-rag/runs/stream`, WebSocket `/agentic-rag/runs/ws`, SSE `text/event-stream`, 9 redacted node progress events/messages including local tool suite and worker completion, durable `agr-*` run id, local SQLite replay endpoint, and paid-provider approval route tests. Pending: reviewer approval UI, approval audit summary, bidirectional in-stream approval flow if required, production replay retention policy, and production graceful fallback states. |
 | M11 Cloud/demo packaging | Show deployability beyond local/kind evidence. | Pending: one selected AWS/GCP/Azure deployment path, architecture diagram update, demo video, and eval report. |
 
@@ -317,7 +314,7 @@ These decisions still need explicit selection before implementation:
 | Streaming protocol | Decided: SSE first, WebSocket only if bidirectional approval becomes necessary | See ADR 0013. Reevaluate if reviewer approval needs live client-to-server decisions inside a stream. |
 | Durable checkpointing | Decided: local SQLite first gate with `langgraph-checkpoint-sqlite` | See ADR 0014. Reevaluate for Postgres when multi-instance workers, approval audit retention, or cloud persistent storage become required. |
 | Agent team operating model | Decided: main writer plus read-only scouts by default; opt-in disjoint writer lanes for large milestones | See ADR 0015. Reevaluate if a milestone splits into 3+ independent implementation lanes. |
-| Agent eval stack | Decided: offline promptfoo regression first, optional Ragas live semantic gate | See ADR 0016. First local compatibility gate complete; promptfoo config/provider scaffold added. First `npx promptfoo@0.121.17` local attempt exceeded 150 seconds, so package execution is not yet proven; run Ragas only with paid eval approval. |
+| Agent eval stack | Decided: offline promptfoo regression first, optional Ragas live semantic gate | See ADR 0016. Local compatibility gate and real promptfoo package gate are complete and wired into CI; run Ragas only with paid eval approval. |
 | Agent tool suite | Decided: local deterministic tool suite first, FastMCP local smoke | See ADR 0017. Live web search, production SQL, and production MCP transport/auth require separate runtime/security evidence. |
 | Serving optimization lane | Keep Triton/ONNX proof | Add vLLM/TensorRT/SGLang only with a targeted benchmark and role-specific portfolio reason. |
 | MCP/A2A | MCP local smoke added as thin wrapper; A2A remains later | Promote MCP to served transport only after auth/runtime boundaries are defined. |

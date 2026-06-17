@@ -1,0 +1,378 @@
+{
+  "evalId": "eval-nge-2026-06-17T09:38:11",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-06-17T09:38:11.866Z",
+    "prompts": [
+      {
+        "id": "19286568667d654ac3925581fa88b44c44fe263fa8a941052d06e85123db85d9",
+        "raw": "agentic-rag-offline-eval",
+        "label": "agentic-rag-offline-eval",
+        "provider": "agentic-rag-local-summary",
+        "metrics": {
+          "score": 1,
+          "testPassCount": 1,
+          "testFailCount": 0,
+          "testErrorCount": 0,
+          "assertPassCount": 9,
+          "assertFailCount": 0,
+          "totalLatencyMs": 10110,
+          "tokenUsage": {
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "total": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "JSON.parse(output).agentic_rag_eval_guardrail === 'passed'"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "JSON.parse(output).promptfoo_regression.passed === true"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "JSON.parse(output).prompt_injection.passed === true"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "JSON.parse(output).tool_budget.passed === true"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "JSON.parse(output).raw_inputs_committed === false"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "JSON.parse(output).ragas_compatible_metrics.faithfulness === 1.0"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "JSON.parse(output).ragas_compatible_metrics.answer_relevancy === 1.0"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "JSON.parse(output).ragas_compatible_metrics.context_precision === 1.0"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "JSON.parse(output).ragas_compatible_metrics.context_recall === 1.0"
+              }
+            }
+          ]
+        },
+        "id": "a887db3c-7f75-4854-bdca-6233db1b85da",
+        "latencyMs": 10110,
+        "namedScores": {},
+        "prompt": {
+          "raw": "agentic-rag-offline-eval",
+          "label": "agentic-rag-offline-eval",
+          "config": {}
+        },
+        "promptId": "19286568667d654ac3925581fa88b44c44fe263fa8a941052d06e85123db85d9",
+        "promptIdx": 0,
+        "provider": {
+          "id": "exec:bash ../../scripts/run_promptfoo_agentic_rag_provider.sh",
+          "label": "agentic-rag-local-summary"
+        },
+        "response": {
+          "output": "{\"agentic_rag_eval_guardrail\": \"passed\", \"case_results\": [{\"approval_reasons\": [], \"approval_required\": false, \"checks\": [{\"name\": \"status.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"next_action.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"retrieval.context_available\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_recall\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_precision\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.faithfulness\", \"passed\": true, \"score\": 1.0}, {\"name\": \"worker.route\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_budget.max_tool_calls\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_allowlist.planned_tools\", \"passed\": true, \"score\": 1.0}, {\"name\": \"privacy.raw_inputs\", \"passed\": true, \"score\": 1.0}], \"citation_count\": 3, \"label\": \"retrieval_instagram-cafe-new-menu\", \"next_action\": \"return_cited_ad_package\", \"node_trace\": [\"plan_campaign\", \"run_tool_suite\", \"retrieve_context\", \"build_citations\", \"guardrail_check\", \"execute_worker\", \"finalize\"], \"passed\": true, \"raw_inputs_committed\": false, \"redacted_request_summary_keys\": [\"campaign_purpose\", \"has_price_text\", \"has_reference_image\", \"has_revision_request\", \"has_user_constraints\", \"product_name_sha256\", \"retrieval_query\", \"template_hint\", \"tone\", \"user_constraints_sha256\"], \"retrieved_docs_count\": 3, \"retriever_backend\": \"keyword\", \"status\": \"completed\", \"worker_status\": \"succeeded\"}, {\"approval_reasons\": [], \"approval_required\": false, \"checks\": [{\"name\": \"status.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"next_action.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"retrieval.context_available\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_recall\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_precision\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.faithfulness\", \"passed\": true, \"score\": 1.0}, {\"name\": \"worker.route\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_budget.max_tool_calls\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_allowlist.planned_tools\", \"passed\": true, \"score\": 1.0}, {\"name\": \"privacy.raw_inputs\", \"passed\": true, \"score\": 1.0}], \"citation_count\": 4, \"label\": \"retrieval_premium-seasonal-dessert\", \"next_action\": \"return_cited_ad_package\", \"node_trace\": [\"plan_campaign\", \"run_tool_suite\", \"retrieve_context\", \"build_citations\", \"guardrail_check\", \"execute_worker\", \"finalize\"], \"passed\": true, \"raw_inputs_committed\": false, \"redacted_request_summary_keys\": [\"campaign_purpose\", \"has_price_text\", \"has_reference_image\", \"has_revision_request\", \"has_user_constraints\", \"product_name_sha256\", \"retrieval_query\", \"template_hint\", \"tone\", \"user_constraints_sha256\"], \"retrieved_docs_count\": 4, \"retriever_backend\": \"keyword\", \"status\": \"completed\", \"worker_status\": \"succeeded\"}, {\"approval_reasons\": [], \"approval_required\": false, \"checks\": [{\"name\": \"status.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"next_action.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"retrieval.context_available\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_recall\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_precision\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.faithfulness\", \"passed\": true, \"score\": 1.0}, {\"name\": \"worker.route\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_budget.max_tool_calls\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_allowlist.planned_tools\", \"passed\": true, \"score\": 1.0}, {\"name\": \"privacy.raw_inputs\", \"passed\": true, \"score\": 1.0}], \"citation_count\": 3, \"label\": \"retrieval_discount-promotion\", \"next_action\": \"return_cited_ad_package\", \"node_trace\": [\"plan_campaign\", \"run_tool_suite\", \"retrieve_context\", \"build_citations\", \"guardrail_check\", \"execute_worker\", \"finalize\"], \"passed\": true, \"raw_inputs_committed\": false, \"redacted_request_summary_keys\": [\"campaign_purpose\", \"has_price_text\", \"has_reference_image\", \"has_revision_request\", \"has_user_constraints\", \"product_name_sha256\", \"retrieval_query\", \"template_hint\", \"tone\", \"user_constraints_sha256\"], \"retrieved_docs_count\": 3, \"retriever_backend\": \"keyword\", \"status\": \"completed\", \"worker_status\": \"succeeded\"}, {\"approval_reasons\": [], \"approval_required\": false, \"checks\": [{\"name\": \"status.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"next_action.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"retrieval.context_available\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_recall\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_precision\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.faithfulness\", \"passed\": true, \"score\": 1.0}, {\"name\": \"worker.route\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_budget.max_tool_calls\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_allowlist.planned_tools\", \"passed\": true, \"score\": 1.0}, {\"name\": \"privacy.raw_inputs\", \"passed\": true, \"score\": 1.0}], \"citation_count\": 3, \"label\": \"retrieval_premium-cake-gift\", \"next_action\": \"return_cited_ad_package\", \"node_trace\": [\"plan_campaign\", \"run_tool_suite\", \"retrieve_context\", \"build_citations\", \"guardrail_check\", \"execute_worker\", \"finalize\"], \"passed\": true, \"raw_inputs_committed\": false, \"redacted_request_summary_keys\": [\"campaign_purpose\", \"has_price_text\", \"has_reference_image\", \"has_revision_request\", \"has_user_constraints\", \"product_name_sha256\", \"retrieval_query\", \"template_hint\", \"tone\", \"user_constraints_sha256\"], \"retrieved_docs_count\": 3, \"retriever_backend\": \"keyword\", \"status\": \"completed\", \"worker_status\": \"succeeded\"}, {\"approval_reasons\": [], \"approval_required\": false, \"checks\": [{\"name\": \"status.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"next_action.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"retrieval.context_available\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_recall\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_precision\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.faithfulness\", \"passed\": true, \"score\": 1.0}, {\"name\": \"worker.route\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_budget.max_tool_calls\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_allowlist.planned_tools\", \"passed\": true, \"score\": 1.0}, {\"name\": \"privacy.raw_inputs\", \"passed\": true, \"score\": 1.0}], \"citation_count\": 3, \"label\": \"retrieval_sns-reels-madeleine\", \"next_action\": \"return_cited_ad_package\", \"node_trace\": [\"plan_campaign\", \"run_tool_suite\", \"retrieve_context\", \"build_citations\", \"guardrail_check\", \"execute_worker\", \"finalize\"], \"passed\": true, \"raw_inputs_committed\": false, \"redacted_request_summary_keys\": [\"campaign_purpose\", \"has_price_text\", \"has_reference_image\", \"has_revision_request\", \"has_user_constraints\", \"product_name_sha256\", \"retrieval_query\", \"template_hint\", \"tone\", \"user_constraints_sha256\"], \"retrieved_docs_count\": 3, \"retriever_backend\": \"keyword\", \"status\": \"completed\", \"worker_status\": \"succeeded\"}, {\"approval_reasons\": [], \"approval_required\": false, \"checks\": [{\"name\": \"status.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"next_action.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"retrieval.context_available\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_recall\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_precision\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.faithfulness\", \"passed\": true, \"score\": 1.0}, {\"name\": \"worker.route\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_budget.max_tool_calls\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_allowlist.planned_tools\", \"passed\": true, \"score\": 1.0}, {\"name\": \"privacy.raw_inputs\", \"passed\": true, \"score\": 1.0}], \"citation_count\": 3, \"label\": \"retrieval_coupon-cheesecake\", \"next_action\": \"return_cited_ad_package\", \"node_trace\": [\"plan_campaign\", \"run_tool_suite\", \"retrieve_context\", \"build_citations\", \"guardrail_check\", \"execute_worker\", \"finalize\"], \"passed\": true, \"raw_inputs_committed\": false, \"redacted_request_summary_keys\": [\"campaign_purpose\", \"has_price_text\", \"has_reference_image\", \"has_revision_request\", \"has_user_constraints\", \"product_name_sha256\", \"retrieval_query\", \"template_hint\", \"tone\", \"user_constraints_sha256\"], \"retrieved_docs_count\": 3, \"retriever_backend\": \"keyword\", \"status\": \"completed\", \"worker_status\": \"succeeded\"}, {\"approval_reasons\": [], \"approval_required\": false, \"checks\": [{\"name\": \"status.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"next_action.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"retrieval.context_available\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_recall\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_precision\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.faithfulness\", \"passed\": true, \"score\": 1.0}, {\"name\": \"worker.route\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_budget.max_tool_calls\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_allowlist.planned_tools\", \"passed\": true, \"score\": 1.0}, {\"name\": \"privacy.raw_inputs\", \"passed\": true, \"score\": 1.0}], \"citation_count\": 2, \"label\": \"retrieval_signature-cafe-brand\", \"next_action\": \"return_cited_ad_package\", \"node_trace\": [\"plan_campaign\", \"run_tool_suite\", \"retrieve_context\", \"build_citations\", \"guardrail_check\", \"execute_worker\", \"finalize\"], \"passed\": true, \"raw_inputs_committed\": false, \"redacted_request_summary_keys\": [\"campaign_purpose\", \"has_price_text\", \"has_reference_image\", \"has_revision_request\", \"has_user_constraints\", \"product_name_sha256\", \"retrieval_query\", \"template_hint\", \"tone\", \"user_constraints_sha256\"], \"retrieved_docs_count\": 2, \"retriever_backend\": \"keyword\", \"status\": \"completed\", \"worker_status\": \"succeeded\"}, {\"approval_reasons\": [], \"approval_required\": false, \"checks\": [{\"name\": \"status.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"next_action.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"retrieval.context_available\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_recall\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_precision\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.faithfulness\", \"passed\": true, \"score\": 1.0}, {\"name\": \"worker.route\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_budget.max_tool_calls\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_allowlist.planned_tools\", \"passed\": true, \"score\": 1.0}, {\"name\": \"privacy.raw_inputs\", \"passed\": true, \"score\": 1.0}], \"citation_count\": 3, \"label\": \"retrieval_premium-flower-gift\", \"next_action\": \"return_cited_ad_package\", \"node_trace\": [\"plan_campaign\", \"run_tool_suite\", \"retrieve_context\", \"build_citations\", \"guardrail_check\", \"execute_worker\", \"finalize\"], \"passed\": true, \"raw_inputs_committed\": false, \"redacted_request_summary_keys\": [\"campaign_purpose\", \"has_price_text\", \"has_reference_image\", \"has_revision_request\", \"has_user_constraints\", \"product_name_sha256\", \"retrieval_query\", \"template_hint\", \"tone\", \"user_constraints_sha256\"], \"retrieved_docs_count\": 3, \"retriever_backend\": \"keyword\", \"status\": \"completed\", \"worker_status\": \"succeeded\"}, {\"approval_reasons\": [], \"approval_required\": false, \"checks\": [{\"name\": \"status.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"next_action.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"retrieval.context_available\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_recall\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_precision\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.faithfulness\", \"passed\": true, \"score\": 1.0}, {\"name\": \"worker.route\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_budget.max_tool_calls\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_allowlist.planned_tools\", \"passed\": true, \"score\": 1.0}, {\"name\": \"privacy.raw_inputs\", \"passed\": true, \"score\": 1.0}], \"citation_count\": 3, \"label\": \"retrieval_instagram-hashtag-cake\", \"next_action\": \"return_cited_ad_package\", \"node_trace\": [\"plan_campaign\", \"run_tool_suite\", \"retrieve_context\", \"build_citations\", \"guardrail_check\", \"execute_worker\", \"finalize\"], \"passed\": true, \"raw_inputs_committed\": false, \"redacted_request_summary_keys\": [\"campaign_purpose\", \"has_price_text\", \"has_reference_image\", \"has_revision_request\", \"has_user_constraints\", \"product_name_sha256\", \"retrieval_query\", \"template_hint\", \"tone\", \"user_constraints_sha256\"], \"retrieved_docs_count\": 3, \"retriever_backend\": \"keyword\", \"status\": \"completed\", \"worker_status\": \"succeeded\"}, {\"approval_reasons\": [], \"approval_required\": false, \"checks\": [{\"name\": \"status.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"next_action.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"retrieval.context_available\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_recall\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_precision\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.faithfulness\", \"passed\": true, \"score\": 1.0}, {\"name\": \"worker.route\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_budget.max_tool_calls\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_allowlist.planned_tools\", \"passed\": true, \"score\": 1.0}, {\"name\": \"privacy.raw_inputs\", \"passed\": true, \"score\": 1.0}], \"citation_count\": 3, \"label\": \"retrieval_benefit-pudding-set\", \"next_action\": \"return_cited_ad_package\", \"node_trace\": [\"plan_campaign\", \"run_tool_suite\", \"retrieve_context\", \"build_citations\", \"guardrail_check\", \"execute_worker\", \"finalize\"], \"passed\": true, \"raw_inputs_committed\": false, \"redacted_request_summary_keys\": [\"campaign_purpose\", \"has_price_text\", \"has_reference_image\", \"has_revision_request\", \"has_user_constraints\", \"product_name_sha256\", \"retrieval_query\", \"template_hint\", \"tone\", \"user_constraints_sha256\"], \"retrieved_docs_count\": 3, \"retriever_backend\": \"keyword\", \"status\": \"completed\", \"worker_status\": \"succeeded\"}, {\"approval_reasons\": [], \"approval_required\": false, \"checks\": [{\"name\": \"status.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"next_action.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"retrieval.context_available\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_recall\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_precision\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.faithfulness\", \"passed\": true, \"score\": 1.0}, {\"name\": \"worker.route\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_budget.max_tool_calls\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_allowlist.planned_tools\", \"passed\": true, \"score\": 1.0}, {\"name\": \"privacy.raw_inputs\", \"passed\": true, \"score\": 1.0}], \"citation_count\": 3, \"label\": \"worker_new_menu_minimal\", \"next_action\": \"return_cited_ad_package\", \"node_trace\": [\"plan_campaign\", \"run_tool_suite\", \"retrieve_context\", \"build_citations\", \"guardrail_check\", \"execute_worker\", \"finalize\"], \"passed\": true, \"raw_inputs_committed\": false, \"redacted_request_summary_keys\": [\"campaign_purpose\", \"has_price_text\", \"has_reference_image\", \"has_revision_request\", \"has_user_constraints\", \"product_name_sha256\", \"retrieval_query\", \"template_hint\", \"tone\", \"user_constraints_sha256\"], \"retrieved_docs_count\": 3, \"retriever_backend\": \"keyword\", \"status\": \"completed\", \"worker_status\": \"succeeded\"}, {\"approval_reasons\": [\"paid_provider_requested\", \"estimated_cost_exceeds_threshold\", \"prompt_injection_suspected\"], \"approval_required\": true, \"checks\": [{\"name\": \"status.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"next_action.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"retrieval.context_available\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_recall\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_precision\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.faithfulness\", \"passed\": true, \"score\": 1.0}, {\"name\": \"worker.route\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_budget.max_tool_calls\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_allowlist.planned_tools\", \"passed\": true, \"score\": 1.0}, {\"name\": \"privacy.raw_inputs\", \"passed\": true, \"score\": 1.0}], \"citation_count\": 4, \"label\": \"approval_paid_provider_injection\", \"next_action\": \"wait_for_human_approval\", \"node_trace\": [\"plan_campaign\", \"run_tool_suite\", \"retrieve_context\", \"build_citations\", \"guardrail_check\", \"human_approval\"], \"passed\": true, \"raw_inputs_committed\": false, \"redacted_request_summary_keys\": [\"campaign_purpose\", \"has_price_text\", \"has_reference_image\", \"has_revision_request\", \"has_user_constraints\", \"product_name_sha256\", \"prompt_injection_categories\", \"prompt_injection_signal_count\", \"reference_image_name_sha256\", \"retrieval_query\", \"template_hint\", \"tone\", \"user_constraints_sha256\"], \"retrieved_docs_count\": 4, \"retriever_backend\": \"keyword\", \"status\": \"needs_approval\", \"worker_status\": null}, {\"approval_reasons\": [], \"approval_required\": false, \"checks\": [{\"name\": \"status.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"next_action.expected\", \"passed\": true, \"score\": 1.0}, {\"name\": \"retrieval.context_available\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_recall\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.context_precision\", \"passed\": true, \"score\": 1.0}, {\"name\": \"citation.faithfulness\", \"passed\": true, \"score\": 1.0}, {\"name\": \"worker.route\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_budget.max_tool_calls\", \"passed\": true, \"score\": 1.0}, {\"name\": \"tool_allowlist.planned_tools\", \"passed\": true, \"score\": 1.0}, {\"name\": \"privacy.raw_inputs\", \"passed\": true, \"score\": 1.0}], \"citation_count\": 4, \"label\": \"worker_instagram_discount\", \"next_action\": \"return_cited_ad_package\", \"node_trace\": [\"plan_campaign\", \"run_tool_suite\", \"retrieve_context\", \"build_citations\", \"guardrail_check\", \"execute_worker\", \"finalize\"], \"passed\": true, \"raw_inputs_committed\": false, \"redacted_request_summary_keys\": [\"campaign_purpose\", \"has_price_text\", \"has_reference_image\", \"has_revision_request\", \"has_user_constraints\", \"product_name_sha256\", \"retrieval_query\", \"template_hint\", \"tone\", \"user_constraints_sha256\"], \"retrieved_docs_count\": 4, \"retriever_backend\": \"keyword\", \"status\": \"completed\", \"worker_status\": \"succeeded\"}], \"evidence_date\": \"2026-06-17\", \"golden_dataset\": {\"case_count\": 13, \"labels\": [\"retrieval_instagram-cafe-new-menu\", \"retrieval_premium-seasonal-dessert\", \"retrieval_discount-promotion\", \"retrieval_premium-cake-gift\", \"retrieval_sns-reels-madeleine\", \"retrieval_coupon-cheesecake\", \"retrieval_signature-cafe-brand\", \"retrieval_premium-flower-gift\", \"retrieval_instagram-hashtag-cake\", \"retrieval_benefit-pudding-set\", \"worker_new_menu_minimal\", \"approval_paid_provider_injection\", \"worker_instagram_discount\"], \"name\": \"agentic_rag_golden_v1\"}, \"prompt_injection\": {\"blocked_before_worker\": true, \"case_count\": 1, \"passed\": true, \"raw_inputs_committed\": false}, \"promptfoo_regression\": {\"case_count\": 13, \"failure_count\": 0, \"passed\": true}, \"ragas_compatible_metrics\": {\"answer_relevancy\": 1.0, \"context_precision\": 1.0, \"context_recall\": 1.0, \"faithfulness\": 1.0}, \"raw_inputs_committed\": false, \"scope\": \"local_ragas_promptfoo_compatible_no_paid_api_call\", \"tool_budget\": {\"allowed_tools\": [\"citation_builder\", \"document_retrieval\", \"generation_workflow\", \"guardrail_check\", \"internal_api\", \"sql_query\", \"web_search\"], \"case_count\": 13, \"max_tool_calls\": 7, \"passed\": true, \"planned_tool_count\": 7, \"unexpected_tools\": []}}"
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "golden dataset and guardrails stay green without paid API calls",
+          "vars": {
+            "scenario": "agentic_rag_eval_guardrail"
+          },
+          "assert": [
+            {
+              "type": "javascript",
+              "value": "JSON.parse(output).agentic_rag_eval_guardrail === 'passed'"
+            },
+            {
+              "type": "javascript",
+              "value": "JSON.parse(output).promptfoo_regression.passed === true"
+            },
+            {
+              "type": "javascript",
+              "value": "JSON.parse(output).prompt_injection.passed === true"
+            },
+            {
+              "type": "javascript",
+              "value": "JSON.parse(output).tool_budget.passed === true"
+            },
+            {
+              "type": "javascript",
+              "value": "JSON.parse(output).raw_inputs_committed === false"
+            },
+            {
+              "type": "javascript",
+              "value": "JSON.parse(output).ragas_compatible_metrics.faithfulness === 1.0"
+            },
+            {
+              "type": "javascript",
+              "value": "JSON.parse(output).ragas_compatible_metrics.answer_relevancy === 1.0"
+            },
+            {
+              "type": "javascript",
+              "value": "JSON.parse(output).ragas_compatible_metrics.context_precision === 1.0"
+            },
+            {
+              "type": "javascript",
+              "value": "JSON.parse(output).ragas_compatible_metrics.context_recall === 1.0"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "scenario": "agentic_rag_eval_guardrail"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      }
+    ],
+    "stats": {
+      "successes": 1,
+      "failures": 0,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 0,
+        "completion": 0,
+        "cached": 0,
+        "total": 0,
+        "numRequests": 1,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 10206,
+      "evaluationDurationMs": 10206
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "Agentic RAG offline eval and guardrail regression gate",
+    "prompts": [
+      "agentic-rag-offline-eval"
+    ],
+    "providers": [
+      {
+        "id": "exec:bash ../../scripts/run_promptfoo_agentic_rag_provider.sh",
+        "label": "agentic-rag-local-summary"
+      }
+    ],
+    "tests": [
+      {
+        "description": "golden dataset and guardrails stay green without paid API calls",
+        "vars": {
+          "scenario": "agentic_rag_eval_guardrail"
+        },
+        "assert": [
+          {
+            "type": "javascript",
+            "value": "JSON.parse(output).agentic_rag_eval_guardrail === 'passed'"
+          },
+          {
+            "type": "javascript",
+            "value": "JSON.parse(output).promptfoo_regression.passed === true"
+          },
+          {
+            "type": "javascript",
+            "value": "JSON.parse(output).prompt_injection.passed === true"
+          },
+          {
+            "type": "javascript",
+            "value": "JSON.parse(output).tool_budget.passed === true"
+          },
+          {
+            "type": "javascript",
+            "value": "JSON.parse(output).raw_inputs_committed === false"
+          },
+          {
+            "type": "javascript",
+            "value": "JSON.parse(output).ragas_compatible_metrics.faithfulness === 1.0"
+          },
+          {
+            "type": "javascript",
+            "value": "JSON.parse(output).ragas_compatible_metrics.answer_relevancy === 1.0"
+          },
+          {
+            "type": "javascript",
+            "value": "JSON.parse(output).ragas_compatible_metrics.context_precision === 1.0"
+          },
+          {
+            "type": "javascript",
+            "value": "JSON.parse(output).ragas_compatible_metrics.context_recall === 1.0"
+          }
+        ]
+      }
+    ],
+    "env": {},
+    "outputPath": [
+      "docs/evidence/agentic-rag-promptfoo-results.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {}
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.121.17",
+    "nodeVersion": "v24.16.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "exportedAt": "2026-06-17T09:38:22.273Z",
+    "evaluationCreatedAt": "2026-06-17T09:38:11.866Z"
+  },
+  "vars": [
+    "scenario"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": false,
+    "repeat": 1,
+    "maxConcurrency": 4,
+    "cache": false
+  }
+}

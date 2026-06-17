@@ -43,6 +43,8 @@ Verified:
   worker and redacted event/replay payloads.
 - Local OpenInference trace first gate for Agentic RAG graph nodes, with
   redacted span attributes and API stream tracer wiring.
+- Local Agentic RAG eval gates: deterministic Ragas-compatible proxy metrics,
+  real promptfoo package smoke, and GitHub Actions CI steps for both paths.
 - AI agent team operating model with main-writer ownership, read-only scouts,
   task-lock template, lane fast gates, and paid-provider tripwires.
 - Docker Compose smoke, Redis/RQ job path, redacted Postgres history, and
@@ -59,11 +61,11 @@ Known gaps:
   editing is not proven.
 - Agentic RAG is still at first-gate maturity. Local SQLite checkpointing,
   SSE/WebSocket streaming, graph tracing, local tool-suite orchestration, and a
-  local eval/guardrail gate are proven, but reviewer approval UI, bidirectional
+  local eval/guardrail plus promptfoo package gate are proven, but reviewer approval UI, bidirectional
   approval, live web search, production SQL policy, production MCP transport/auth,
   production stream replay retention policy, production storage policy,
-  production trace retention policy, and full Ragas/promptfoo package execution
-  are still pending.
+  production trace retention policy, and Ragas live evaluator execution are
+  still pending.
 - Current eval sets are demo-scale and need a larger real/product-like scenario
   matrix before broader quality claims.
 
@@ -330,8 +332,8 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Extend the Agentic RAG control plane from local graph/tool-suite/SSE/WebSocket/SQLite/replay/trace first gates to reviewer approval UI, production stream replay retention policy, production trace retention policy, and production storage policy if needed.
-2. Promote the local Ragas/promptfoo-compatible eval gate to actual Ragas + promptfoo package execution after dependency/runtime ADR.
+1. Extend the Agentic RAG control plane from local graph/tool-suite/SSE/WebSocket/SQLite/replay/trace/run-metrics first gates to reviewer approval UI, production stream replay retention policy, production trace retention policy, and production storage policy if needed.
+2. Add Ragas live evaluator execution only after paid eval approval and trace/result payload review.
 3. Implement remediation for the failed paid `gpt-image-2` + `quality=medium` provider-quality gate before any further paid full-gate iteration.
 4. Add human visual review or provider-quality visual statistics for generated assets.
 5. Define MCP served transport/auth boundaries before claiming production MCP operation.

@@ -15,7 +15,12 @@ jobs:
           python-version: "3.11"
           cache: pip
           cache-dependency-path: pyproject.toml
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
       - run: pip install -e ".[dev]"
+      - run: npm ci --no-audit --no-fund
       - run: ruff check .
       - run: ruff format --check .
       - run: pytest -q
@@ -23,6 +28,12 @@ jobs:
         run: >
           python scripts/agentic_rag_eval_guardrail.py
           --output /tmp/agentic-rag-eval-guardrail-summary.json
+      - name: Agentic RAG promptfoo package gate
+        run: >
+          python scripts/agentic_rag_promptfoo_package_smoke.py
+          --summary-output /tmp/agentic-rag-promptfoo-package-summary.json
+          --results-output /tmp/agentic-rag-promptfoo-results.json
+          --timeout-seconds 180
       - run: docker build -f Dockerfile.api -t dessert-ad-studio-api:ci .
       - name: API smoke
         run: |

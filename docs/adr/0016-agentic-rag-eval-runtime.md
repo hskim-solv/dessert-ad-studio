@@ -45,19 +45,23 @@ golden eval" 요구를 완전히 증명하지는 않는다.
 - 기본 CI 승격 대상:
   - `evals/promptfoo/agentic-rag.yaml`
   - `scripts/promptfoo_agentic_rag_provider.py`
+  - `scripts/agentic_rag_promptfoo_package_smoke.py`
   - 기존 `scripts/agentic_rag_eval_guardrail.py` summary를 promptfoo provider output으로 재사용
 - 선택적 live gate:
   - `ragas>=0.4,<0.5`, `datasets`, `langchain-openai`를 `eval` optional dependency로 둔다.
   - evaluator LLM이 필요한 Ragas gate는 paid API 사용 승인 후 수동으로 실행한다.
-- 현재 CI의 `Agentic RAG eval guardrail gate`는 유지한다. promptfoo package execution을
-  CI에 추가하기 전에는 Node dependency cache/runtime을 한 번 더 측정한다.
+- 현재 CI의 `Agentic RAG eval guardrail gate`는 유지하고,
+  `Agentic RAG promptfoo package gate`를 추가한다. Node dependency는
+  `package-lock.json`과 `npm ci --no-audit --no-fund`로 고정하고, promptfoo
+  실행은 `--no-cache --no-progress-bar --no-table`과 telemetry disable 환경으로
+  bounded 실행한다.
 
 ## 결과 및 재평가 조건 (Consequences)
 
 - 이 선택으로 감수하는 것:
   - Ragas live gate가 기본 CI의 항상-실행 evidence가 되지는 않는다.
-  - promptfoo는 실제 패키지 실행으로 빠르게 승격 가능하지만, Ragas semantic metric은
-    비용 승인과 evaluator 모델 안정성 확인이 필요하다.
+  - promptfoo package gate는 기본 CI에 들어갔지만, Ragas semantic metric은 비용
+    승인과 evaluator 모델 안정성 확인이 필요하다.
   - compatibility summary와 promptfoo assertion 사이의 중복을 유지한다.
 - 재평가 트리거:
   - 기본 CI에서 promptfoo 실행이 60초를 초과하거나 flake가 발생한다.

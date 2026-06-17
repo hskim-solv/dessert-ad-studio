@@ -5,7 +5,7 @@ prompts:
   - "agentic-rag-offline-eval"
 
 providers:
-  - id: exec:bash scripts/run_promptfoo_agentic_rag_provider.sh
+  - id: exec:bash ../../scripts/run_promptfoo_agentic_rag_provider.sh
     label: agentic-rag-local-summary
 
 tests:
