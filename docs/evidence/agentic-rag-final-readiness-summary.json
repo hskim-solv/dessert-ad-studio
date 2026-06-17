@@ -38,8 +38,8 @@
   "ci_gate_integrity": {
     "passed": true,
     "workflow": ".github/workflows/ci.yml",
-    "required_strings_present": 6,
-    "required_strings_total": 6,
+    "required_strings_present": 7,
+    "required_strings_total": 7,
     "missing_required_strings": []
   },
   "claim_boundary_integrity": {

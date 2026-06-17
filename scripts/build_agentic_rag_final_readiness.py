@@ -435,8 +435,9 @@ def _build_ci_gate_integrity() -> dict[str, Any]:
         "Agentic RAG promptfoo package gate",
         "Agentic RAG final readiness gate",
         "python scripts/build_agentic_rag_final_readiness.py",
-        "--summary-output /tmp/agentic-rag-final-readiness-summary.json",
-        "--report-output /tmp/agentic-rag-final-readiness.md",
+        "--summary-output docs/evidence/agentic-rag-final-readiness-summary.json",
+        "--report-output docs/evidence/agentic-rag-final-readiness.md",
+        "--check",
     ]
     missing = [item for item in required_strings if item not in workflow]
     return {
@@ -590,11 +591,31 @@ def main() -> int:
     parser.add_argument("--date", default=date.today().isoformat())
     parser.add_argument("--report-output", type=Path, default=DEFAULT_REPORT_OUTPUT)
     parser.add_argument("--summary-output", type=Path, default=DEFAULT_SUMMARY_OUTPUT)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Verify committed outputs are up to date without rewriting them.",
+    )
     args = parser.parse_args()
 
     summary = build_agentic_rag_final_readiness_summary(evidence_date=args.date)
     summary_payload = json.dumps(summary, ensure_ascii=False, indent=2)
     report_payload = render_agentic_rag_final_readiness(summary)
+
+    if args.check:
+        mismatches = _find_output_mismatches(
+            summary_output=args.summary_output,
+            expected_summary=summary_payload + "\n",
+            report_output=args.report_output,
+            expected_report=report_payload,
+        )
+        check_payload = {
+            "agentic_rag_final_readiness_check": "passed" if not mismatches else "failed",
+            "checked_outputs": [str(args.summary_output), str(args.report_output)],
+            "mismatches": mismatches,
+        }
+        print(json.dumps(check_payload, ensure_ascii=False, indent=2))
+        return 0 if not mismatches and summary["agentic_rag_final_readiness"] == "passed" else 1
 
     args.summary_output.parent.mkdir(parents=True, exist_ok=True)
     args.report_output.parent.mkdir(parents=True, exist_ok=True)
@@ -602,6 +623,27 @@ def main() -> int:
     args.report_output.write_text(report_payload, encoding="utf-8")
     print(summary_payload)
     return 0 if summary["agentic_rag_final_readiness"] == "passed" else 1
+
+
+def _find_output_mismatches(
+    *,
+    summary_output: Path,
+    expected_summary: str,
+    report_output: Path,
+    expected_report: str,
+) -> list[dict[str, str]]:
+    mismatches: list[dict[str, str]] = []
+    for path, expected in (
+        (summary_output, expected_summary),
+        (report_output, expected_report),
+    ):
+        if not path.exists():
+            mismatches.append({"path": str(path), "reason": "missing"})
+            continue
+        actual = path.read_text(encoding="utf-8")
+        if actual != expected:
+            mismatches.append({"path": str(path), "reason": "stale_or_modified"})
+    return mismatches
 
 
 if __name__ == "__main__":

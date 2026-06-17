@@ -37,8 +37,10 @@ jobs:
       - name: Agentic RAG final readiness gate
         run: >
           python scripts/build_agentic_rag_final_readiness.py
-          --summary-output /tmp/agentic-rag-final-readiness-summary.json
-          --report-output /tmp/agentic-rag-final-readiness.md
+          --date 2026-06-17
+          --summary-output docs/evidence/agentic-rag-final-readiness-summary.json
+          --report-output docs/evidence/agentic-rag-final-readiness.md
+          --check
       - run: docker build -f Dockerfile.api -t dessert-ad-studio-api:ci .
       - name: API smoke
         run: |
