@@ -38,8 +38,10 @@ destructive cleanup, broad retention 변경은 기존 tripwire를 유지한다.
 
 ## 결정 (Decision)
 
-기본 운영 모델은 **B. read-only scouts + main writer**로 채택한다. 큰 작업에서만
-명시적으로 **C. 제한적 multi-writer worktree**를 허용한다.
+기본 운영 모델은 **B. read-only scouts + main writer**로 채택한다. 큰 작업에서
+task 경계가 분명하면 **C. 제한적 multi-writer worktree**를 허용한다. 즉
+multi-writer는 금지가 아니라, write scope와 integration owner가 먼저 정해진
+병렬 task bundle일 때 사용한다.
 
 적용 규칙:
 
@@ -47,6 +49,10 @@ destructive cleanup, broad retention 변경은 기존 tripwire를 유지한다.
 - subagent는 기본적으로 read-only scout/reviewer/test-planner 역할만 맡는다.
 - 구현 병렬화가 필요하면 task마다 disjoint write scope를 먼저 선언하고, task lock을
   만든 뒤 worktree 단위로 실행한다.
+- multi-writer에 적합한 단위는 `frontend reviewer UI`, `eval gate`, `MCP tool
+  server`, `docs/evidence packaging`처럼 파일/검증 경계가 분리되는 lane이다.
+- 같은 endpoint, schema, 테스트 파일을 동시에 수정하는 slice는 main writer가 닫고,
+  subagent는 read-only review/test-planning으로 붙인다.
 - lane별 fast gate를 먼저 실행하고, 통합 전에는 전체 regression과 CI를 확인한다.
 - task 상태와 운영 규칙은 `docs/agent-workflow/`에 남긴다.
 

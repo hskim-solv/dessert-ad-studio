@@ -23,7 +23,8 @@ LANES: dict[str, FastGateLane] = {
     "agentic-rag": FastGateLane(
         name="agentic-rag",
         purpose=(
-            "LangGraph control-plane, SSE, SQLite checkpoint, replay, and graph trace fast gate."
+            "LangGraph control-plane, SSE/WebSocket, SQLite checkpoint, replay, "
+            "and graph trace fast gate."
         ),
         commands=(
             ".venv/bin/pytest tests/test_agentic_rag.py tests/test_agentic_rag_smoke_script.py "
@@ -31,9 +32,12 @@ LANES: dict[str, FastGateLane] = {
             "tests/test_api.py::test_agentic_rag_run_stream_emits_redacted_worker_events "
             "tests/test_api.py::test_agentic_rag_run_replay_returns_redacted_sqlite_checkpoint_summary "
             "tests/test_api.py::test_agentic_rag_run_replay_returns_404_for_unknown_run "
-            "tests/test_api.py::test_agentic_rag_run_stream_routes_paid_provider_to_approval -q",
+            "tests/test_api.py::test_agentic_rag_run_stream_routes_paid_provider_to_approval "
+            "tests/test_api.py::test_agentic_rag_run_websocket_emits_redacted_worker_events "
+            "tests/test_api.py::test_agentic_rag_run_websocket_routes_paid_provider_to_approval -q",
             ".venv/bin/python scripts/agentic_rag_graph_smoke.py --output /tmp/agentic-rag-graph-summary.json",
             ".venv/bin/python scripts/agentic_rag_stream_smoke.py --output /tmp/agentic-rag-stream-summary.json",
+            ".venv/bin/python scripts/agentic_rag_websocket_smoke.py --output /tmp/agentic-rag-websocket-summary.json",
             ".venv/bin/python scripts/agentic_rag_sqlite_checkpoint_smoke.py --output /tmp/agentic-rag-sqlite-checkpoint-summary.json --checkpoint-db /tmp/agentic-rag-checkpoints.sqlite",
             ".venv/bin/python scripts/agentic_rag_trace_smoke.py --output /tmp/agentic-rag-trace-summary.json",
         ),

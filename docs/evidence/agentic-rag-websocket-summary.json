@@ -1,0 +1,31 @@
+{
+  "agentic_rag_websocket_smoke": "passed",
+  "scope": "local_fastapi_websocket_no_paid_api_call",
+  "evidence_date": "2026-06-17",
+  "stream_protocol": "websocket",
+  "run_id_prefix": "agr",
+  "checkpointing_enabled": true,
+  "event_names": [
+    "run_started",
+    "node_completed",
+    "node_completed",
+    "node_completed",
+    "node_completed",
+    "node_completed",
+    "node_completed",
+    "run_completed"
+  ],
+  "node_sequence": [
+    "plan_campaign",
+    "retrieve_context",
+    "build_citations",
+    "guardrail_check",
+    "execute_worker",
+    "finalize"
+  ],
+  "final_status": "completed",
+  "final_next_action": "return_cited_ad_package",
+  "worker_status": "succeeded",
+  "copy_option_count": 3,
+  "raw_inputs_committed": false
+}

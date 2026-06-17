@@ -12,6 +12,8 @@ external memory through ADR/evidence docs.
 - ADR 0015 selects the operating model.
 - `docs/agent-workflow/README.md` defines roles, lock contract, fast gates, and
   escalation rules.
+- Multi-writer mode is allowed for independent task lanes with disjoint write
+  scopes; the main agent remains integration owner.
 - `docs/agent-workflow/tasks/README.md` defines the task-lock template.
 - `scripts/agent_team_fast_gate.py` lists and runs lane-specific fast gates.
 - Paid-provider checks are represented as a tripwire lane and are not executed
@@ -39,7 +41,8 @@ Current tested behavior:
   `parallel_safe_lanes`.
 - `--lane agentic-rag --dry-run` returns commands without executing them.
 - `--lane agentic-rag --execute` runs the Agentic RAG lane fast gate: focused
-  tests plus graph, stream/replay, SQLite checkpoint, and graph trace smokes.
+  tests plus graph, SSE/WebSocket stream/replay, SQLite checkpoint, and graph
+  trace smokes.
 - `--lane paid-provider --dry-run` reports `paid_api: true` and
   `parallel_safe: false`.
 
@@ -55,5 +58,7 @@ Current tested behavior:
 ## Limits
 
 - This is not a fully autonomous Docker worker swarm.
-- Writer subagents remain opt-in and require disjoint write scopes.
-- The default mode remains main writer plus read-only scouts.
+- Writer subagents are allowed for independent task bundles, but require
+  disjoint write scopes and main-agent integration.
+- The default mode for tightly coupled slices remains main writer plus
+  read-only scouts.

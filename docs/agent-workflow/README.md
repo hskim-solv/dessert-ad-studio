@@ -12,6 +12,25 @@ repository into an uncontrolled autonomous swarm.
 - Writer subagents are opt-in only for large milestones with disjoint write
   scopes.
 
+## Multi-Writer Mode
+
+Use multiple writer agents when the milestone can be split into independent
+task lanes with non-overlapping files and separate fast gates. Good candidates:
+
+- reviewer UI
+- eval or prompt-injection gate
+- MCP/tool wrapper
+- docs/evidence packaging
+- deployment manifest-only work
+
+Avoid multiple writers inside one tightly coupled slice, such as one FastAPI
+endpoint plus its shared schema and shared API tests. In that case, keep one
+writer and use scouts for review or test planning.
+
+The main agent remains the integration owner: it reviews all diffs, resolves
+merge order, runs the relevant lane gates, then runs the full regression before
+commit/push.
+
 ## Task Lock Contract
 
 Before any writer subagent is allowed, create a task note under

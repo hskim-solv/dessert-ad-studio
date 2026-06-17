@@ -13,8 +13,9 @@ from typing import Any, AsyncIterator
 from uuid import uuid4
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import FastAPI, HTTPException, Request, Response, WebSocket
 from fastapi.responses import StreamingResponse
+from pydantic import ValidationError
 
 from dessert_ad_studio.a2a import (
     A2AInputError,
@@ -452,6 +453,20 @@ async def _agentic_rag_sse_events(
     request: GenerationRequest,
     dependencies: GenerationWorkflowDependencies,
 ) -> AsyncIterator[str]:
+    async for event_name, payload in _agentic_rag_run_events(
+        request,
+        dependencies,
+        stream_protocol="sse",
+    ):
+        yield _sse_event(event_name, payload)
+
+
+async def _agentic_rag_run_events(
+    request: GenerationRequest,
+    dependencies: GenerationWorkflowDependencies,
+    *,
+    stream_protocol: str,
+) -> AsyncIterator[tuple[str, dict[str, Any]]]:
     requires_paid_provider = _agentic_rag_requires_paid_provider(dependencies)
     checkpoint_db = _agentic_rag_checkpoint_db_path()
     run_id = f"agr-{uuid4()}"
@@ -476,12 +491,12 @@ async def _agentic_rag_sse_events(
         )
         config = {"configurable": {"thread_id": run_id}} if checkpointer is not None else None
 
-        yield _sse_event(
+        yield (
             "run_started",
             {
                 "run_id": run_id,
                 "status": "started",
-                "stream_protocol": "sse",
+                "stream_protocol": stream_protocol,
                 "checkpointing_enabled": checkpointer is not None,
                 "raw_inputs_committed": False,
             },
@@ -498,7 +513,7 @@ async def _agentic_rag_sse_events(
                 payload = _agentic_rag_stream_update(node_name, update)
                 final_status = payload.get("status", final_status)
                 final_next_action = payload.get("next_action", final_next_action)
-                yield _sse_event("node_completed", payload)
+                yield ("node_completed", payload)
                 await asyncio.sleep(0)
 
     run_completed = {
@@ -507,7 +522,7 @@ async def _agentic_rag_sse_events(
     }
     if final_next_action is not None:
         run_completed["next_action"] = final_next_action
-    yield _sse_event("run_completed", run_completed)
+    yield ("run_completed", run_completed)
 
 
 def _agentic_rag_checkpoint_db_path() -> Path | None:
@@ -680,6 +695,77 @@ async def stream_agentic_rag_run(request: GenerationRequest) -> StreamingRespons
         _agentic_rag_sse_events(request, dependencies),
         media_type="text/event-stream",
     )
+
+
+@app.websocket("/agentic-rag/runs/ws")
+async def websocket_agentic_rag_run(websocket: WebSocket) -> None:
+    await websocket.accept()
+    try:
+        payload = await websocket.receive_json()
+        request = GenerationRequest.model_validate(payload)
+        dependencies = build_workflow_dependencies(request)
+    except ValidationError:
+        await websocket.send_json(
+            {
+                "event": "run_failed",
+                "data": {
+                    "status": "failed",
+                    "error_type": "invalid_request",
+                    "raw_inputs_committed": False,
+                },
+            }
+        )
+        await websocket.close(code=1003)
+        return
+    except ReferenceImageError:
+        await websocket.send_json(
+            {
+                "event": "run_failed",
+                "data": {
+                    "status": "failed",
+                    "error_type": "reference_image_error",
+                    "raw_inputs_committed": False,
+                },
+            }
+        )
+        await websocket.close(code=1008)
+        return
+    except AdBackendError:
+        await websocket.send_json(
+            {
+                "event": "run_failed",
+                "data": {
+                    "status": "failed",
+                    "error_type": "backend_error",
+                    "raw_inputs_committed": False,
+                },
+            }
+        )
+        await websocket.close(code=1011)
+        return
+    except RuntimeError as exc:
+        if not _is_marketing_context_dependency_error(exc):
+            raise
+        await websocket.send_json(
+            {
+                "event": "run_failed",
+                "data": {
+                    "status": "failed",
+                    "error_type": "retrieval_dependency_error",
+                    "raw_inputs_committed": False,
+                },
+            }
+        )
+        await websocket.close(code=1011)
+        return
+
+    async for event_name, event_payload in _agentic_rag_run_events(
+        request,
+        dependencies,
+        stream_protocol="websocket",
+    ):
+        await websocket.send_json({"event": event_name, "data": event_payload})
+    await websocket.close(code=1000)
 
 
 @app.get("/agentic-rag/runs/{run_id}/replay")

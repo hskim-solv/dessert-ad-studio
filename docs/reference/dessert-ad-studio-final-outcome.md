@@ -129,12 +129,13 @@ Verified:
   3 citations, 7 approval checkpoints, 8 worker checkpoints, and redacted
   summary evidence in
   [`docs/evidence/agentic-rag-graph.md`](../evidence/agentic-rag-graph.md).
-- First FastAPI async SSE streaming and replay gate:
-  `POST /agentic-rag/runs/stream` returns `text/event-stream`, emits 8 redacted
-  run/node/completion events, streams local graph progress through
-  `execute_worker`, emits a durable `agr-*` run id, and supports redacted local
-  SQLite replay through `GET /agentic-rag/runs/{run_id}/replay`. Evidence is
-  recorded in
+- First FastAPI async SSE/WebSocket streaming and replay gate:
+  `POST /agentic-rag/runs/stream` returns `text/event-stream`, WebSocket
+  `/agentic-rag/runs/ws` sends JSON event envelopes, both surfaces emit 8
+  redacted run/node/completion events or messages, stream local graph progress
+  through `execute_worker`, emit a durable `agr-*` run id, and support redacted
+  local SQLite replay through `GET /agentic-rag/runs/{run_id}/replay`. Evidence
+  is recorded in
   [`docs/evidence/agentic-rag-streaming.md`](../evidence/agentic-rag-streaming.md).
 - First durable SQLite checkpoint gate: local `langgraph-checkpoint-sqlite`
   persists 8 checkpoints, a reopened connection lists the same 8 checkpoints,
@@ -156,8 +157,8 @@ Not yet proven:
   SQLite checkpoint, local replay, and local graph trace gates are complete, but
   reviewer approval UI, Postgres or production storage policy, and production
   trace retention policy remain pending.
-- Full production streaming. SSE plus local SQLite replay first gates are
-  complete; WebSocket, bidirectional approval, production replay retention
+- Full production streaming. SSE, WebSocket, and local SQLite replay first gates are
+  complete; bidirectional approval, production replay retention
   policy, and production stream trace integration remain pending.
 - Ragas and promptfoo eval gates in CI.
 - Agent tool suite covering web search, SQL query, internal API, document
@@ -253,7 +254,7 @@ flowchart LR
 | M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, live worker outage/restore smoke, explicit retry/timeout/cancel non-support, 30-scenario product-like eval, offline visual proxy gate, paid provider-quality failure evidence, provider-gate postmortem, one-sample canary CLI, first trace/log privacy allowlist gate, and first cost guard are complete. Next evidence should cover text/latency/cost remediation for the failed provider gate plus human/provider visual quality review. |
 | M8 Agentic RAG graph | Add the LangGraph control plane without discarding existing workflow evidence. | First gate complete: ADR 0012/0014, `langgraph` and `langgraph-checkpoint-sqlite` dependencies, typed state schema, deterministic planner/retriever/citation/guardrail/worker/reflection/HITL/finalize nodes, conditional approval route, local mock worker route through the existing generation workflow, in-memory and local SQLite checkpoint proof, redacted smoke summaries, focused tests, local FastAPI SSE wiring, local SQLite replay summary, and local OpenInference graph-node trace proof. Pending: reviewer approval UI, Postgres or production storage policy if needed, and production trace retention policy. |
 | M9 Agentic RAG eval/guardrail gate | Prove answer/ad package faithfulness, citation quality, and tool safety. | Pending: golden dataset, Ragas faithfulness/answer relevancy/context precision/recall, promptfoo regression, prompt-injection tests, tool budget tests, and CI eval command. |
-| M10 Streaming and reviewer approval | Make long-running graph execution reviewable in real time. | First gate complete: ADR 0013, async FastAPI `POST /agentic-rag/runs/stream`, SSE `text/event-stream`, redacted node progress events, durable `agr-*` run id, local SQLite replay endpoint, local mock worker completion stream, and paid-provider approval route test. Pending: reviewer approval UI, approval audit summary, WebSocket only if bidirectional approval is required, production replay retention policy, and production graceful fallback states. |
+| M10 Streaming and reviewer approval | Make long-running graph execution reviewable in real time. | First gate complete: ADR 0013, async FastAPI `POST /agentic-rag/runs/stream`, WebSocket `/agentic-rag/runs/ws`, SSE `text/event-stream`, redacted node progress events/messages, durable `agr-*` run id, local SQLite replay endpoint, local mock worker completion stream, and paid-provider approval route tests. Pending: reviewer approval UI, approval audit summary, bidirectional in-stream approval flow if required, production replay retention policy, and production graceful fallback states. |
 | M11 Cloud/demo packaging | Show deployability beyond local/kind evidence. | Pending: one selected AWS/GCP/Azure deployment path, architecture diagram update, demo video, and eval report. |
 
 ## Failure Conditions

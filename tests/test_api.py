@@ -43,6 +43,15 @@ def _parse_sse_events(body: str) -> list[dict]:
     return events
 
 
+def _receive_agentic_rag_websocket_messages(websocket) -> list[dict]:
+    messages: list[dict] = []
+    while True:
+        message = websocket.receive_json()
+        messages.append(message)
+        if message["event"] == "run_completed":
+            return messages
+
+
 def test_health() -> None:
     response = client.get("/health")
     assert response.status_code == 200
@@ -445,6 +454,91 @@ def test_agentic_rag_run_stream_routes_paid_provider_to_approval(
         "approval_reasons": ["paid_provider_requested"],
     }
     assert "execute_worker" not in body
+
+
+def test_agentic_rag_run_websocket_emits_redacted_worker_events(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path / "outputs"))
+    monkeypatch.setenv("GENERATION_LOG_PATH", str(tmp_path / "generations.jsonl"))
+    payload = {
+        **base_payload(),
+        "product_name": "비공개 말차 푸딩",
+        "user_constraints": "VIP 고객에게만 보일 문구",
+    }
+
+    with client.websocket_connect("/agentic-rag/runs/ws") as websocket:
+        websocket.send_json(payload)
+        messages = _receive_agentic_rag_websocket_messages(websocket)
+
+    assert [message["event"] for message in messages] == [
+        "run_started",
+        "node_completed",
+        "node_completed",
+        "node_completed",
+        "node_completed",
+        "node_completed",
+        "node_completed",
+        "run_completed",
+    ]
+    assert messages[0]["data"]["stream_protocol"] == "websocket"
+    assert messages[0]["data"]["run_id"].startswith("agr-")
+    assert messages[0]["data"]["raw_inputs_committed"] is False
+    assert [
+        message["data"].get("node") for message in messages if message["event"] == "node_completed"
+    ] == [
+        "plan_campaign",
+        "retrieve_context",
+        "build_citations",
+        "guardrail_check",
+        "execute_worker",
+        "finalize",
+    ]
+    assert messages[-1]["data"] == {
+        "status": "completed",
+        "next_action": "return_cited_ad_package",
+        "raw_inputs_committed": False,
+    }
+
+    serialized = json.dumps(messages, ensure_ascii=False)
+    assert "비공개 말차 푸딩" not in serialized
+    assert "VIP 고객에게만 보일 문구" not in serialized
+
+
+def test_agentic_rag_run_websocket_routes_paid_provider_to_approval(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import api.main as api_main
+
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path / "outputs"))
+    monkeypatch.setenv("GENERATION_LOG_PATH", str(tmp_path / "generations.jsonl"))
+    monkeypatch.setattr(api_main, "_agentic_rag_requires_paid_provider", lambda deps: True)
+
+    with client.websocket_connect("/agentic-rag/runs/ws") as websocket:
+        websocket.send_json(base_payload())
+        messages = _receive_agentic_rag_websocket_messages(websocket)
+
+    assert [
+        message["data"].get("node") for message in messages if message["event"] == "node_completed"
+    ] == [
+        "plan_campaign",
+        "retrieve_context",
+        "build_citations",
+        "guardrail_check",
+        "human_approval",
+    ]
+    assert messages[-1]["data"] == {
+        "status": "needs_approval",
+        "next_action": "wait_for_human_approval",
+        "raw_inputs_committed": False,
+    }
+    assert not any(
+        message["data"].get("node") == "execute_worker"
+        for message in messages
+        if message["event"] == "node_completed"
+    )
 
 
 def test_create_generation_job_runs_inline_and_status_is_redacted(

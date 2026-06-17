@@ -49,6 +49,7 @@ def test_agent_team_fast_gate_dry_run_returns_commands_without_running() -> None
     assert payload["paid_api"] is False
     assert payload["commands"]
     assert any("tests/test_agentic_rag.py" in command for command in payload["commands"])
+    assert any("agentic_rag_websocket_smoke.py" in command for command in payload["commands"])
     assert any("agentic_rag_trace_smoke.py" in command for command in payload["commands"])
     assert payload["executed"] is False
 
