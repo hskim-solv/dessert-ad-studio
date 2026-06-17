@@ -1,0 +1,1534 @@
+{
+  "sample_count": 30,
+  "average_score": 1.0,
+  "passed": true,
+  "threshold": 0.8,
+  "failure_count": 0,
+  "failure_cases": [],
+  "results": [
+    {
+      "sample_label": "카페 신메뉴 - 흑임자 크림 라떼",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "디저트 카페 - 바닐라빈 까눌레",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "베이커리 - 소금 버터롤",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "브런치 카페 - 아보카도 에그 토스트",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "케이크샵 - 얼그레이 쉬폰 케이크",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "마카롱샵 - 제주 말차 마카롱",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "빙수 카페 - 애플망고 빙수",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "도넛샵 - 라즈베리 글레이즈 도넛",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "젤라또샵 - 피스타치오 젤라또",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "티하우스 - 복숭아 우롱 티",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "쿠키샵 - 르뱅 초코칩 쿠키",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "타르트샵 - 레몬 머랭 타르트",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "샌드위치 카페 - 바질 치킨 샌드위치",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "수제청 카페 - 자몽 허니 에이드",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "크로플 카페 - 브라운치즈 크로플",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "파운드케이크샵 - 유자 파운드케이크",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "푸딩샵 - 카라멜 커스터드 푸딩",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "스콘샵 - 무화과 크림치즈 스콘",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "컵케이크샵 - 블루베리 컵케이크",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "로스터리 카페 - 콜드브루 라떼",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "한식 디저트 카페 - 흑임자 인절미 케이크",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "요거트샵 - 그래놀라 그릭요거트",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "초콜릿샵 - 다크 초콜릿 봉봉",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "와플샵 - 누텔라 바나나 와플",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "샐러드 카페 - 리코타 베리 샐러드",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "팬케이크 카페 - 메이플 수플레 팬케이크",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "프레첼샵 - 갈릭 크림치즈 프레첼",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "허니브레드 카페 - 시나몬 허니브레드",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "비건 베이커리 - 비건 초코 머핀",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    },
+    {
+      "sample_label": "디저트 박스샵 - 홈카페 디저트 박스",
+      "score": 1.0,
+      "passed": true,
+      "checks": [
+        {
+          "name": "copy.option_count",
+          "passed": true,
+          "score": 1.0,
+          "detail": "expected at least 3 copy options, got 3"
+        },
+        {
+          "name": "copy.korean_text",
+          "passed": true,
+          "score": 1.0,
+          "detail": "all copy options contain Korean text"
+        },
+        {
+          "name": "copy.product_name",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product name appears in generated copy"
+        },
+        {
+          "name": "image.path",
+          "passed": true,
+          "score": 1.0,
+          "detail": "image path is populated"
+        },
+        {
+          "name": "product_analysis.present",
+          "passed": true,
+          "score": 1.0,
+          "detail": "product analysis is present"
+        },
+        {
+          "name": "workflow.required_steps",
+          "passed": true,
+          "score": 1.0,
+          "detail": "workflow trace has required ordered steps"
+        },
+        {
+          "name": "workflow.elapsed_ms",
+          "passed": true,
+          "score": 1.0,
+          "detail": "response and step elapsed times are non-negative"
+        }
+      ]
+    }
+  ],
+  "scenario_pack": "product_like_v1",
+  "total_available": 30,
+  "business_types": [
+    "도넛샵",
+    "디저트 박스샵",
+    "디저트 카페",
+    "로스터리 카페",
+    "마카롱샵",
+    "베이커리",
+    "브런치 카페",
+    "비건 베이커리",
+    "빙수 카페",
+    "샌드위치 카페",
+    "샐러드 카페",
+    "수제청 카페",
+    "스콘샵",
+    "와플샵",
+    "요거트샵",
+    "젤라또샵",
+    "초콜릿샵",
+    "카페",
+    "컵케이크샵",
+    "케이크샵",
+    "쿠키샵",
+    "크로플 카페",
+    "타르트샵",
+    "티하우스",
+    "파운드케이크샵",
+    "팬케이크 카페",
+    "푸딩샵",
+    "프레첼샵",
+    "한식 디저트 카페",
+    "허니브레드 카페"
+  ],
+  "platforms": [
+    "네이버 스마트스토어",
+    "네이버 플레이스 소식",
+    "배달앱 배너",
+    "인스타그램 릴스 커버",
+    "인스타그램 스토리",
+    "인스타그램 피드",
+    "카카오채널"
+  ],
+  "tones": [
+    "clean",
+    "playful",
+    "premium",
+    "warm"
+  ],
+  "template_hints": [
+    "cozy_cafe",
+    "minimal_premium",
+    "seasonal_event"
+  ]
+}

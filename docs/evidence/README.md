@@ -20,7 +20,7 @@ deployment readiness, privacy boundaries, and model-backed product analysis.
 docker compose config -q
 ```
 
-Latest local regression snapshot: `203 passed, 1 warning`.
+Latest local regression snapshot: `205 passed, 1 warning`.
 
 ## Evidence Map
 
@@ -32,6 +32,7 @@ Latest local regression snapshot: `203 passed, 1 warning`.
 | Async reliability matrix | [`async-reliability-matrix.md`](async-reliability-matrix.md), [`async-reliability-matrix.json`](async-reliability-matrix.json) | Burst submit, failure state, queue enqueue failure, duplicate polling, worker startup wait, and K8s async smoke passed; cancel/retry/timeout remain pending | `.venv/bin/pytest tests/test_async_reliability.py tests/test_generation_jobs.py::test_generation_worker_waits_for_redis_until_ready -q` |
 | AgentOps observability | [`agentops-phoenix.md`](agentops-phoenix.md), [`assets/phoenix-workflow-trace.png`](assets/phoenix-workflow-trace.png), [`assets/phoenix-trace-detail.png`](assets/phoenix-trace-detail.png) | OTEL console smoke, Phoenix OTLP trace export, UI screenshots, trace count verification, trace/log privacy allowlist tests | `WORKFLOW_TRACING=otel WORKFLOW_TRACE_EXPORT=console .venv/bin/python scripts/otel_trace_smoke.py` |
 | Workflow eval and failure report | [`workflow-eval-summary.json`](workflow-eval-summary.json) | 3 demo samples, average score 1.00, failure_count 0, failure_cases present | `.venv/bin/python scripts/eval_demo_samples.py --output docs/evidence/workflow-eval-summary.json` |
+| Product-like workflow eval | [`product-like-workflow-eval.md`](product-like-workflow-eval.md), [`product-like-workflow-eval-summary.json`](product-like-workflow-eval-summary.json) | 30 product-like scenarios, average score 1.00, failure_count 0 | `.venv/bin/python scripts/eval_product_like_samples.py --output docs/evidence/product-like-workflow-eval-summary.json` |
 | Demo gallery | [`demo-gallery.md`](demo-gallery.md), [`demo-gallery-manifest.json`](demo-gallery-manifest.json), [`assets/demo-gallery/`](assets/demo-gallery/) | 3 deterministic reviewer-visible banners generated from the local workflow with Korean overlay rendering | `.venv/bin/python scripts/build_demo_gallery.py --date 2026-06-16` |
 | Streamlit reviewer flow | [`streamlit-reviewer-flow.md`](streamlit-reviewer-flow.md), [`assets/streamlit-reviewer-input.png`](assets/streamlit-reviewer-input.png), [`assets/streamlit-reviewer-result.png`](assets/streamlit-reviewer-result.png) | Local reviewer flow shows input form, revision request, generated banner, revised copy, and download action | See the API, Streamlit, and Playwright capture steps in the evidence note |
 | Real-sample preservation | [`real-sample-preservation.md`](real-sample-preservation.md), [`real-sample-preservation-results.json`](real-sample-preservation-results.json), [`assets/real-sample-preservation/`](assets/real-sample-preservation/) | 3 public sample photos, pass rate 1.00, minimum top-region pixel match 1.00 for deterministic composition | `.venv/bin/python scripts/build_real_sample_preservation_evidence.py --date 2026-06-16` |

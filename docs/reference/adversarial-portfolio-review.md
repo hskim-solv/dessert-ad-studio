@@ -40,7 +40,7 @@ Scope limits:
 | P1 | Live Kubernetes deployability proof. | Complete for the synchronous base stack: `docs/evidence/k8s-live-smoke-summary.json` records `kind` apply, Triton model sync, pod readiness, port-forward, and full `/generate` smoke. |
 | P2 | Kubernetes async operations alignment. | First gate complete: async overlay renders and live `kind` smoke passes Redis/RQ worker plus Postgres history. |
 | P3 | Provider-quality image-edit gate. | Approved paid `gpt-image-2` + `quality=medium` run over 3 public samples with ROI preservation, text-contamination, latency, and redaction metrics. |
-| P4 | Real evaluation pack. | 30+ scenario matrix, retrieval grounding checks, human review rubric, failure taxonomy, p95 latency/cost, and reproducible summary JSON. |
+| P4 | Real evaluation pack. | First product-like gate complete: 30 deterministic workflow scenarios with reproducible summary JSON. Human rubric, real samples, p95 latency/cost, and stronger visual checks remain pending. |
 | P5 | Trace/log privacy hardening. | First gate complete: allowlist tests cover workflow trace/log attributes, image-failure usage logs, and OTEL smoke output. Production external-trace rollout still requires deployment-specific attribute review. |
 | P6 | Async reliability matrix. | First deterministic gate complete for burst submit, workflow failure state, queue enqueue failure, duplicate polling, worker startup wait, and K8s async smoke. Retry/timeout/cancel and live worker failure injection remain pending. |
 | P7 | Cost guard. | Per-run estimated cost in summaries and optional budget threshold for paid smoke scripts. |
