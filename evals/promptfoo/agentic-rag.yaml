@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+description: Agentic RAG offline eval and guardrail regression gate
+
+prompts:
+  - "agentic-rag-offline-eval"
+
+providers:
+  - id: exec:bash scripts/run_promptfoo_agentic_rag_provider.sh
+    label: agentic-rag-local-summary
+
+tests:
+  - description: golden dataset and guardrails stay green without paid API calls
+    vars:
+      scenario: agentic_rag_eval_guardrail
+    assert:
+      - type: javascript
+        value: JSON.parse(output).agentic_rag_eval_guardrail === 'passed'
+      - type: javascript
+        value: JSON.parse(output).promptfoo_regression.passed === true
+      - type: javascript
+        value: JSON.parse(output).prompt_injection.passed === true
+      - type: javascript
+        value: JSON.parse(output).tool_budget.passed === true
+      - type: javascript
+        value: JSON.parse(output).raw_inputs_committed === false
+      - type: javascript
+        value: JSON.parse(output).ragas_compatible_metrics.faithfulness === 1.0
+      - type: javascript
+        value: JSON.parse(output).ragas_compatible_metrics.answer_relevancy === 1.0
+      - type: javascript
+        value: JSON.parse(output).ragas_compatible_metrics.context_precision === 1.0
+      - type: javascript
+        value: JSON.parse(output).ragas_compatible_metrics.context_recall === 1.0

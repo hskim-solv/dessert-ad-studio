@@ -1,0 +1,11 @@
+{
+  "name": "dessert-ad-studio-evals",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "eval:promptfoo": "promptfoo eval -c evals/promptfoo/agentic-rag.yaml -o docs/evidence/agentic-rag-promptfoo-results.json"
+  },
+  "devDependencies": {
+    "promptfoo": "0.121.17"
+  }
+}

@@ -32,6 +32,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+eval = [
+  "datasets>=3.0",
+  "langchain-openai>=0.3",
+  "ragas>=0.4,<0.5",
+]
 image = [
   "torch>=2.3",
   "diffusers>=0.37",
