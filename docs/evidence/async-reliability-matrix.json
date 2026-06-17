@@ -1,8 +1,8 @@
 {
   "date": "2026-06-17",
-  "scope": "generation job API, inline deterministic adapter, worker startup, K8s async smoke, and worker outage/restore evidence",
-  "command": ".venv/bin/pytest tests/test_async_reliability.py tests/test_generation_jobs.py::test_generation_worker_waits_for_redis_until_ready tests/test_k8s_async_failure_smoke.py -q",
-  "result": "8 passed, 1 warning",
+  "scope": "generation job API, inline deterministic adapter, worker startup, K8s async smoke, worker outage/restore, and explicit async policy evidence",
+  "command": ".venv/bin/pytest tests/test_async_reliability.py tests/test_generation_jobs.py::test_generation_worker_waits_for_redis_until_ready tests/test_api.py::test_generation_job_policy_reports_explicit_async_limits tests/test_api.py::test_cancel_generation_job_is_explicit_non_support tests/test_k8s_async_failure_smoke.py -q",
+  "result": "10 passed, 1 warning",
   "cases": [
     {
       "case": "burst_submit",
@@ -45,14 +45,19 @@
       "evidence": "POST /generation-jobs rejects reference_image_b64 until object storage and retention policy are selected"
     },
     {
+      "case": "async_policy_endpoint",
+      "status": "passed",
+      "evidence": "GET /generation-jobs/policy reports cancel unsupported, automatic_retries 0, worker_job_timeout_seconds null, and no dead-letter queue"
+    },
+    {
       "case": "cancel_endpoint",
-      "status": "not_supported",
-      "evidence": "no cancellation API is claimed yet"
+      "status": "explicit_non_support",
+      "evidence": "POST /generation-jobs/{job_id}/cancel returns HTTP 501 with a bounded Korean detail"
     },
     {
       "case": "retry_timeout_policy",
-      "status": "pending",
-      "evidence": "explicit retry policy and timeout/dead-letter behavior remain pending"
+      "status": "explicit_non_support",
+      "evidence": "automatic retries, worker job timeout, and dead-letter queue are not claimed until a storage/retention policy is selected"
     }
   ],
   "privacy_boundary": {

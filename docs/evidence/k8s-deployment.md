@@ -382,8 +382,9 @@ The redacted machine-readable summary is committed at
   a dedicated `ReadWriteMany` overlay/storage class.
 - The async overlay live proof covers one local/test `kind` run of Redis/RQ
   worker plus Postgres history and a single worker outage/restore path. It does
-  not yet prove multi-replica queue behavior, retry policy, cancellation, or
-  timeout behavior under load.
+  not yet prove multi-replica queue behavior or production load behavior.
+  Automatic retry, worker timeout, cancellation, and dead-letter handling are
+  explicit non-support in the current API policy.
 - `kind` does not include metrics-server by default, so HPA rendering is proven
   but live CPU autoscaling behavior is not.
 - Production hardening such as TLS, image registry pinning, auth, network policy,

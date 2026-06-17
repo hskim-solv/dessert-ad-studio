@@ -25,11 +25,13 @@ from dessert_ad_studio.backends.mock import MockAdBackend
 from dessert_ad_studio.backends.openai_copy import OpenAICopyBackend
 from dessert_ad_studio.backends.openai_image import OpenAIImageBackend
 from dessert_ad_studio.generation_jobs import (
+    GENERATION_JOB_CANCEL_UNSUPPORTED_DETAIL,
     GenerationJobQueueError,
     GenerationJobStore,
     InMemoryGenerationJobStore,
     PostgresGenerationJobStore,
     enqueue_generation_job,
+    generation_job_policy_summary,
     redacted_request_summary,
 )
 from dessert_ad_studio.marketing_context import (
@@ -567,6 +569,16 @@ def create_generation_job(request: GenerationRequest) -> dict[str, Any]:
         "status_url": f"/generation-jobs/{job_id}",
         "queue_backend": queue_backend,
     }
+
+
+@app.get("/generation-jobs/policy")
+def get_generation_job_policy() -> dict[str, Any]:
+    return generation_job_policy_summary()
+
+
+@app.post("/generation-jobs/{job_id}/cancel")
+def cancel_generation_job(job_id: str) -> dict[str, Any]:
+    raise HTTPException(status_code=501, detail=GENERATION_JOB_CANCEL_UNSUPPORTED_DETAIL)
 
 
 @app.get("/generation-jobs/{job_id}")

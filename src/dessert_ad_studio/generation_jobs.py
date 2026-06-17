@@ -12,6 +12,10 @@ JOB_STATUS_QUEUED = "queued"
 JOB_STATUS_RUNNING = "running"
 JOB_STATUS_SUCCEEDED = "succeeded"
 JOB_STATUS_FAILED = "failed"
+GENERATION_JOB_CANCEL_UNSUPPORTED_DETAIL = (
+    "비동기 생성 작업 취소는 아직 지원하지 않습니다. "
+    "재시도/타임아웃/취소 정책이 정해지기 전까지 상태 조회만 제공합니다."
+)
 
 _GENERATION_JOBS_SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS generation_jobs (
@@ -328,6 +332,17 @@ def redacted_response_summary(response: GenerationResponse) -> dict[str, Any]:
         "marketing_context_backend": response.marketing_context.retriever_backend,
         "marketing_context_categories": list(response.marketing_context.guide_categories),
         "marketing_context_retrieved_docs_count": response.marketing_context.retrieved_docs_count,
+    }
+
+
+def generation_job_policy_summary() -> dict[str, Any]:
+    return {
+        "cancel_supported": False,
+        "automatic_retries": 0,
+        "worker_job_timeout_seconds": None,
+        "dead_letter_queue_supported": False,
+        "reference_image_async_supported": False,
+        "policy": "explicit_non_support_until_storage_and_retry_policy_are_selected",
     }
 
 

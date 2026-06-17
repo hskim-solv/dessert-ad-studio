@@ -20,7 +20,7 @@ deployment readiness, privacy boundaries, and model-backed product analysis.
 docker compose config -q
 ```
 
-Latest local regression snapshot: `217 passed, 1 warning`.
+Latest local regression snapshot: `219 passed, 1 warning`.
 
 ## Evidence Map
 
@@ -29,7 +29,7 @@ Latest local regression snapshot: `217 passed, 1 warning`.
 | Retrieval baseline | [`rag-baseline.md`](rag-baseline.md), [`rag-baseline-results.json`](rag-baseline-results.json) | 10 samples, category hit rate 1.00, prohibited-claims hit rate 1.00, precision 0.75 | `.venv/bin/python scripts/eval_marketing_context.py --output docs/evidence/rag-baseline-results.json` |
 | Hybrid vector retrieval | [`pgvector-retrieval.md`](pgvector-retrieval.md), [`pgvector-baseline-results.json`](pgvector-baseline-results.json), [`pgvector-db-smoke-results.json`](pgvector-db-smoke-results.json) | pgvector hybrid preserves hit rate 1.00 and improves precision to 1.00 on the current 10-sample set | `.venv/bin/python scripts/eval_pgvector_marketing_context.py --output docs/evidence/pgvector-baseline-results.json` |
 | Async job reliability | [`generation-jobs.md`](generation-jobs.md) | Redis/RQ queue, redacted Postgres history, job status API, Streamlit polling/history UX | See focused test and smoke commands in the evidence note |
-| Async reliability matrix | [`async-reliability-matrix.md`](async-reliability-matrix.md), [`async-reliability-matrix.json`](async-reliability-matrix.json) | Burst submit, failure state, queue enqueue failure, duplicate polling, worker startup wait, K8s async smoke, and live worker outage/restore smoke passed; cancel/retry/timeout remain pending | `.venv/bin/pytest tests/test_async_reliability.py tests/test_generation_jobs.py::test_generation_worker_waits_for_redis_until_ready tests/test_k8s_async_failure_smoke.py -q` |
+| Async reliability matrix | [`async-reliability-matrix.md`](async-reliability-matrix.md), [`async-reliability-matrix.json`](async-reliability-matrix.json) | Burst submit, failure state, queue enqueue failure, duplicate polling, worker startup wait, K8s async smoke, live worker outage/restore, and explicit retry/timeout/cancel non-support evidence passed | `.venv/bin/pytest tests/test_async_reliability.py tests/test_generation_jobs.py::test_generation_worker_waits_for_redis_until_ready tests/test_api.py::test_generation_job_policy_reports_explicit_async_limits tests/test_api.py::test_cancel_generation_job_is_explicit_non_support tests/test_k8s_async_failure_smoke.py -q` |
 | AgentOps observability | [`agentops-phoenix.md`](agentops-phoenix.md), [`assets/phoenix-workflow-trace.png`](assets/phoenix-workflow-trace.png), [`assets/phoenix-trace-detail.png`](assets/phoenix-trace-detail.png) | OTEL console smoke, Phoenix OTLP trace export, UI screenshots, trace count verification, trace/log privacy allowlist tests | `WORKFLOW_TRACING=otel WORKFLOW_TRACE_EXPORT=console .venv/bin/python scripts/otel_trace_smoke.py` |
 | Workflow eval and failure report | [`workflow-eval-summary.json`](workflow-eval-summary.json) | 3 demo samples, average score 1.00, failure_count 0, failure_cases present | `.venv/bin/python scripts/eval_demo_samples.py --output docs/evidence/workflow-eval-summary.json` |
 | Product-like workflow eval | [`product-like-workflow-eval.md`](product-like-workflow-eval.md), [`product-like-workflow-eval-summary.json`](product-like-workflow-eval-summary.json) | 30 product-like scenarios, average score 1.00, failure_count 0 | `.venv/bin/python scripts/eval_product_like_samples.py --output docs/evidence/product-like-workflow-eval-summary.json` |
@@ -70,5 +70,5 @@ Latest local regression snapshot: `217 passed, 1 warning`.
 
 - Run the strengthened provider-quality gate with `gpt-image-2` and
   `quality=medium` only if a second paid image-edit iteration is approved.
-- Add retry/timeout/cancel behavior or explicit non-support evidence before
-  making broader async operations claims.
+- Add human visual review or stronger automated visual rubrics before making
+  broader generated-asset quality claims.

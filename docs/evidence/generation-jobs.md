@@ -204,7 +204,8 @@ Verified on 2026-06-15 and 2026-06-16:
 | Full Docker API/worker smoke | passed through containerized API + worker with Triton scorer, Redis/RQ queue, and Postgres history |
 | Kubernetes async overlay smoke | passed on `kind-dessert-ad-studio`: API ready with `generation_queue_backend=rq`, `generation_history_backend=postgres`, worker/Redis/pgvector pods ready, and `scripts/generation_job_smoke.py` returned `status=succeeded` |
 | Kubernetes worker outage/restore smoke | passed on `kind-dessert-ad-studio`: worker scaled to 0, same job stayed `queued` for 3 observations, worker restored to 1, same job reached `succeeded` |
-| Async reliability matrix | burst submit, workflow failure state, queue enqueue failure, duplicate polling, worker startup wait, K8s async smoke, and live worker outage/restore passed; retry/timeout/cancel remain pending |
+| Async policy non-support | `GET /generation-jobs/policy` documents no cancel, no automatic retries, no worker job timeout, and no dead-letter queue until policy/storage choices are made |
+| Async reliability matrix | burst submit, workflow failure state, queue enqueue failure, duplicate polling, worker startup wait, K8s async smoke, live worker outage/restore, and explicit retry/timeout/cancel non-support evidence passed |
 
 The inline test path proves the API contract and redaction contract without
 needing Redis/Postgres fixtures. The Redis/RQ smoke proves the queue adapter and

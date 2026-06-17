@@ -299,6 +299,30 @@ def test_generation_job_status_returns_404_for_unknown_job(
     assert response.json()["detail"] == "generation job not found"
 
 
+def test_generation_job_policy_reports_explicit_async_limits() -> None:
+    response = client.get("/generation-jobs/policy")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "cancel_supported": False,
+        "automatic_retries": 0,
+        "worker_job_timeout_seconds": None,
+        "dead_letter_queue_supported": False,
+        "reference_image_async_supported": False,
+        "policy": "explicit_non_support_until_storage_and_retry_policy_are_selected",
+    }
+
+
+def test_cancel_generation_job_is_explicit_non_support() -> None:
+    response = client.post("/generation-jobs/job-test/cancel")
+
+    assert response.status_code == 501
+    assert response.json()["detail"] == (
+        "비동기 생성 작업 취소는 아직 지원하지 않습니다. "
+        "재시도/타임아웃/취소 정책이 정해지기 전까지 상태 조회만 제공합니다."
+    )
+
+
 def test_generate_with_reference_image_flags_usage() -> None:
     payload = {
         **base_payload(),

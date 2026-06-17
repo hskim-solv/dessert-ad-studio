@@ -5,11 +5,11 @@ Date: 2026-06-17
 ## Scope
 
 This evidence covers a local `kind` failure-injection check for the Kubernetes
-async overlay. It does not claim retry, cancellation, dead-letter queues, or
-multi-worker production resilience. It proves the current Redis/RQ status path
-survives a worker outage window: a generation job remains queued while
-`deploy/worker` has zero replicas, and the same job succeeds after the worker is
-restored.
+async overlay. It does not claim automatic retry, cancellation, dead-letter
+queues, or multi-worker production resilience. It proves the current Redis/RQ
+status path survives a worker outage window: a generation job remains queued
+while `deploy/worker` has zero replicas, and the same job succeeds after the
+worker is restored.
 
 ## Command
 
@@ -68,6 +68,6 @@ No `kubectl port-forward` process remained for `18082:8000`.
 
 ## Remaining Gap
 
-Retry policy, timeout/dead-letter behavior, cancellation, and multi-worker
-failure handling remain unclaimed until they have explicit API behavior and
-tests.
+Automatic retry, worker timeout, cancellation, and dead-letter handling are
+explicit non-support in the current API policy. Multi-worker failure handling
+remains unclaimed until it has explicit behavior and tests.
