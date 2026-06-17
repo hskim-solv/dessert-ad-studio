@@ -42,6 +42,9 @@ Verified:
 - FastAPI async SSE run-streaming and local SQLite replay first gate for the
   Agentic RAG control plane, with node progress events through the local mock
   worker and redacted event/replay payloads.
+- Local WebSocket bidirectional approval first gate for approval-routed runs,
+  with in-stream reviewer decision, redacted `approval_completed` event, and
+  in-process post-approval worker resume.
 - Local HITL approval API first gate for approval-routed runs, with redacted
   reviewer/comment hashes, in-process post-approval worker resume, and no
   persistent audit-retention claim.
@@ -76,9 +79,9 @@ Known gaps:
 - Agentic RAG is still at first-gate maturity. Local SQLite checkpointing,
   SSE/WebSocket streaming, graph tracing, local tool-suite orchestration, and a
   local eval/guardrail plus promptfoo package gate are proven, and reviewer
-  approval UI plus in-process post-approval worker resume have local first
-  gates, and the retention boundary policy is recorded. Bidirectional approval,
-  live web search, production SQL policy, production MCP transport/auth, durable
+  approval UI plus in-process post-approval worker resume and bidirectional
+  WebSocket approval have local first gates, and the retention boundary policy
+  is recorded. Live web search, production SQL policy, production MCP transport/auth, durable
   cross-process resume, approved production storage, deployment-specific
   external trace retention, and Ragas live evaluator execution are still
   pending.
@@ -348,7 +351,7 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Extend the Agentic RAG control plane from local graph/tool-suite/SSE/WebSocket/SQLite/replay/trace/run-metrics/reviewer-approval/resume plus retention-boundary first gates to durable cross-process resume, approved production storage, and deployment-specific external trace retention.
+1. Extend the Agentic RAG control plane from local graph/tool-suite/SSE/WebSocket/SQLite/replay/trace/run-metrics/reviewer-approval/resume plus bidirectional approval and retention-boundary first gates to durable cross-process resume, approved production storage, and deployment-specific external trace retention.
 2. Add Ragas live evaluator execution only after paid eval approval and trace/result payload review.
 3. Implement remediation for the failed paid `gpt-image-2` + `quality=medium` provider-quality gate before any further paid full-gate iteration.
 4. Add human visual review or provider-quality visual statistics for generated assets.

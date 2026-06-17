@@ -52,6 +52,15 @@ def _receive_agentic_rag_websocket_messages(websocket) -> list[dict]:
             return messages
 
 
+def _receive_agentic_rag_websocket_messages_until(websocket, event_name: str) -> list[dict]:
+    messages: list[dict] = []
+    while True:
+        message = websocket.receive_json()
+        messages.append(message)
+        if message["event"] == event_name:
+            return messages
+
+
 def test_health() -> None:
     response = client.get("/health")
     assert response.status_code == 200
@@ -551,6 +560,10 @@ def test_agentic_rag_run_stream_routes_paid_provider_to_approval(
 
     monkeypatch.setenv("OUTPUT_DIR", str(tmp_path / "outputs"))
     monkeypatch.setenv("GENERATION_LOG_PATH", str(tmp_path / "generations.jsonl"))
+    monkeypatch.setenv(
+        "AGENTIC_RAG_CHECKPOINT_DB",
+        str(tmp_path / "agentic-rag-checkpoints.sqlite"),
+    )
     monkeypatch.setattr(api_main, "_agentic_rag_requires_paid_provider", lambda deps: True)
 
     with client.stream("POST", "/agentic-rag/runs/stream", json=base_payload()) as response:
@@ -645,6 +658,10 @@ def test_agentic_rag_run_websocket_routes_paid_provider_to_approval(
 
     monkeypatch.setenv("OUTPUT_DIR", str(tmp_path / "outputs"))
     monkeypatch.setenv("GENERATION_LOG_PATH", str(tmp_path / "generations.jsonl"))
+    monkeypatch.setenv(
+        "AGENTIC_RAG_CHECKPOINT_DB",
+        str(tmp_path / "agentic-rag-checkpoints.sqlite"),
+    )
     monkeypatch.setattr(api_main, "_agentic_rag_requires_paid_provider", lambda deps: True)
 
     with client.websocket_connect("/agentic-rag/runs/ws") as websocket:
@@ -671,6 +688,64 @@ def test_agentic_rag_run_websocket_routes_paid_provider_to_approval(
         for message in messages
         if message["event"] == "node_completed"
     )
+
+
+def test_agentic_rag_run_websocket_accepts_approval_decision_and_resumes_worker(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import api.main as api_main
+
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path / "outputs"))
+    monkeypatch.setenv("GENERATION_LOG_PATH", str(tmp_path / "generations.jsonl"))
+    monkeypatch.setenv(
+        "AGENTIC_RAG_CHECKPOINT_DB",
+        str(tmp_path / "agentic-rag-checkpoints.sqlite"),
+    )
+    monkeypatch.setattr(api_main, "_agentic_rag_requires_paid_provider", lambda deps: True)
+    payload = {
+        **base_payload(),
+        "product_name": "비공개 말차 푸딩",
+        "user_constraints": "VIP 고객에게만 보일 문구",
+    }
+
+    with client.websocket_connect("/agentic-rag/runs/ws") as websocket:
+        websocket.send_json(payload)
+        messages = _receive_agentic_rag_websocket_messages(websocket)
+        run_id = messages[0]["data"]["run_id"]
+        websocket.send_json(
+            {
+                "type": "approval_decision",
+                "decision": "approved",
+                "reviewer_id": "reviewer@example.com",
+                "comment": "비공개 승인 메모",
+            }
+        )
+        approval_messages = _receive_agentic_rag_websocket_messages_until(
+            websocket,
+            "approval_completed",
+        )
+
+    assert messages[-1]["data"] == {
+        "status": "needs_approval",
+        "next_action": "wait_for_human_approval",
+        "raw_inputs_committed": False,
+    }
+    assert approval_messages[-1]["data"]["run_id"] == run_id
+    assert approval_messages[-1]["data"]["status"] == "approved"
+    assert approval_messages[-1]["data"]["next_action"] == "return_cited_ad_package"
+    assert approval_messages[-1]["data"]["post_approval_worker_resumed"] is True
+    assert approval_messages[-1]["data"]["post_approval_worker_status"] == "succeeded"
+    assert approval_messages[-1]["data"]["raw_inputs_committed"] is False
+
+    serialized = json.dumps([messages, approval_messages], ensure_ascii=False)
+    for raw_value in [
+        "비공개 말차 푸딩",
+        "VIP 고객에게만 보일 문구",
+        "reviewer@example.com",
+        "비공개 승인 메모",
+    ]:
+        assert raw_value not in serialized
 
 
 def test_create_generation_job_runs_inline_and_status_is_redacted(

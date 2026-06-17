@@ -24,6 +24,7 @@ os.environ.setdefault(
 
 from fastapi.testclient import TestClient  # noqa: E402
 
+import api.main as api_main  # noqa: E402
 from api.main import app  # noqa: E402
 
 
@@ -45,6 +46,7 @@ def build_agentic_rag_websocket_summary(*, evidence_date: str) -> dict[str, Any]
         websocket.send_json(payload)
         messages = _receive_messages(websocket)
 
+    approval_summary = _build_websocket_approval_summary(client, payload)
     run_started = messages[0]["data"]
     final_event = messages[-1]
     node_sequence = [
@@ -64,7 +66,49 @@ def build_agentic_rag_websocket_summary(*, evidence_date: str) -> dict[str, Any]
         "final_next_action": final_event["data"].get("next_action"),
         "worker_status": _first_message_value(messages, "worker_status"),
         "copy_option_count": _first_message_value(messages, "copy_option_count"),
+        "bidirectional_approval": approval_summary,
         "raw_inputs_committed": False,
+    }
+
+
+def _build_websocket_approval_summary(
+    client: TestClient,
+    payload: dict[str, Any],
+) -> dict[str, Any]:
+    original_requires_paid_provider = api_main._agentic_rag_requires_paid_provider
+    api_main._agentic_rag_requires_paid_provider = lambda _deps: True
+    try:
+        with client.websocket_connect("/agentic-rag/runs/ws") as websocket:
+            websocket.send_json(payload)
+            messages = _receive_messages(websocket)
+            run_id = messages[0]["data"]["run_id"]
+            websocket.send_json(
+                {
+                    "type": "approval_decision",
+                    "decision": "approved",
+                    "reviewer_id": "reviewer@example.com",
+                    "comment": "비공개 승인 메모",
+                }
+            )
+            approval_messages = _receive_messages_until(websocket, "approval_completed")
+    finally:
+        api_main._agentic_rag_requires_paid_provider = original_requires_paid_provider
+
+    final_event = messages[-1]["data"]
+    approval_event = approval_messages[-1]["data"]
+    return {
+        "passed": True,
+        "run_id_prefix": run_id.split("-", maxsplit=1)[0],
+        "event_names": [message["event"] for message in messages + approval_messages],
+        "approval_route_status": final_event["status"],
+        "approval_route_next_action": final_event["next_action"],
+        "approval_decision_status": approval_event["status"],
+        "approval_next_action": approval_event["next_action"],
+        "approval_reasons": approval_event["approval_reasons"],
+        "post_approval_worker_resumed": approval_event["post_approval_worker_resumed"],
+        "post_approval_worker_status": approval_event.get("post_approval_worker_status"),
+        "post_approval_status": approval_event.get("post_approval_status"),
+        "raw_inputs_committed": approval_event["raw_inputs_committed"],
     }
 
 
@@ -74,6 +118,15 @@ def _receive_messages(websocket) -> list[dict[str, Any]]:
         message = websocket.receive_json()
         messages.append(message)
         if message["event"] == "run_completed":
+            return messages
+
+
+def _receive_messages_until(websocket, event_name: str) -> list[dict[str, Any]]:
+    messages: list[dict[str, Any]] = []
+    while True:
+        message = websocket.receive_json()
+        messages.append(message)
+        if message["event"] == event_name:
             return messages
 
 

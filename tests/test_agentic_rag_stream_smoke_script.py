@@ -116,10 +116,29 @@ def test_agentic_rag_websocket_smoke_writes_summary(tmp_path: Path) -> None:
     ]
     assert summary["final_status"] == "completed"
     assert summary["final_next_action"] == "return_cited_ad_package"
+    assert summary["bidirectional_approval"]["passed"] is True
+    assert summary["bidirectional_approval"]["run_id_prefix"] == "agr"
+    assert "approval_completed" in summary["bidirectional_approval"]["event_names"]
+    assert summary["bidirectional_approval"]["approval_route_status"] == "needs_approval"
+    assert (
+        summary["bidirectional_approval"]["approval_route_next_action"] == "wait_for_human_approval"
+    )
+    assert summary["bidirectional_approval"]["approval_decision_status"] == "approved"
+    assert summary["bidirectional_approval"]["approval_next_action"] == "return_cited_ad_package"
+    assert summary["bidirectional_approval"]["approval_reasons"] == ["paid_provider_requested"]
+    assert summary["bidirectional_approval"]["post_approval_worker_resumed"] is True
+    assert summary["bidirectional_approval"]["post_approval_worker_status"] == "succeeded"
+    assert summary["bidirectional_approval"]["post_approval_status"] == "completed"
+    assert summary["bidirectional_approval"]["raw_inputs_committed"] is False
     assert summary["raw_inputs_committed"] is False
 
     serialized = json.dumps(summary, ensure_ascii=False)
-    for raw_value in ["비공개 말차 푸딩", "VIP 고객"]:
+    for raw_value in [
+        "비공개 말차 푸딩",
+        "VIP 고객",
+        "reviewer@example.com",
+        "비공개 승인 메모",
+    ]:
         assert raw_value not in serialized
 
 

@@ -18,6 +18,8 @@ MCP tools.
   - `node_completed`
   - `run_completed`
 - WebSocket messages use the same event names and redacted payload schema
+- WebSocket approval-routed runs can accept an in-stream reviewer decision and
+  return a redacted `approval_completed` event
 - node progress for:
   - `plan_campaign`
   - `run_tool_suite`
@@ -30,6 +32,8 @@ MCP tools.
 - durable `run_id` emitted in `run_started`
 - local SQLite replay endpoint: `GET /agentic-rag/runs/{run_id}/replay`
 - paid-provider approval route covered by focused SSE and WebSocket API tests
+- bidirectional WebSocket approval/resume covered by focused API and smoke
+  tests
 
 ## Result
 
@@ -66,6 +70,13 @@ Current WebSocket result:
 - worker status: `succeeded`
 - copy options: `3`
 - checkpointing enabled: `true`
+- bidirectional approval: `passed`
+- approval route status: `needs_approval`
+- approval route next action: `wait_for_human_approval`
+- approval decision status: `approved`
+- approval next action: `return_cited_ad_package`
+- post-approval worker resumed: `true`
+- post-approval worker status: `succeeded`
 - raw inputs committed: `false`
 
 ## Reproduce
@@ -90,6 +101,7 @@ Focused tests:
   tests/test_api.py::test_agentic_rag_run_stream_routes_paid_provider_to_approval \
   tests/test_api.py::test_agentic_rag_run_websocket_emits_redacted_worker_events \
   tests/test_api.py::test_agentic_rag_run_websocket_routes_paid_provider_to_approval \
+  tests/test_api.py::test_agentic_rag_run_websocket_accepts_approval_decision_and_resumes_worker \
   tests/test_agentic_rag_stream_smoke_script.py -q
 ```
 
@@ -100,7 +112,5 @@ streaming system. The following remain pending:
 
 - production stream replay and retention policy
 - production Postgres or multi-instance graph checkpointing
-- reviewer approval UI
 - production trace retention policy for stream events
-- bidirectional in-stream approval flow if reviewer decisions need to be sent
-  before graph completion
+- durable cross-process resume and approved production replay/audit storage

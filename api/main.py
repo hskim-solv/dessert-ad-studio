@@ -15,9 +15,9 @@ from typing import Any, AsyncIterator, Literal
 from uuid import uuid4
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Request, Response, WebSocket
+from fastapi import FastAPI, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, Field, ValidationError
 
 from dessert_ad_studio.a2a import (
     A2AInputError,
@@ -96,6 +96,10 @@ class AgenticRagApprovalDecision(BaseModel):
     decision: Literal["approved", "rejected"]
     reviewer_id: str | None = None
     comment: str | None = None
+
+
+class AgenticRagWebSocketApprovalDecision(AgenticRagApprovalDecision):
+    message_type: Literal["approval_decision"] = Field(alias="type")
 
 
 class _BestEffortGenerationLogger:
@@ -804,12 +808,61 @@ async def websocket_agentic_rag_run(websocket: WebSocket) -> None:
         await websocket.close(code=1011)
         return
 
+    websocket_run_id = ""
+    final_event_name = ""
+    final_event_payload: dict[str, Any] = {}
     async for event_name, event_payload in _agentic_rag_run_events(
         request,
         dependencies,
         stream_protocol="websocket",
     ):
         await websocket.send_json({"event": event_name, "data": event_payload})
+        if event_name == "run_started":
+            websocket_run_id = str(event_payload.get("run_id", ""))
+        final_event_name = event_name
+        final_event_payload = event_payload
+    if (
+        final_event_name == "run_completed"
+        and final_event_payload.get("status") == "needs_approval"
+        and final_event_payload.get("next_action") == "wait_for_human_approval"
+    ):
+        try:
+            approval_payload = await websocket.receive_json()
+            approval_decision = AgenticRagWebSocketApprovalDecision.model_validate(approval_payload)
+            approval = _approve_agentic_rag_run(
+                websocket_run_id,
+                approval_decision,
+            )
+        except WebSocketDisconnect:
+            return
+        except ValidationError:
+            await websocket.send_json(
+                {
+                    "event": "approval_failed",
+                    "data": {
+                        "status": "failed",
+                        "error_type": "invalid_approval_decision",
+                        "raw_inputs_committed": False,
+                    },
+                }
+            )
+            await websocket.close(code=1003)
+            return
+        except HTTPException as exc:
+            await websocket.send_json(
+                {
+                    "event": "approval_failed",
+                    "data": {
+                        "status": "failed",
+                        "error_type": "approval_error",
+                        "status_code": exc.status_code,
+                        "raw_inputs_committed": False,
+                    },
+                }
+            )
+            await websocket.close(code=1011)
+            return
+        await websocket.send_json({"event": "approval_completed", "data": approval})
     await websocket.close(code=1000)
 
 
@@ -833,6 +886,13 @@ def get_agentic_rag_run_replay(run_id: str) -> dict[str, Any]:
 
 @app.post("/agentic-rag/runs/{run_id}/approval")
 def approve_agentic_rag_run(
+    run_id: str,
+    decision: AgenticRagApprovalDecision,
+) -> dict[str, Any]:
+    return _approve_agentic_rag_run(run_id, decision)
+
+
+def _approve_agentic_rag_run(
     run_id: str,
     decision: AgenticRagApprovalDecision,
 ) -> dict[str, Any]:
