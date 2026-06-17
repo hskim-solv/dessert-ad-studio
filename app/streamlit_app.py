@@ -17,6 +17,7 @@ from pydantic import ValidationError
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 LAST_GENERATION_KEY = "last_successful_generation"
 GENERATION_JOBS_KEY = "generation_jobs"
+AGENTIC_RAG_RUNS_KEY = "agentic_rag_runs"
 MAX_GENERATION_JOBS = 5
 DOWNLOAD_IGNORE_MIN_VERSION = (1, 43, 0)
 IMAGE_STRETCH_MIN_VERSION = (1, 58, 0)
@@ -25,6 +26,13 @@ JOB_STATUS_LABELS = {
     "queued": "대기",
     "running": "생성 중",
     "succeeded": "완료",
+    "failed": "실패",
+}
+AGENTIC_RAG_RUN_STATUS_LABELS = {
+    "needs_approval": "승인 대기",
+    "approved": "승인됨",
+    "rejected": "거절됨",
+    "completed": "완료",
     "failed": "실패",
 }
 
@@ -152,6 +160,76 @@ def _merge_generation_job_status(job: dict, status: dict) -> dict:
     return updated
 
 
+def _agentic_rag_run_status_label(status: str) -> str:
+    return AGENTIC_RAG_RUN_STATUS_LABELS.get(status, status)
+
+
+def _build_agentic_rag_approval_payload(
+    *,
+    decision: str,
+    reviewer_id: str,
+    comment: str,
+) -> dict[str, str]:
+    payload = {"decision": decision}
+    if reviewer_id.strip():
+        payload["reviewer_id"] = reviewer_id.strip()
+    if comment.strip():
+        payload["comment"] = comment.strip()
+    return payload
+
+
+def _merge_agentic_rag_approval_decision(run: dict, approval: dict) -> dict:
+    updated = dict(run)
+    updated["status"] = approval.get("status", run.get("status", "unknown"))
+    updated["next_action"] = approval.get("next_action", run.get("next_action"))
+    updated["decision"] = {
+        "status": approval.get("status"),
+        "decision": approval.get("decision"),
+        "next_action": approval.get("next_action"),
+        "reviewer_id_sha256": approval.get("reviewer_id_sha256"),
+        "comment_sha256": approval.get("comment_sha256"),
+        "audit_persisted": approval.get("audit_persisted", False),
+        "raw_inputs_committed": approval.get("raw_inputs_committed", False),
+    }
+    updated.pop("approval_error", None)
+    return updated
+
+
+def _submit_agentic_rag_approval(
+    run: dict,
+    *,
+    decision: str,
+    reviewer_id: str,
+    comment: str,
+) -> dict:
+    run_id = str(run["run_id"])
+    payload = _build_agentic_rag_approval_payload(
+        decision=decision,
+        reviewer_id=reviewer_id,
+        comment=comment,
+    )
+    try:
+        response = httpx.post(
+            _api_url(f"/agentic-rag/runs/{run_id}/approval"),
+            json=payload,
+            timeout=20,
+        )
+        response.raise_for_status()
+    except httpx.HTTPStatusError as exc:
+        try:
+            detail = exc.response.json().get("detail")
+        except Exception:
+            detail = None
+        updated = dict(run)
+        updated["approval_error"] = detail or str(exc)
+        return updated
+    except Exception as exc:
+        updated = dict(run)
+        updated["approval_error"] = str(exc)
+        return updated
+    return _merge_agentic_rag_approval_decision(run, response.json())
+
+
 def _upsert_generation_job(
     jobs: list[dict],
     request: GenerationRequest,
@@ -218,6 +296,73 @@ def _render_generation_job_history(jobs: list[dict]) -> None:
                 st.info("생성 중")
             else:
                 st.info("대기 중")
+
+
+def _render_agentic_rag_approval_queue(runs: list[dict]) -> list[dict]:
+    if not runs:
+        return runs
+
+    st.subheader("Agentic RAG 승인")
+    updated_runs = list(runs)
+    for index, run in enumerate(runs):
+        status = str(run.get("status", "unknown"))
+        with st.container(border=True):
+            st.markdown(f"**{_agentic_rag_run_status_label(status)}**")
+            st.caption(f"{run.get('run_id', 'unknown')} · next={run.get('next_action', 'unknown')}")
+            reasons = run.get("approval_reasons") or []
+            if reasons:
+                st.write("승인 사유: " + ", ".join(str(reason) for reason in reasons))
+            if run.get("approval_error"):
+                st.error(f"승인 요청 실패: {run['approval_error']}")
+            if run.get("decision"):
+                decision = run["decision"]
+                st.success(
+                    "결정 기록: "
+                    f"{decision.get('decision', decision.get('status', 'unknown'))} · "
+                    f"next={decision.get('next_action', 'unknown')}"
+                )
+                st.caption(
+                    "reviewer_hash="
+                    f"{decision.get('reviewer_id_sha256') or 'none'} · "
+                    f"comment_hash={decision.get('comment_sha256') or 'none'}"
+                )
+                continue
+            if status != "needs_approval":
+                st.info("승인 대기 상태가 아닙니다.")
+                continue
+
+            reviewer_id = st.text_input(
+                "리뷰어 ID",
+                key=f"agentic_rag_reviewer_{run.get('run_id', index)}",
+            )
+            comment = st.text_area(
+                "승인 메모",
+                key=f"agentic_rag_comment_{run.get('run_id', index)}",
+            )
+            approve_col, reject_col = st.columns(2)
+            if approve_col.button(
+                "승인",
+                key=f"agentic_rag_approve_{run.get('run_id', index)}",
+                use_container_width=True,
+            ):
+                updated_runs[index] = _submit_agentic_rag_approval(
+                    run,
+                    decision="approved",
+                    reviewer_id=reviewer_id,
+                    comment=comment,
+                )
+            if reject_col.button(
+                "거절",
+                key=f"agentic_rag_reject_{run.get('run_id', index)}",
+                use_container_width=True,
+            ):
+                updated_runs[index] = _submit_agentic_rag_approval(
+                    run,
+                    decision="rejected",
+                    reviewer_id=reviewer_id,
+                    comment=comment,
+                )
+    return updated_runs
 
 
 def _render_saved_generation(saved_generation: dict) -> None:
@@ -398,11 +543,15 @@ with left_column:
 with right_column:
     saved_generation = st.session_state.get(LAST_GENERATION_KEY)
     generation_jobs = st.session_state.get(GENERATION_JOBS_KEY, [])
+    agentic_rag_runs = st.session_state.get(AGENTIC_RAG_RUNS_KEY, [])
     if generation_jobs:
         generation_jobs = _refresh_pending_generation_jobs(generation_jobs)
         st.session_state[GENERATION_JOBS_KEY] = generation_jobs
+    if agentic_rag_runs:
+        agentic_rag_runs = _render_agentic_rag_approval_queue(agentic_rag_runs)
+        st.session_state[AGENTIC_RAG_RUNS_KEY] = agentic_rag_runs
 
-    if not submitted and saved_generation is None and not generation_jobs:
+    if not submitted and saved_generation is None and not generation_jobs and not agentic_rag_runs:
         st.info(
             "광고 생성 후 이 영역에서 데모 제품 분석, 대표 완성 배너, 추천 문구, "
             "오버레이 배너 다운로드, 원본 이미지와 기술 정보를 확인할 수 있습니다."

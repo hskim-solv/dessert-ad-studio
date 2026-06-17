@@ -65,5 +65,7 @@ Focused tests:
 - It does not yet resume the graph worker after approval.
 - It does not persist approval audit records beyond the redacted summary
   artifact.
-- Reviewer UI, bidirectional in-stream approval, production approval audit
-  retention, and production storage policy remain pending.
+- Reviewer approval UI now has a separate local first gate in
+  `docs/evidence/agentic-rag-reviewer-ui.md`.
+- Bidirectional in-stream approval, post-approval worker resume, production
+  approval audit retention, and production storage policy remain pending.

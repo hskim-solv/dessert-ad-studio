@@ -44,6 +44,9 @@ Verified:
   worker and redacted event/replay payloads.
 - Local HITL approval API first gate for approval-routed runs, with redacted
   reviewer/comment hashes and no persistent audit-retention claim.
+- Local Streamlit reviewer approval UI first gate for approval-routed runs,
+  with replay-backed pending state, redacted reviewer/comment hashes, and no
+  paid API calls.
 - Local OpenInference trace first gate for Agentic RAG graph nodes, with
   redacted span attributes and API stream tracer wiring.
 - Reviewer-facing offline Agentic RAG eval report that consolidates golden
@@ -68,9 +71,9 @@ Known gaps:
   editing is not proven.
 - Agentic RAG is still at first-gate maturity. Local SQLite checkpointing,
   SSE/WebSocket streaming, graph tracing, local tool-suite orchestration, and a
-  local eval/guardrail plus promptfoo package gate are proven, but reviewer
-  approval UI, post-approval worker resume, bidirectional approval, live web
-  search, production SQL policy, production MCP transport/auth,
+  local eval/guardrail plus promptfoo package gate are proven, and reviewer
+  approval UI has a local first gate. Post-approval worker resume,
+  bidirectional approval, live web search, production SQL policy, production MCP transport/auth,
   production stream replay retention policy, production storage policy,
   production trace retention policy, and Ragas live evaluator execution are
   still pending.
@@ -340,7 +343,7 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Extend the Agentic RAG control plane from local graph/tool-suite/SSE/WebSocket/SQLite/replay/trace/run-metrics first gates to reviewer approval UI, production stream replay retention policy, production trace retention policy, and production storage policy if needed.
+1. Extend the Agentic RAG control plane from local graph/tool-suite/SSE/WebSocket/SQLite/replay/trace/run-metrics/reviewer-approval first gates to post-approval worker resume, production stream replay retention policy, production trace retention policy, and production storage policy if needed.
 2. Add Ragas live evaluator execution only after paid eval approval and trace/result payload review.
 3. Implement remediation for the failed paid `gpt-image-2` + `quality=medium` provider-quality gate before any further paid full-gate iteration.
 4. Add human visual review or provider-quality visual statistics for generated assets.

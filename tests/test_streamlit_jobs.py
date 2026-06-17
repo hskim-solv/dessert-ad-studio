@@ -93,3 +93,50 @@ def test_generation_job_status_helpers() -> None:
     assert streamlit_app._is_generation_job_pending({"status": "running"}) is True
     assert streamlit_app._is_generation_job_pending({"status": "succeeded"}) is False
     assert streamlit_app._generation_job_status_label("failed") == "실패"
+
+
+def test_agentic_rag_approval_payload_and_merge_keep_raw_reviewer_data_out() -> None:
+    run = {
+        "run_id": "agr-review-1",
+        "status": "needs_approval",
+        "next_action": "wait_for_human_approval",
+        "approval_required": True,
+        "approval_reasons": ["paid_provider_requested"],
+    }
+
+    payload = streamlit_app._build_agentic_rag_approval_payload(
+        decision="approved",
+        reviewer_id="reviewer@example.com",
+        comment="VIP 고객 원문이 담긴 비공개 승인 메모",
+    )
+    assert payload == {
+        "decision": "approved",
+        "reviewer_id": "reviewer@example.com",
+        "comment": "VIP 고객 원문이 담긴 비공개 승인 메모",
+    }
+
+    merged = streamlit_app._merge_agentic_rag_approval_decision(
+        run,
+        {
+            "run_id": "agr-review-1",
+            "status": "approved",
+            "previous_status": "needs_approval",
+            "previous_next_action": "wait_for_human_approval",
+            "approval_required": True,
+            "approval_reasons": ["paid_provider_requested"],
+            "decision": "approved",
+            "next_action": "dispatch_generation_worker_after_approval",
+            "reviewer_id_sha256": "a" * 64,
+            "comment_sha256": "b" * 64,
+            "audit_persisted": False,
+            "raw_inputs_committed": False,
+        },
+    )
+
+    assert merged["status"] == "approved"
+    assert merged["decision"]["next_action"] == "dispatch_generation_worker_after_approval"
+    assert merged["decision"]["reviewer_id_sha256"] == "a" * 64
+    assert merged["decision"]["comment_sha256"] == "b" * 64
+    assert merged["decision"]["raw_inputs_committed"] is False
+    assert "reviewer_id" not in merged["decision"]
+    assert "comment" not in merged["decision"]

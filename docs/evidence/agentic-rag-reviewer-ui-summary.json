@@ -1,0 +1,30 @@
+{
+  "agentic_rag_reviewer_ui_smoke": "passed",
+  "scope": "local_streamlit_reviewer_approval_ui_no_paid_api_call",
+  "evidence_date": "2026-06-17",
+  "streamlit_session_key": "agentic_rag_runs",
+  "approval_run": {
+    "run_id_prefix": "agr",
+    "status": "needs_approval",
+    "next_action": "wait_for_human_approval",
+    "approval_required": true,
+    "approval_reasons": [
+      "paid_provider_requested"
+    ]
+  },
+  "ui_decision": {
+    "status": "approved",
+    "decision": "approved",
+    "next_action": "dispatch_generation_worker_after_approval",
+    "reviewer_id_sha256": "18717f7f1f60f92207bd02972c16aec92f52b31c2a8442444df988d8e8503c5e",
+    "comment_sha256": "bdcef6c791e1b6260a3f06642ab7dd3d511b0554c2dd13ca4d653ea5a6192e6e",
+    "audit_persisted": false,
+    "raw_inputs_committed": false
+  },
+  "privacy_boundary": {
+    "raw_reviewer_id_committed": false,
+    "raw_comment_committed": false,
+    "raw_request_committed": false,
+    "paid_api_call_count": 0
+  }
+}
