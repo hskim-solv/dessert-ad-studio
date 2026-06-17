@@ -28,14 +28,16 @@ Verified:
 - Docker Compose smoke, Redis/RQ job path, redacted Postgres history, and
   local AgentOps trace evidence.
 - Kubernetes manifests that render through Kustomize with probes, ingress, HPA,
-  Triton, Streamlit, and AgentOps overlays.
+  Triton, Streamlit, and AgentOps overlays, plus a live `kind` smoke that
+  applied the base stack, synced Triton models, reached pod readiness, and
+  passed full API `/generate`.
 
 Known gaps:
 
 - The first paid OpenAI image-edit provider gate failed; the deterministic
   preservation path passes, but provider-quality image editing is still pending.
-- Kubernetes evidence is render/deployability evidence, not a live cluster
-  operation proof yet.
+- Kubernetes base evidence covers the synchronous API/UI/Triton path; the
+  async worker/Redis/Postgres operational path is still Docker Compose only.
 - Current eval sets are demo-scale and need a larger real/product-like scenario
   matrix before broader quality claims.
 
@@ -268,9 +270,9 @@ kubectl kustomize deploy/k8s/overlays/agentops
 ```
 
 The base stack includes FastAPI, Streamlit, Triton, PVCs, NGINX Ingress, health
-probes, resource requests/limits, and API HPA. This is structural deployability
-evidence. A live cluster apply, pod readiness proof, and full in-cluster
-`/generate` smoke are still roadmap items. The AgentOps overlay routes API
+probes, resource requests/limits, and API HPA. Live `kind` evidence now covers
+base apply, Triton model PVC sync, `api`/`app`/`triton` readiness, API
+port-forward, and full `/generate` smoke. The AgentOps overlay routes API
 workflow traces through OpenTelemetry Collector to Phoenix.
 
 Evidence:
@@ -297,11 +299,10 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Run `scripts/k8s_live_smoke.py` on a local/test Kubernetes context, or add a disposable `kind` bootstrap path if this machine needs to create the context.
-2. Align Kubernetes with async operations by adding a worker/Redis/Postgres overlay or explicitly keeping K8s as a sync API skeleton.
-3. Run the strengthened `gpt-image-2` + `quality=medium` provider-quality image-edit gate only if a second paid iteration is approved.
-4. Add a 30+ case real evaluation pack with retrieval grounding, visual review rubric, failure taxonomy, latency p95, and cost summary.
-5. Add trace/log attribute allowlist tests and async reliability checks for burst jobs, worker failure, retries, timeout behavior, and history consistency.
-6. Keep FastMCP/A2A as optional thin wrappers after the workflow/API evidence is stable.
+1. Align Kubernetes with async operations by adding a worker/Redis/Postgres overlay or explicitly keeping K8s as a sync API skeleton.
+2. Run the strengthened `gpt-image-2` + `quality=medium` provider-quality image-edit gate only if a second paid iteration is approved.
+3. Add a 30+ case real evaluation pack with retrieval grounding, visual review rubric, failure taxonomy, latency p95, and cost summary.
+4. Add trace/log attribute allowlist tests and async reliability checks for burst jobs, worker failure, retries, timeout behavior, and history consistency.
+5. Keep FastMCP/A2A as optional thin wrappers after the workflow/API evidence is stable.
 
 FastMCP is intentionally deferred. It can later expose the studio as agent-callable tools such as `generate_dessert_ad`, generation log lookup, result retrieval, and template scoring.

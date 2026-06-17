@@ -21,7 +21,7 @@ Scope limits:
 
 | Severity | Finding | Disposition | Roadmap action |
 |---|---|---|---|
-| High | The phrase `production-grade deployment` is stronger than the current Kubernetes evidence. The repo has Kustomize render evidence, probes, HPA, ingress, and compose smoke, but no live cluster scheduling or full in-cluster `/generate` smoke. | Accept | Reframe as `deployment-shaped` or `Kustomize deployability evidence`; add live `kind`/cluster apply, readiness, ingress, Triton model sync, and full API smoke before using stronger deployment language. |
+| High | The phrase `production-grade deployment` was stronger than the Kubernetes evidence before live cluster proof existed. | Accepted and partially closed | Live `kind` base-stack proof now covers apply, PVC binding, Triton model sync, pod readiness, port-forward, and full `/generate` smoke. Keep stronger claims scoped to the synchronous API/UI/Triton base stack until async K8s and production hardening are added. |
 | High | Product-photo preservation is proven for deterministic composition, but the first paid OpenAI image-edit provider gate failed. | Accept | Put this limitation near the top of portfolio materials. Keep the next paid `gpt-image-2` + `quality=medium` gate as a decision-gated milestone. |
 | High | Kubernetes deployability does not include the async worker/Redis/Postgres operational path that Docker Compose demonstrates. | Accept | Either add a Kubernetes worker/Redis/Postgres overlay, or label current K8s evidence as sync API skeleton plus Triton/UI/AgentOps render evidence. |
 | Medium | Evaluation is still demo/proxy-heavy: small retrieval sets, 3 workflow demos, synthetic product-analysis evals, and limited visual acceptance criteria. | Accept | Add a real eval pack with 30+ product-like scenarios, human rubric, failure taxonomy, grounding checks, latency/cost p95, and pass/fail thresholds. |
@@ -37,7 +37,7 @@ Scope limits:
 | Priority | Workstream | Completion evidence |
 |---|---|---|
 | P0 | Reframe portfolio claims around verified scope. | README and final target distinguish verified, in-progress, and not-yet-proven items. |
-| P1 | Live Kubernetes deployability proof. | Fail-closed live smoke automation is added in `scripts/k8s_live_smoke.py`; remaining proof is an actual `kind`/cluster apply, pod readiness, ingress/port-forward smoke, full `/generate` path after Triton model sync, and documented rollback/cleanup. |
+| P1 | Live Kubernetes deployability proof. | Complete for the synchronous base stack: `docs/evidence/k8s-live-smoke-summary.json` records `kind` apply, Triton model sync, pod readiness, port-forward, and full `/generate` smoke. |
 | P2 | Kubernetes async operations alignment. | Worker, Redis, and Postgres overlay or explicit documentation that K8s base is a sync API skeleton. |
 | P3 | Provider-quality image-edit gate. | Approved paid `gpt-image-2` + `quality=medium` run over 3 public samples with ROI preservation, text-contamination, latency, and redaction metrics. |
 | P4 | Real evaluation pack. | 30+ scenario matrix, retrieval grounding checks, human review rubric, failure taxonomy, p95 latency/cost, and reproducible summary JSON. |

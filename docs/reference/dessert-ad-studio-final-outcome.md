@@ -58,14 +58,15 @@ Verified:
   text rendering.
 - Curated retrieval baseline plus a measured pgvector storage/query lane.
 - Redis/RQ and Postgres job/history path in Docker Compose.
-- Local/demo AgentOps trace evidence and Kubernetes Kustomize render evidence.
+- Local/demo AgentOps trace evidence, Kubernetes Kustomize render evidence, and
+  live `kind` base-stack smoke with Triton model sync plus full `/generate`.
 
 Not yet proven:
 
 - Provider-quality image editing. The first paid OpenAI image-edit gate failed;
   a stronger `gpt-image-2` + `quality=medium` gate is prepared but not run.
-- Live Kubernetes operation. Current Kubernetes evidence now includes a
-  fail-closed live smoke script, but no local/test cluster run has been captured.
+- Kubernetes async operation. Current live Kubernetes evidence covers the
+  synchronous API/UI/Triton base stack, not the worker/Redis/Postgres path.
 - Production trace privacy. Current trace evidence is local/demo scoped and
   still needs an attribute allowlist test before production claims.
 - Broad quality statistics. Current evals are useful regression gates but still
@@ -141,7 +142,7 @@ flowchart LR
 | M4 Real product analysis | Replace mock product analysis with a real VLM-backed analyzer while preserving redaction policy. | Complete first analyzer gate: OpenAI Responses Vision adapter, ADR, no-network tests, env/compose wiring, one redacted live smoke, 10-case synthetic reference eval, pass rate 1.00, p95 latency 13.15s. |
 | M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields. |
 | M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, Streamlit reviewer screenshots at `docs/evidence/streamlit-reviewer-flow.md`, real-sample preservation evidence at `docs/evidence/real-sample-preservation.md`, paid OpenAI image-edit failure evidence at `docs/evidence/openai-image-edit-preservation.md`, README links, reproducible command map. |
-| M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings, and `scripts/k8s_live_smoke.py` adds fail-closed live smoke automation. Next evidence should capture an actual local/test K8s run, provider-quality image-edit gate, larger eval pack, trace allowlist tests, and async reliability matrix. |
+| M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings, and live K8s base-stack proof is complete through `docs/evidence/k8s-live-smoke-summary.json`. Next evidence should cover provider-quality image-edit gate, larger eval pack, trace allowlist tests, K8s async alignment, and async reliability matrix. |
 
 ## Failure Conditions
 
@@ -195,9 +196,8 @@ The project is complete when it can be described accurately as:
 ## Next Milestone
 
 The immediate M6 portfolio-packaging gate is complete, but the adversarial
-review moved the project into M7 hardening. The next milestone should run
-`scripts/k8s_live_smoke.py` against a local/test Kubernetes context, or add a
-disposable `kind` bootstrap path if this machine needs to create that context.
-After a live K8s proof is captured, run the strengthened `gpt-image-2` +
-`quality=medium` provider-quality image-edit gate only if a second paid
-iteration is approved.
+review moved the project into M7 hardening. Live K8s base-stack proof is now
+captured. The next milestone should either align Kubernetes with the
+worker/Redis/Postgres async path or run the strengthened `gpt-image-2` +
+`quality=medium` provider-quality image-edit gate if a second paid iteration is
+approved.

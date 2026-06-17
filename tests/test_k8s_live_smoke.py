@@ -87,11 +87,15 @@ def test_run_k8s_live_smoke_applies_local_context_and_writes_redacted_summary(
     assert summary["k8s_live_smoke"] == "passed"
     assert summary["context"] == "kind-dessert-ad-studio"
     assert summary["checks"]["kubectl_apply"] is True
+    assert summary["checks"]["triton_model_sync"] is True
     assert summary["checks"]["api_smoke"] is True
     assert any(
         call[:4] == ["kubectl", "--context", "kind-dessert-ad-studio", "apply"]
         for call in runner.calls
     )
+    assert any("triton-model-sync" in call for call in runner.calls)
+    assert any("cp" in call and "models/." in call for call in runner.calls)
+    assert any("restart" in call and "deploy/triton" in call for call in runner.calls)
     assert any("deploy/api" in call for call in runner.calls)
     assert any("deploy/app" in call for call in runner.calls)
     assert any("deploy/triton" in call for call in runner.calls)

@@ -1,6 +1,7 @@
 # Kubernetes Deployment Evidence
 
 Date: 2026-06-13
+Updated: 2026-06-17 live `kind` smoke
 
 ## Purpose
 
@@ -20,8 +21,8 @@ collection.
 - Resource requests/limits for API, Streamlit, Triton, Phoenix, and OTEL
   Collector.
 - API HorizontalPodAutoscaler using `autoscaling/v2`.
-- Shared output/log PVC configured as `ReadWriteMany` so API HPA does not rely
-  on a single-node `ReadWriteOnce` mount.
+- Shared output/log PVC configured as `ReadWriteOnce` so local/test clusters
+  such as `kind` can provision it with the default local-path storage class.
 - NGINX Ingress with host-based UI/API routing.
 - GPU overlay for Triton GPU scheduling evidence.
 - AgentOps overlay with API -> OpenTelemetry Collector -> Phoenix trace routing.
@@ -43,7 +44,7 @@ hpa=True
 startup_probe=True
 resources=True
 ingress_class=True
-rwx_outputs=True
+rwo_outputs=True
 ```
 
 GPU overlay:
@@ -136,7 +137,7 @@ base = [doc for doc in yaml.safe_load_all(Path("/tmp/dessert-k8s-base.yaml").rea
 api = next(doc for doc in base if doc.get("kind") == "Deployment" and doc["metadata"]["name"] == "api")
 assert "startupProbe" in api["spec"]["template"]["spec"]["containers"][0]
 outputs = next(doc for doc in base if doc.get("kind") == "PersistentVolumeClaim" and doc["metadata"]["name"] == "outputs")
-assert outputs["spec"]["accessModes"] == ["ReadWriteMany"]
+assert outputs["spec"]["accessModes"] == ["ReadWriteOnce"]
 assert "nvidia.com/gpu" in Path("/tmp/dessert-k8s-gpu.yaml").read_text()
 agentops_text = Path("/tmp/dessert-k8s-agentops.yaml").read_text()
 for needle in [
@@ -196,7 +197,7 @@ Result:
 trace_smoke=passed export=console endpoint=local-console steps=7
 ```
 
-## What This Proves
+## Render Evidence Proves
 
 - The API, UI, Triton, Ingress, HPA, and AgentOps manifests render through
   Kubernetes-native Kustomize.
@@ -208,20 +209,6 @@ trace_smoke=passed export=console endpoint=local-console steps=7
 - The AgentOps overlay uses an in-cluster collector boundary instead of having
   application pods export directly to Phoenix.
 
-## What This Does Not Prove Yet
-
-- No live cluster pod scheduling screenshot is included in this evidence file.
-- `kubectl apply --dry-run=client` still attempted API discovery against the
-  current kube context (`localhost:8080`) and failed because no local cluster is
-  running. This evidence therefore uses `kubectl kustomize` render checks plus
-  local YAML structural checks.
-- The Triton model PVC still needs to be populated in a real cluster before full
-  `/generate` traffic should be expected to pass.
-- The shared outputs PVC requires a storage class that supports `ReadWriteMany`,
-  or a production replacement such as object storage.
-- Production hardening such as TLS, image registry pinning, auth, network policy,
-  and secret management is intentionally deferred.
-
 ## Live Smoke Path
 
 Added on 2026-06-17:
@@ -230,7 +217,9 @@ Added on 2026-06-17:
 .venv/bin/python scripts/k8s_live_smoke.py \
   --context kind-dessert-ad-studio \
   --kustomize-path deploy/k8s/base \
-  --namespace dessert-ad-studio
+  --namespace dessert-ad-studio \
+  --timeout 900 \
+  --summary docs/evidence/k8s-live-smoke-summary.json
 ```
 
 The script is intentionally fail-closed. By default it refuses to apply
@@ -243,19 +232,77 @@ manifests unless the active context looks local/test-scoped:
 - `k3d-*`
 
 When a safe context is available, the script applies the base Kustomize stack,
-waits for `deploy/api`, `deploy/app`, and `deploy/triton`, port-forwards
-`svc/api`, runs `scripts/api_smoke.py`, and writes a redacted summary to
+syncs `models/` into the `triton-models` PVC, restarts `deploy/triton`, waits
+for `deploy/api`, `deploy/app`, and `deploy/triton`, port-forwards `svc/api`,
+runs `scripts/api_smoke.py`, and writes a redacted summary to
 `docs/evidence/k8s-live-smoke-summary.json`.
 
 Current machine status on 2026-06-17:
 
 - `kubectl` is installed.
-- No current Kubernetes context is configured.
-- Docker CLI is installed, but no Docker server is currently available.
-- `kind`, `minikube`, and `k3d` are not installed.
+- Docker Desktop is running.
+- `kind` v0.32.0 is installed.
+- `kind-dessert-ad-studio` local/test context is available.
+- `dessert-ad-studio-api:latest` and `dessert-ad-studio-app:latest` were built
+  locally and loaded into the kind node.
 
-Therefore this repository now has the live smoke automation and guardrail, but
-the actual live cluster proof is still pending a local/test Kubernetes context.
+Live smoke result:
+
+```text
+API smoke passed: http://127.0.0.1:18080
+k8s_live_smoke=passed
+context=kind-dessert-ad-studio
+elapsed_ms=98406
+skip_generate=false
+kubectl_apply=true
+triton_model_sync=true
+rollout_api=true
+rollout_app=true
+rollout_triton=true
+api_port_forward=true
+api_smoke=true
+```
+
+Post-smoke pod state:
+
+```text
+api      1/1 Running
+app      1/1 Running
+triton   1/1 Running
+```
+
+Triton model load excerpt:
+
+```text
+| template_scorer | 1 | READY |
+```
+
+The redacted machine-readable summary is committed at
+`docs/evidence/k8s-live-smoke-summary.json`.
+
+## What This Proves
+
+- The base stack applies to a real local Kubernetes cluster.
+- `outputs` and `triton-models` PVCs bind under `kind`'s default local-path
+  provisioner.
+- `models/` is synced into the `triton-models` PVC and Triton loads
+  `template_scorer` as `READY`.
+- `deploy/api`, `deploy/app`, and `deploy/triton` reach rollout success.
+- Port-forwarded API smoke passes with `skip_generate=false`, which exercises
+  the `/generate` path through the Triton template scorer.
+
+## What This Does Not Prove Yet
+
+- The base `ReadWriteOnce` outputs PVC is local/test friendly but is not a
+  multi-node artifact strategy. Production scaling should use object storage or
+  a dedicated `ReadWriteMany` overlay/storage class.
+- The live proof covers the synchronous API/UI/Triton base stack. It does not
+  yet include the async worker/Redis/Postgres path demonstrated by Docker
+  Compose.
+- `kind` does not include metrics-server by default, so HPA rendering is proven
+  but live CPU autoscaling behavior is not.
+- Production hardening such as TLS, image registry pinning, auth, network policy,
+  and secret management is intentionally deferred.
 
 ## Reproduction Commands
 

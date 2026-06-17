@@ -28,6 +28,7 @@ from scripts.api_smoke import run_smoke as run_api_smoke  # noqa: E402
 
 DEFAULT_ALLOWED_CONTEXT_PATTERN = r"^(kind-.+|minikube|docker-desktop|rancher-desktop|k3d-.+)$"
 DEFAULT_SUMMARY_PATH = Path("docs/evidence/k8s-live-smoke-summary.json")
+DEFAULT_TRITON_MODELS_PATH = Path("models")
 
 
 @dataclass(frozen=True)
@@ -69,6 +70,7 @@ def run_k8s_live_smoke(
     timeout_seconds: float = 180.0,
     skip_generate: bool = False,
     cleanup: bool = False,
+    triton_models_path: Path | None = DEFAULT_TRITON_MODELS_PATH,
     runner: CommandRunner | None = None,
     api_smoke: ApiSmoke = run_api_smoke,
     port_forward_factory: PortForwardFactory | None = None,
@@ -80,6 +82,7 @@ def run_k8s_live_smoke(
     checks = {
         "safe_context": False,
         "kubectl_apply": False,
+        "triton_model_sync": False,
         "rollout_api": False,
         "rollout_app": False,
         "rollout_triton": False,
@@ -104,6 +107,17 @@ def run_k8s_live_smoke(
             commands=commands,
         )
         checks["kubectl_apply"] = True
+
+        if triton_models_path is not None:
+            _sync_triton_models(
+                context=active_context,
+                namespace=namespace,
+                models_path=triton_models_path,
+                runner=runner,
+                timeout_seconds=timeout_seconds,
+                commands=commands,
+            )
+            checks["triton_model_sync"] = True
 
         for deployment, check_name in (
             ("deploy/api", "rollout_api"),
@@ -163,6 +177,7 @@ def run_k8s_live_smoke(
         "context": active_context,
         "namespace": namespace,
         "kustomize_path": str(kustomize_path),
+        "triton_models_path": str(triton_models_path) if triton_models_path else None,
         "elapsed_ms": round((perf_counter() - started) * 1000),
         "skip_generate": skip_generate,
         "cleanup_requested": cleanup,
@@ -214,6 +229,109 @@ def _assert_safe_context(
 
 def _kubectl(context: str, *args: str) -> list[str]:
     return ["kubectl", "--context", context, *args]
+
+
+def _sync_triton_models(
+    *,
+    context: str,
+    namespace: str,
+    models_path: Path,
+    runner: CommandRunner,
+    timeout_seconds: float,
+    commands: list[list[str]],
+) -> None:
+    if not models_path.exists():
+        raise CommandFailedError(f"triton models path does not exist: {models_path}")
+
+    sync_pod = "triton-model-sync"
+    _run_checked(
+        _kubectl(context, "-n", namespace, "delete", "pod", sync_pod, "--ignore-not-found"),
+        runner=runner,
+        timeout_seconds=timeout_seconds,
+        commands=commands,
+    )
+
+    overrides = json.dumps(
+        {
+            "spec": {
+                "containers": [
+                    {
+                        "name": sync_pod,
+                        "image": "busybox:1.36",
+                        "command": ["sh", "-c", "sleep 3600"],
+                        "volumeMounts": [{"name": "triton-models", "mountPath": "/models"}],
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "triton-models",
+                        "persistentVolumeClaim": {"claimName": "triton-models"},
+                    }
+                ],
+            }
+        },
+        separators=(",", ":"),
+    )
+    _run_checked(
+        _kubectl(
+            context,
+            "-n",
+            namespace,
+            "run",
+            sync_pod,
+            "--image=busybox:1.36",
+            "--restart=Never",
+            "--labels=app=triton-model-sync",
+            "--overrides",
+            overrides,
+        ),
+        runner=runner,
+        timeout_seconds=timeout_seconds,
+        commands=commands,
+    )
+
+    try:
+        _run_checked(
+            _kubectl(
+                context,
+                "-n",
+                namespace,
+                "wait",
+                f"pod/{sync_pod}",
+                "--for=condition=Ready",
+                f"--timeout={round(timeout_seconds)}s",
+            ),
+            runner=runner,
+            timeout_seconds=timeout_seconds,
+            commands=commands,
+        )
+        _run_checked(
+            _kubectl(
+                context,
+                "-n",
+                namespace,
+                "cp",
+                f"{models_path.as_posix().rstrip('/')}/.",
+                f"{sync_pod}:/models",
+            ),
+            runner=runner,
+            timeout_seconds=timeout_seconds,
+            commands=commands,
+        )
+    finally:
+        _run_checked(
+            _kubectl(context, "-n", namespace, "delete", "pod", sync_pod, "--ignore-not-found"),
+            runner=runner,
+            timeout_seconds=timeout_seconds,
+            commands=commands,
+        )
+
+    _run_checked(
+        _kubectl(context, "-n", namespace, "rollout", "restart", "deploy/triton"),
+        runner=runner,
+        timeout_seconds=timeout_seconds,
+        commands=commands,
+    )
 
 
 def _run_checked(
@@ -281,6 +399,8 @@ def main() -> int:
     parser.add_argument("--timeout", type=float, default=180.0)
     parser.add_argument("--skip-generate", action="store_true")
     parser.add_argument("--cleanup", action="store_true")
+    parser.add_argument("--triton-models-path", type=Path, default=DEFAULT_TRITON_MODELS_PATH)
+    parser.add_argument("--no-sync-triton-models", action="store_true")
     parser.add_argument("--summary", type=Path, default=DEFAULT_SUMMARY_PATH)
     args = parser.parse_args()
 
@@ -296,6 +416,7 @@ def main() -> int:
             timeout_seconds=args.timeout,
             skip_generate=args.skip_generate,
             cleanup=args.cleanup,
+            triton_models_path=None if args.no_sync_triton_models else args.triton_models_path,
         )
     except (
         UnsafeKubernetesContextError,

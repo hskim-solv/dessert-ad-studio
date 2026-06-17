@@ -55,18 +55,20 @@ script는 다음 순서로 실행한다.
 1. `kubectl config current-context` 확인.
 2. context allowlist 검증. 허용되지 않으면 apply 전 실패.
 3. `kubectl apply -k deploy/k8s/base`.
-4. `deploy/api`, `deploy/app`, `deploy/triton` rollout status 확인.
-5. `svc/api` port-forward.
-6. 기존 `scripts/api_smoke.py`의 API smoke 실행.
-7. redacted JSON summary 작성.
+4. `models/`를 `triton-models` PVC에 동기화하고 `deploy/triton`을 재시작.
+5. `deploy/api`, `deploy/app`, `deploy/triton` rollout status 확인.
+6. `svc/api` port-forward.
+7. 기존 `scripts/api_smoke.py`의 API smoke 실행.
+8. redacted JSON summary 작성.
 
 ## 결과 및 재평가 조건 (Consequences)
 
 - 이 선택으로 감수하는 것:
-  - 현재 machine에 local Kubernetes context가 없으면 live proof는 실행되지 않는다.
   - 이 script는 cluster를 생성하지 않는다.
   - 현재 base manifest는 worker/Redis/Postgres async path를 포함하지 않는다.
-  - Triton model PVC sync는 아직 별도 단계다.
+  - Triton model PVC sync는 local repo의 `models/`를 기준으로 처리한다.
+  - 2026-06-17 현재 machine에서는 `kind-dessert-ad-studio` context로 live proof를
+    완료했고, summary는 `docs/evidence/k8s-live-smoke-summary.json`에 남겼다.
 - 재평가 트리거:
   - 이 machine 또는 CI에 `kind`를 설치해 disposable cluster proof를 자동화할 때
     kind bootstrap script를 추가한다.

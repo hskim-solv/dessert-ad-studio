@@ -38,9 +38,11 @@ For production, prefer building a small custom Triton image or using a controlle
 
 ## Storage Notes
 
-The `outputs` PVC uses `ReadWriteMany` because the API can be scaled by HPA while
-the Streamlit UI reads generated artifacts. Use a storage class that supports
-RWX access, or replace this PVC with object storage in a production cluster.
+The base `outputs` PVC uses `ReadWriteOnce` so it works on local/test clusters
+such as `kind` with the default local-path provisioner. This is enough for the
+single-node deployability smoke. For multi-node production scaling, move
+generated artifacts to object storage or add an overlay with a storage class
+that supports `ReadWriteMany`.
 
 The `triton-models` PVC is `ReadWriteOnce` because the base manifest runs one
 Triton replica.
@@ -87,10 +89,11 @@ Check a running base stack:
 ```bash
 kubectl -n dessert-ad-studio get pods
 kubectl -n dessert-ad-studio port-forward svc/api 8000:8000
-python scripts/api_smoke.py --base-url http://127.0.0.1:8000 --skip-generate
+python scripts/api_smoke.py --base-url http://127.0.0.1:8000
 ```
 
-The smoke uses `--skip-generate` here because the Triton model PVC must be populated before full generation is expected to pass.
+Full generation requires the Triton model PVC to contain the repository layout
+from `models/`. The fail-closed smoke below performs that sync automatically.
 
 Fail-closed local/test context smoke:
 
@@ -98,11 +101,15 @@ Fail-closed local/test context smoke:
 .venv/bin/python scripts/k8s_live_smoke.py \
   --context kind-dessert-ad-studio \
   --kustomize-path deploy/k8s/base \
-  --namespace dessert-ad-studio
+  --namespace dessert-ad-studio \
+  --timeout 900 \
+  --summary docs/evidence/k8s-live-smoke-summary.json
 ```
 
 The script refuses unknown Kubernetes contexts unless `--allow-unsafe-context`
-is passed intentionally.
+is passed intentionally. It applies the base stack, syncs `models/` into the
+`triton-models` PVC, restarts Triton, waits for `api`/`app`/`triton`, runs API
+smoke, and writes a redacted summary.
 
 For AgentOps UI evidence:
 
