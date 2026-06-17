@@ -157,7 +157,8 @@ The Streamlit reviewer flow screenshots are in
 [`docs/evidence/streamlit-reviewer-flow.md`](docs/evidence/streamlit-reviewer-flow.md).
 Real-sample deterministic preservation evidence is in
 [`docs/evidence/real-sample-preservation.md`](docs/evidence/real-sample-preservation.md).
-The first paid OpenAI image-edit preservation gate is documented in
+The first paid OpenAI image-edit preservation gate and the strengthened
+provider-quality gate definition are documented in
 [`docs/evidence/openai-image-edit-preservation.md`](docs/evidence/openai-image-edit-preservation.md).
 The README architecture image is
 [`docs/evidence/assets/architecture.svg`](docs/evidence/assets/architecture.svg).
@@ -272,7 +273,7 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Run a second paid OpenAI image-edit prompt/model iteration only if the failed live gate should be improved.
+1. Run the strengthened `gpt-image-2` + `quality=medium` provider-quality image-edit gate only if a second paid iteration is approved.
 2. Add product-preserving segmentation/composition only if evals show a real gap.
 3. Add serving optimization benchmarks only when vLLM/TensorRT/SGLang has a measured role.
 4. Keep FastMCP/A2A as thin wrappers after the workflow/API is stable.

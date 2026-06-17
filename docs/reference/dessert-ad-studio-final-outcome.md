@@ -92,7 +92,7 @@ flowchart LR
 | Latency | Mock path p95 <= 2 seconds; OpenAI path p95 <= 30 seconds; FLUX2/GPU path measured and documented separately. |
 | Copy quality | Across 10-20 representative samples: Korean text presence 100%, product-name inclusion >= 90%, prohibited-claim violations 0. |
 | Retrieval quality | Retrieval eval set category hit rate >= 80%; prohibited-claims guidance hit rate 100%. |
-| Image quality | Product-preservation checklist pass rate >= 80%; Korean overlay rendering failures 0. Deterministic public-sample preservation first gate: pass rate 1.00, minimum top-region pixel match 1.00. Paid OpenAI image-edit first gate failed and is documented as model-quality evidence, not hidden. |
+| Image quality | Product-preservation checklist pass rate >= 80%; Korean overlay rendering failures 0. Deterministic public-sample preservation first gate: pass rate 1.00, minimum top-region pixel match 1.00. Paid OpenAI image-edit first gate failed and is documented as model-quality evidence, not hidden. The next provider-quality gate now requires multi-sample ROI color/hash/edge preservation, latency, redaction, and text-contamination checks. |
 | Error handling | Backend failures map to Korean `AdBackendError`; unknown backend, unsupported reference image, and missing API key fail clearly. |
 | Regression guard | `pytest`, `ruff`, API smoke, retrieval eval, and workflow eval commands are documented and reproducible. |
 
@@ -174,6 +174,6 @@ The project is complete when it can be described accurately as:
 The immediate M6 portfolio-packaging gate is complete. The evidence index now
 links the main quality, trace, deployment, product-analysis, demo gallery,
 architecture, Streamlit reviewer-flow, real-sample preservation proof, and the
-first paid OpenAI image-edit failure report. The next milestone should run a
-second paid OpenAI image-edit prompt/model iteration only if this failed live
-gate needs to become a passing provider-quality gate.
+first paid OpenAI image-edit failure report. The next milestone should run the
+strengthened `gpt-image-2` + `quality=medium` provider-quality gate only if a
+second paid image-edit iteration is approved.
