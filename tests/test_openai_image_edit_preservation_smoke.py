@@ -7,6 +7,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 from dessert_ad_studio.backends.base import ImageResult
+from dessert_ad_studio.schemas import GenerationRequest
 from scripts.openai_image_edit_preservation_smoke import (
     ReferenceSample,
     build_live_image_edit_preservation_summary,
@@ -105,6 +106,10 @@ def test_build_provider_quality_gate_summary_checks_multiple_samples_and_redacts
         item["generated_image"]["path"] == "redacted_outputs_path"
         for item in summary["sample_results"]
     )
+    assert sorted(path.name for path in output_dir.iterdir()) == [
+        "generated-말차_푸딩.png",
+        "generated-피스타치오_케이크.png",
+    ]
 
     persisted = json.loads(summary_path.read_text(encoding="utf-8"))
     serialized = json.dumps(persisted, ensure_ascii=False)
@@ -240,24 +245,36 @@ def _write_reference(
     image.save(path)
 
 
-def _fake_image_generator(*, reference_bytes: bytes, output_dir: Path, prompt: str) -> ImageResult:
+def _fake_image_generator(
+    *,
+    reference_bytes: bytes,
+    output_dir: Path,
+    prompt: str,
+    request: GenerationRequest,
+) -> ImageResult:
     assert reference_bytes
     assert "원본 사진의 상품 형태" in prompt
+    assert request.product_name
     output_dir.mkdir(parents=True, exist_ok=True)
     with Image.open(BytesIO(reference_bytes)) as source:
         image = source.convert("RGB").resize((1024, 1024))
     draw = ImageDraw.Draw(image)
     draw.rectangle((0, image.height - 40, image.width, image.height), fill=(35, 35, 35))
-    output_path = output_dir / "generated.png"
+    output_path = output_dir / f"generated-{request.product_name.replace(' ', '_')}.png"
     image.save(output_path)
     return ImageResult(path=str(output_path), usage={"total_tokens": 123})
 
 
 def _fake_text_heavy_mismatch_generator(
-    *, reference_bytes: bytes, output_dir: Path, prompt: str
+    *,
+    reference_bytes: bytes,
+    output_dir: Path,
+    prompt: str,
+    request: GenerationRequest,
 ) -> ImageResult:
     assert reference_bytes
     assert "이미지 안에" in prompt
+    assert request.product_name
     output_dir.mkdir(parents=True, exist_ok=True)
     image = Image.new("RGB", (1024, 1024), color=(245, 245, 245))
     draw = ImageDraw.Draw(image)

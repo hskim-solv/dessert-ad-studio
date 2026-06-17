@@ -256,6 +256,7 @@ def _run_reference_sample(
         reference_bytes=reference_bytes,
         output_dir=output_dir,
         prompt=prompt,
+        request=request,
     )
     elapsed_ms = round((perf_counter() - started) * 1000)
     generated_path = Path(result.path)
@@ -292,16 +293,13 @@ def _run_reference_sample(
 
 
 def _live_image_generator(backend: OpenAIImageBackend) -> ImageGenerator:
-    request = GenerationRequest(
-        campaign_purpose="seasonal_event",
-        product_name="말차 푸딩",
-        tone="premium",
-        template_hint="minimal_premium",
-        price_text="2개 세트",
-        user_constraints="원본 사진의 상품 형태와 컵 실루엣을 보존",
-    )
-
-    def generate(*, reference_bytes: bytes, output_dir: Path, prompt: str) -> ImageResult:
+    def generate(
+        *,
+        reference_bytes: bytes,
+        output_dir: Path,
+        prompt: str,
+        request: GenerationRequest,
+    ) -> ImageResult:
         output_dir.mkdir(parents=True, exist_ok=True)
         return backend.generate_image(
             request,
