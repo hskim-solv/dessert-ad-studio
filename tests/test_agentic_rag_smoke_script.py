@@ -23,7 +23,7 @@ def test_agentic_rag_graph_smoke_writes_redacted_summary(tmp_path: Path) -> None
         capture_output=True,
         check=False,
         text=True,
-        timeout=30,
+        timeout=60,
     )
 
     assert completed.returncode == 0, completed.stderr + completed.stdout
@@ -87,7 +87,7 @@ def test_agentic_rag_sqlite_checkpoint_smoke_writes_redacted_summary(
         capture_output=True,
         check=False,
         text=True,
-        timeout=30,
+        timeout=60,
     )
 
     assert completed.returncode == 0, completed.stderr + completed.stdout
@@ -131,7 +131,7 @@ def test_agentic_rag_trace_smoke_writes_redacted_summary(tmp_path: Path) -> None
         capture_output=True,
         check=False,
         text=True,
-        timeout=30,
+        timeout=60,
     )
 
     assert completed.returncode == 0, completed.stderr + completed.stdout

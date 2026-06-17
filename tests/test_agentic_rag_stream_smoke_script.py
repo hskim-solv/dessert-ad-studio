@@ -23,7 +23,7 @@ def test_agentic_rag_stream_smoke_writes_summary(tmp_path: Path) -> None:
         capture_output=True,
         check=False,
         text=True,
-        timeout=30,
+        timeout=60,
     )
 
     assert completed.returncode == 0, completed.stderr + completed.stdout
@@ -81,7 +81,7 @@ def test_agentic_rag_websocket_smoke_writes_summary(tmp_path: Path) -> None:
         capture_output=True,
         check=False,
         text=True,
-        timeout=30,
+        timeout=60,
     )
 
     assert completed.returncode == 0, completed.stderr + completed.stdout

@@ -40,6 +40,7 @@ LANES: dict[str, FastGateLane] = {
             ".venv/bin/python scripts/agentic_rag_websocket_smoke.py --output /tmp/agentic-rag-websocket-summary.json",
             ".venv/bin/python scripts/agentic_rag_sqlite_checkpoint_smoke.py --output /tmp/agentic-rag-sqlite-checkpoint-summary.json --checkpoint-db /tmp/agentic-rag-checkpoints.sqlite",
             ".venv/bin/python scripts/agentic_rag_trace_smoke.py --output /tmp/agentic-rag-trace-summary.json",
+            ".venv/bin/python scripts/agentic_rag_eval_guardrail.py --output /tmp/agentic-rag-eval-guardrail-summary.json",
         ),
         parallel_safe=True,
         notes="Uses /tmp outputs for generated summaries, traces, and SQLite checkpoints.",

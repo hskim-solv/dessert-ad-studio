@@ -35,6 +35,17 @@ AgenticRagNextAction = Literal[
     "inspect_failed_run",
 ]
 AgenticRagWorkerExecutor = Callable[["AgenticRagState"], dict[str, Any]]
+_ALLOWED_PLANNED_TOOLS = {
+    "document_retrieval",
+    "citation_builder",
+    "guardrail_check",
+    "generation_workflow",
+}
+_PROMPT_INJECTION_PATTERNS = (
+    ("instruction_override", ("ignore previous instructions", "이전 지시", "무시하고")),
+    ("system_prompt_exfiltration", ("system prompt", "시스템 프롬프트", "developer message")),
+    ("citation_bypass", ("retrieved docs", "출처 없이", "근거 없이")),
+)
 
 
 class AgenticRagRequestSummary(TypedDict, total=False):
@@ -50,6 +61,8 @@ class AgenticRagRequestSummary(TypedDict, total=False):
     revision_request_sha256: str
     reference_image_name_sha256: str
     retrieval_query: str
+    prompt_injection_signal_count: int
+    prompt_injection_categories: list[str]
 
 
 class AgenticRagApproval(TypedDict):
@@ -108,6 +121,7 @@ def build_agentic_rag_initial_state(
 ) -> AgenticRagState:
     """Build checkpoint-safe graph input from a potentially sensitive request."""
 
+    prompt_injection_categories = _prompt_injection_categories(request)
     request_summary: AgenticRagRequestSummary = {
         "campaign_purpose": request.campaign_purpose,
         "tone": request.tone,
@@ -125,6 +139,9 @@ def build_agentic_rag_initial_state(
         request_summary["revision_request_sha256"] = _hash_text(request.revision_request)
     if request.reference_image_name:
         request_summary["reference_image_name_sha256"] = _hash_text(request.reference_image_name)
+    if prompt_injection_categories:
+        request_summary["prompt_injection_signal_count"] = len(prompt_injection_categories)
+        request_summary["prompt_injection_categories"] = prompt_injection_categories
 
     return {
         "request_summary": request_summary,
@@ -423,6 +440,15 @@ def _guardrail_check(state: AgenticRagState) -> dict[str, Any]:
         reasons.append("paid_provider_requested")
     if state.get("estimated_cost_usd", 0.0) > state.get("approval_cost_threshold_usd", 0.0):
         reasons.append("estimated_cost_exceeds_threshold")
+    if state.get("request_summary", {}).get("prompt_injection_signal_count", 0) > 0:
+        reasons.append("prompt_injection_suspected")
+    tool_budget = state.get("plan", {}).get("tool_budget", {})
+    planned_tools = tool_budget.get("planned_tools", [])
+    max_tool_calls = tool_budget.get("max_tool_calls", 0)
+    if not set(planned_tools).issubset(_ALLOWED_PLANNED_TOOLS):
+        reasons.append("unapproved_tool_requested")
+    if isinstance(max_tool_calls, int) and len(planned_tools) > max_tool_calls:
+        reasons.append("tool_budget_exceeded")
     return {
         "approval": {
             "required": bool(reasons),
@@ -563,6 +589,19 @@ def _safe_retrieval_terms(request: GenerationRequest) -> list[str]:
 def _mentions_instagram(text: str) -> bool:
     normalized = text.lower()
     return "instagram" in normalized or "인스타" in normalized or "sns" in normalized
+
+
+def _prompt_injection_categories(request: GenerationRequest) -> list[str]:
+    text = " ".join(
+        value
+        for value in (request.user_constraints, request.revision_request)
+        if isinstance(value, str)
+    ).lower()
+    categories: list[str] = []
+    for category, patterns in _PROMPT_INJECTION_PATTERNS:
+        if any(pattern in text for pattern in patterns):
+            categories.append(category)
+    return categories
 
 
 def _trace_after(state: AgenticRagState, node_name: str) -> list[str]:

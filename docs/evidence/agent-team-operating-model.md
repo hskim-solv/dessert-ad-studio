@@ -42,7 +42,7 @@ Current tested behavior:
 - `--lane agentic-rag --dry-run` returns commands without executing them.
 - `--lane agentic-rag --execute` runs the Agentic RAG lane fast gate: focused
   tests plus graph, SSE/WebSocket stream/replay, SQLite checkpoint, and graph
-  trace smokes.
+  trace/eval/guardrail smokes.
 - `--lane paid-provider --dry-run` reports `paid_api: true` and
   `parallel_safe: false`.
 
