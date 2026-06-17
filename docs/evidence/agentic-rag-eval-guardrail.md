@@ -57,7 +57,7 @@ Current result:
 - context recall: `1.0`
 - promptfoo-compatible regression: `passed`
 - prompt-injection case: blocked before worker
-- tool budget: max tool calls `4`, no unexpected tools
+- tool budget: max tool calls `7`, no unexpected tools
 - raw inputs committed: `false`
 - CI gate: `.github/workflows/ci.yml` runs the same command on push/PR
 
@@ -75,6 +75,7 @@ Focused tests:
 .venv/bin/pytest \
   tests/test_agentic_rag.py::test_agentic_rag_graph_routes_prompt_injection_to_human_approval_without_raw_inputs \
   tests/test_agentic_rag.py::test_agentic_rag_guardrail_flags_unapproved_tool_and_budget \
+  tests/test_agentic_rag_tools.py \
   tests/test_ci_workflow.py::test_ci_runs_agentic_rag_eval_guardrail_gate \
   tests/test_agentic_rag_eval_guardrail_script.py -q
 ```

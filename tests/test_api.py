@@ -282,12 +282,14 @@ def test_agentic_rag_run_stream_emits_redacted_worker_events(
         "node_completed",
         "node_completed",
         "node_completed",
+        "node_completed",
         "run_completed",
     ]
     assert [
         event["data"].get("node") for event in events if event["event"] == "node_completed"
     ] == [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -345,6 +347,7 @@ def test_agentic_rag_run_replay_returns_redacted_sqlite_checkpoint_summary(
     assert replay["next_action"] == "return_cited_ad_package"
     assert replay["node_trace"] == [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -401,6 +404,7 @@ def test_agentic_rag_run_stream_uses_workflow_tracer_for_graph_nodes(
         record.name for record in tracer.records() if record.name.startswith("agentic_rag.")
     ] == [
         "agentic_rag.plan_campaign",
+        "agentic_rag.run_tool_suite",
         "agentic_rag.retrieve_context",
         "agentic_rag.build_citations",
         "agentic_rag.guardrail_check",
@@ -434,6 +438,7 @@ def test_agentic_rag_run_stream_routes_paid_provider_to_approval(
         event["data"].get("node") for event in events if event["event"] == "node_completed"
     ] == [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -480,6 +485,7 @@ def test_agentic_rag_run_websocket_emits_redacted_worker_events(
         "node_completed",
         "node_completed",
         "node_completed",
+        "node_completed",
         "run_completed",
     ]
     assert messages[0]["data"]["stream_protocol"] == "websocket"
@@ -489,6 +495,7 @@ def test_agentic_rag_run_websocket_emits_redacted_worker_events(
         message["data"].get("node") for message in messages if message["event"] == "node_completed"
     ] == [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -524,6 +531,7 @@ def test_agentic_rag_run_websocket_routes_paid_provider_to_approval(
         message["data"].get("node") for message in messages if message["event"] == "node_completed"
     ] == [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",

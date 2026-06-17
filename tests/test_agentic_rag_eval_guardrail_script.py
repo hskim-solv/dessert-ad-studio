@@ -42,7 +42,7 @@ def test_agentic_rag_eval_guardrail_script_writes_summary(tmp_path: Path) -> Non
     assert summary["promptfoo_regression"]["case_count"] == summary["golden_dataset"]["case_count"]
     assert summary["prompt_injection"]["passed"] is True
     assert summary["tool_budget"]["passed"] is True
-    assert summary["tool_budget"]["max_tool_calls"] == 4
+    assert summary["tool_budget"]["max_tool_calls"] == 7
     assert summary["tool_budget"]["unexpected_tools"] == []
     assert summary["raw_inputs_committed"] is False
 

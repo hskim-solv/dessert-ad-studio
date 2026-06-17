@@ -42,10 +42,12 @@ def test_agentic_rag_stream_smoke_writes_summary(tmp_path: Path) -> None:
         "node_completed",
         "node_completed",
         "node_completed",
+        "node_completed",
         "run_completed",
     ]
     assert summary["node_sequence"] == [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -100,10 +102,12 @@ def test_agentic_rag_websocket_smoke_writes_summary(tmp_path: Path) -> None:
         "node_completed",
         "node_completed",
         "node_completed",
+        "node_completed",
         "run_completed",
     ]
     assert summary["node_sequence"] == [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",

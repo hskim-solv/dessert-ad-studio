@@ -4,12 +4,14 @@ Date: 2026-06-17
 
 This evidence records the first OpenInference-compatible trace gate for the
 Agentic RAG control plane. It proves graph-node spans with redacted attributes
-without calling paid providers, web search, cloud services, or MCP tools.
+without calling paid providers, live web search, cloud services, or production
+MCP tools.
 
 ## Scope
 
 - LangGraph node spans for:
   - `plan_campaign`
+  - `run_tool_suite`
   - `retrieve_context`
   - `build_citations`
   - `guardrail_check`
@@ -17,6 +19,7 @@ without calling paid providers, web search, cloud services, or MCP tools.
   - `finalize`
 - OpenInference span kinds:
   - `AGENT`
+  - `TOOL`
   - `RETRIEVER`
   - `CHAIN`
   - `GUARDRAIL`
@@ -36,7 +39,7 @@ Current result:
 
 - `agentic_rag_trace_smoke`: `passed`
 - `scope`: `local_in_memory_openinference_trace_no_paid_api_call`
-- span count: `6`
+- span count: `7`
 - final status: `completed`
 - final next action: `return_cited_ad_package`
 - raw inputs committed: `false`

@@ -7,6 +7,7 @@ from typing import Any, Callable, Literal, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
+from dessert_ad_studio.agentic_tools import run_agentic_tool_suite
 from dessert_ad_studio.marketing_context import KeywordMarketingContextRetriever
 from dessert_ad_studio.observability import NoopWorkflowTracer, WorkflowTracer
 from dessert_ad_studio.schemas import (
@@ -37,6 +38,9 @@ AgenticRagNextAction = Literal[
 AgenticRagWorkerExecutor = Callable[["AgenticRagState"], dict[str, Any]]
 _ALLOWED_PLANNED_TOOLS = {
     "document_retrieval",
+    "web_search",
+    "sql_query",
+    "internal_api",
     "citation_builder",
     "guardrail_check",
     "generation_workflow",
@@ -82,6 +86,7 @@ class AgenticRagState(TypedDict, total=False):
     estimated_cost_usd: float
     approval_cost_threshold_usd: float
     plan: dict[str, Any]
+    tool_results: dict[str, Any]
     marketing_context: dict[str, Any]
     citations: list[AgenticRagCitation]
     approval: AgenticRagApproval
@@ -169,6 +174,10 @@ def build_agentic_rag_graph(
         _traced_node("retrieve_context", "retriever", _retrieve_context, tracer),
     )
     workflow.add_node(
+        "run_tool_suite",
+        _traced_node("run_tool_suite", "tool", _run_tool_suite, tracer),
+    )
+    workflow.add_node(
         "build_citations",
         _traced_node("build_citations", "chain", _build_citations, tracer),
     )
@@ -197,7 +206,8 @@ def build_agentic_rag_graph(
         )
 
     workflow.add_edge(START, "plan_campaign")
-    workflow.add_edge("plan_campaign", "retrieve_context")
+    workflow.add_edge("plan_campaign", "run_tool_suite")
+    workflow.add_edge("run_tool_suite", "retrieve_context")
     workflow.add_edge("retrieve_context", "build_citations")
     workflow.add_edge("build_citations", "guardrail_check")
     if worker_executor is None:
@@ -361,6 +371,10 @@ def _agentic_rag_span_attributes(update: dict[str, Any]) -> dict[str, Any]:
             "retrieved_docs_count"
         )
 
+    tool_results = update.get("tool_results")
+    if isinstance(tool_results, dict):
+        attributes["agentic_rag.tool_result_count"] = len(tool_results)
+
     citations = update.get("citations")
     if isinstance(citations, list):
         attributes["agentic_rag.citation_count"] = len(citations)
@@ -390,9 +404,12 @@ def _plan_campaign(state: AgenticRagState) -> dict[str, Any]:
             "worker": "generation_workflow",
             "retrieval_strategy": "keyword_marketing_context",
             "tool_budget": {
-                "max_tool_calls": 4,
+                "max_tool_calls": 7,
                 "planned_tools": [
                     "document_retrieval",
+                    "web_search",
+                    "sql_query",
+                    "internal_api",
                     "citation_builder",
                     "guardrail_check",
                     "generation_workflow",
@@ -403,6 +420,15 @@ def _plan_campaign(state: AgenticRagState) -> dict[str, Any]:
         },
         "status": "planned",
         "node_trace": _trace_after(state, "plan_campaign"),
+    }
+
+
+def _run_tool_suite(state: AgenticRagState) -> dict[str, Any]:
+    return {
+        "tool_results": run_agentic_tool_suite(
+            request_summary=dict(state.get("request_summary", {}))
+        ),
+        "node_trace": _trace_after(state, "run_tool_suite"),
     }
 
 

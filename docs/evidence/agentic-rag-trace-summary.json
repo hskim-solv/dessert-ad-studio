@@ -6,6 +6,7 @@
   "final_next_action": "return_cited_ad_package",
   "span_names": [
     "agentic_rag.plan_campaign",
+    "agentic_rag.run_tool_suite",
     "agentic_rag.retrieve_context",
     "agentic_rag.build_citations",
     "agentic_rag.guardrail_check",
@@ -14,13 +15,14 @@
   ],
   "span_kinds": [
     "AGENT",
+    "TOOL",
     "RETRIEVER",
     "CHAIN",
     "GUARDRAIL",
     "TOOL",
     "CHAIN"
   ],
-  "span_count": 6,
+  "span_count": 7,
   "redacted_attribute_keys": [
     "agentic_rag.approval_reason_count",
     "agentic_rag.approval_required",
@@ -36,6 +38,7 @@
     "agentic_rag.retrieved_docs_count",
     "agentic_rag.retriever_backend",
     "agentic_rag.status",
+    "agentic_rag.tool_result_count",
     "agentic_rag.used_reference",
     "agentic_rag.worker_status"
   ],

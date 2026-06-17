@@ -3,16 +3,18 @@
 Date: 2026-06-17
 
 This evidence records the first offline LangGraph control-plane gate for
-Dessert Ad Studio. It proves the graph skeleton and privacy boundary without
-calling paid providers, web search, or MCP tools. It also proves that the graph
-can dispatch the existing local mock image/copy generation workflow as a worker
-node after guardrails pass.
+Dessert Ad Studio. It proves the graph skeleton, local tool-suite node, and
+privacy boundary without calling paid providers, live web search, or production
+MCP tools. It also proves that the graph can dispatch the existing local mock
+image/copy generation workflow as a worker node after guardrails pass.
 
 ## Scope
 
 - LangGraph `StateGraph` with typed state schema.
-- Deterministic planner, retrieval, citation, guardrail, worker, reflection,
-  HITL, and finalize nodes.
+- Deterministic planner, local tool-suite, retrieval, citation, guardrail,
+  worker, reflection, HITL, and finalize nodes.
+- Local tool-suite node for web search snapshot, allowlisted SQLite query, and
+  in-process internal API policy preview.
 - Conditional edge from guardrail check to either human approval or worker
   dispatch.
 - Worker execution through the existing `run_generation_workflow()` path using
@@ -44,13 +46,14 @@ Approval route:
 - next action: `wait_for_human_approval`
 - node trace:
   - `plan_campaign`
+  - `run_tool_suite`
   - `retrieve_context`
   - `build_citations`
   - `guardrail_check`
   - `human_approval`
 - retrieved docs: `3`
 - citations: `3`
-- checkpoints: `7`
+- checkpoints: `8`
 - raw inputs committed: `false`
 
 Worker route:
@@ -63,12 +66,13 @@ Worker route:
 - copy options: `3`
 - node trace:
   - `plan_campaign`
+  - `run_tool_suite`
   - `retrieve_context`
   - `build_citations`
   - `guardrail_check`
   - `execute_worker`
   - `finalize`
-- checkpoints: `8`
+- checkpoints: `9`
 - raw inputs committed: `false`
 
 ## Reproduce
@@ -93,5 +97,5 @@ This is not yet the full Agentic RAG system. The following remain pending:
 - SSE/WebSocket streaming
 - production API graph wiring
 - Ragas and promptfoo eval gates
-- web search, SQL, internal API, and MCP tools
+- live web search, production SQL access, and proven MCP package execution
 - production citation assembly over generated ad packages

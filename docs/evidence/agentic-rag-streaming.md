@@ -4,7 +4,8 @@ Date: 2026-06-17
 
 This evidence records the first FastAPI async SSE and WebSocket run-streaming
 gate for the Agentic RAG control plane. It uses the local mock workflow path
-and does not call paid providers, web search, cloud services, or MCP tools.
+and does not call paid providers, live web search, cloud services, or production
+MCP tools.
 
 ## Scope
 
@@ -19,6 +20,7 @@ and does not call paid providers, web search, cloud services, or MCP tools.
 - WebSocket messages use the same event names and redacted payload schema
 - node progress for:
   - `plan_campaign`
+  - `run_tool_suite`
   - `retrieve_context`
   - `build_citations`
   - `guardrail_check`
@@ -49,7 +51,7 @@ Current SSE result:
 - copy options: `3`
 - checkpointing enabled: `true`
 - replay checkpoint backend: `sqlite`
-- replay checkpoints: `8`
+- replay checkpoints: `9`
 - replay status: `completed`
 - replay next action: `return_cited_ad_package`
 - raw inputs committed: `false`

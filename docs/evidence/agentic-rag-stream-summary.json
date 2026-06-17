@@ -13,10 +13,12 @@
     "node_completed",
     "node_completed",
     "node_completed",
+    "node_completed",
     "run_completed"
   ],
   "node_sequence": [
     "plan_campaign",
+    "run_tool_suite",
     "retrieve_context",
     "build_citations",
     "guardrail_check",
@@ -30,9 +32,10 @@
   "replay_status": "completed",
   "replay_next_action": "return_cited_ad_package",
   "replay_checkpoint_backend": "sqlite",
-  "replay_checkpoint_count": 8,
+  "replay_checkpoint_count": 9,
   "replay_node_sequence": [
     "plan_campaign",
+    "run_tool_suite",
     "retrieve_context",
     "build_citations",
     "guardrail_check",

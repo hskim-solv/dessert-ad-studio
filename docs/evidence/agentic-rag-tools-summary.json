@@ -1,0 +1,62 @@
+{
+  "agentic_rag_tools_smoke": "passed",
+  "scope": "local_tool_suite_no_network_no_paid_api_call",
+  "evidence_date": "2026-06-17",
+  "planned_tools": [
+    "document_retrieval",
+    "web_search",
+    "sql_query",
+    "internal_api",
+    "citation_builder",
+    "guardrail_check",
+    "generation_workflow"
+  ],
+  "max_tool_calls": 7,
+  "tool_result_keys": [
+    "internal_api",
+    "sql_query",
+    "web_search"
+  ],
+  "web_search": {
+    "tool": "web_search",
+    "mode": "local_curated_snapshot",
+    "result_count": 2,
+    "source_ids": [
+      "hiring-agent-rag-tools",
+      "ad-policy-local-guides"
+    ]
+  },
+  "sql_query": {
+    "tool": "sql_query",
+    "mode": "sqlite_allowlisted_query",
+    "query_id": "template_policy_summary",
+    "row_count": 3,
+    "min_score_threshold": 0.62,
+    "policy_guardrail_count": 3
+  },
+  "internal_api": {
+    "tool": "internal_api",
+    "mode": "in_process_contract",
+    "endpoint": "preview_generation_policy",
+    "requires_reference_image": false,
+    "recommended_review_lane": "standard",
+    "policy_count": 3
+  },
+  "document_retrieval": {
+    "retriever_backend": "keyword",
+    "retrieved_docs_count": 3,
+    "source_doc_count": 3
+  },
+  "approval_required": false,
+  "approval_reasons": [],
+  "node_trace": [
+    "plan_campaign",
+    "run_tool_suite",
+    "retrieve_context",
+    "build_citations",
+    "guardrail_check",
+    "finalize"
+  ],
+  "mcp_server_scaffold": "mcp_servers/dessert_ad_studio_server.py",
+  "raw_inputs_committed": false
+}

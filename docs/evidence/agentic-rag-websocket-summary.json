@@ -13,10 +13,12 @@
     "node_completed",
     "node_completed",
     "node_completed",
+    "node_completed",
     "run_completed"
   ],
   "node_sequence": [
     "plan_campaign",
+    "run_tool_suite",
     "retrieve_context",
     "build_citations",
     "guardrail_check",

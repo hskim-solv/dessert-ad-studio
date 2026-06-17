@@ -40,13 +40,16 @@
   },
   "tool_budget": {
     "passed": true,
-    "max_tool_calls": 4,
-    "planned_tool_count": 4,
+    "max_tool_calls": 7,
+    "planned_tool_count": 7,
     "allowed_tools": [
       "citation_builder",
       "document_retrieval",
       "generation_workflow",
-      "guardrail_check"
+      "guardrail_check",
+      "internal_api",
+      "sql_query",
+      "web_search"
     ],
     "unexpected_tools": [],
     "case_count": 13
@@ -59,6 +62,7 @@
       "next_action": "return_cited_ad_package",
       "node_trace": [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -144,6 +148,7 @@
       "next_action": "return_cited_ad_package",
       "node_trace": [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -229,6 +234,7 @@
       "next_action": "return_cited_ad_package",
       "node_trace": [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -314,6 +320,7 @@
       "next_action": "return_cited_ad_package",
       "node_trace": [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -399,6 +406,7 @@
       "next_action": "return_cited_ad_package",
       "node_trace": [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -484,6 +492,7 @@
       "next_action": "return_cited_ad_package",
       "node_trace": [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -569,6 +578,7 @@
       "next_action": "return_cited_ad_package",
       "node_trace": [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -654,6 +664,7 @@
       "next_action": "return_cited_ad_package",
       "node_trace": [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -739,6 +750,7 @@
       "next_action": "return_cited_ad_package",
       "node_trace": [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -824,6 +836,7 @@
       "next_action": "return_cited_ad_package",
       "node_trace": [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -909,6 +922,7 @@
       "next_action": "return_cited_ad_package",
       "node_trace": [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -994,6 +1008,7 @@
       "next_action": "wait_for_human_approval",
       "node_trace": [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -1085,6 +1100,7 @@
       "next_action": "return_cited_ad_package",
       "node_trace": [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",

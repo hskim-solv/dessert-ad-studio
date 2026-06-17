@@ -35,6 +35,7 @@ def test_agentic_rag_graph_smoke_writes_redacted_summary(tmp_path: Path) -> None
     assert summary["approval_route"]["next_action"] == "wait_for_human_approval"
     assert summary["approval_route"]["node_trace"] == [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -49,6 +50,7 @@ def test_agentic_rag_graph_smoke_writes_redacted_summary(tmp_path: Path) -> None
     assert summary["worker_route"]["copy_option_count"] == 3
     assert summary["worker_route"]["node_trace"] == [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -141,13 +143,67 @@ def test_agentic_rag_trace_smoke_writes_redacted_summary(tmp_path: Path) -> None
     assert summary["scope"] == "local_in_memory_openinference_trace_no_paid_api_call"
     assert summary["span_names"] == [
         "agentic_rag.plan_campaign",
+        "agentic_rag.run_tool_suite",
         "agentic_rag.retrieve_context",
         "agentic_rag.build_citations",
         "agentic_rag.guardrail_check",
         "agentic_rag.execute_worker",
         "agentic_rag.finalize",
     ]
-    assert summary["span_kinds"] == ["AGENT", "RETRIEVER", "CHAIN", "GUARDRAIL", "TOOL", "CHAIN"]
+    assert summary["span_kinds"] == [
+        "AGENT",
+        "TOOL",
+        "RETRIEVER",
+        "CHAIN",
+        "GUARDRAIL",
+        "TOOL",
+        "CHAIN",
+    ]
+    assert summary["raw_inputs_committed"] is False
+
+    serialized = json.dumps(summary, ensure_ascii=False)
+    assert "비공개 말차 푸딩" not in serialized
+    assert "VIP 고객" not in serialized
+
+
+def test_agentic_rag_tools_smoke_writes_redacted_summary(tmp_path: Path) -> None:
+    output_path = tmp_path / "agentic-rag-tools-summary.json"
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "scripts/agentic_rag_tools_smoke.py",
+            "--output",
+            str(output_path),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=60,
+    )
+
+    assert completed.returncode == 0, completed.stderr + completed.stdout
+    summary = json.loads(output_path.read_text(encoding="utf-8"))
+
+    assert summary["agentic_rag_tools_smoke"] == "passed"
+    assert summary["scope"] == "local_tool_suite_no_network_no_paid_api_call"
+    assert summary["planned_tools"] == [
+        "document_retrieval",
+        "web_search",
+        "sql_query",
+        "internal_api",
+        "citation_builder",
+        "guardrail_check",
+        "generation_workflow",
+    ]
+    assert summary["max_tool_calls"] == 7
+    assert summary["tool_result_keys"] == ["internal_api", "sql_query", "web_search"]
+    assert summary["web_search"]["mode"] == "local_curated_snapshot"
+    assert summary["sql_query"]["mode"] == "sqlite_allowlisted_query"
+    assert summary["internal_api"]["mode"] == "in_process_contract"
+    assert summary["document_retrieval"]["retriever_backend"] == "keyword"
+    assert summary["mcp_server_scaffold"] == "mcp_servers/dessert_ad_studio_server.py"
     assert summary["raw_inputs_committed"] is False
 
     serialized = json.dumps(summary, ensure_ascii=False)

@@ -32,9 +32,12 @@ Verified:
 - Deterministic Korean overlay and demo banner generation.
 - Curated marketing retrieval eval plus a measured pgvector storage/query lane.
 - Offline LangGraph control-plane first gate with typed state, conditional
-  HITL routing, keyword retrieval, citations, checkpoint evidence, local mock
-  worker execution, retry/reflection test coverage, and redacted summary
-  artifact.
+  HITL routing, local tool-suite node, keyword retrieval, citations, checkpoint
+  evidence, local mock worker execution, retry/reflection test coverage, and
+  redacted summary artifact.
+- Local Agentic RAG tool-suite first gate with document retrieval, local
+  web-search snapshot, allowlisted SQLite SQL query, in-process internal API
+  policy preview, and FastMCP server scaffold.
 - FastAPI async SSE run-streaming and local SQLite replay first gate for the
   Agentic RAG control plane, with node progress events through the local mock
   worker and redacted event/replay payloads.
@@ -55,10 +58,12 @@ Known gaps:
   preservation path and offline visual proxy pass, but provider-quality image
   editing is not proven.
 - Agentic RAG is still at first-gate maturity. Local SQLite checkpointing,
-  SSE/WebSocket streaming, graph tracing, and a local eval/guardrail gate are
-  proven, but reviewer approval UI, bidirectional approval, production stream
-  replay retention policy, production storage policy, production trace retention
-  policy, and full Ragas/promptfoo package execution are still pending.
+  SSE/WebSocket streaming, graph tracing, local tool-suite orchestration, and a
+  local eval/guardrail gate are proven, but reviewer approval UI, bidirectional
+  approval, live web search, production SQL policy, MCP package execution,
+  production stream replay retention policy, production storage policy,
+  production trace retention policy, and full Ragas/promptfoo package execution
+  are still pending.
 - Current eval sets are demo-scale and need a larger real/product-like scenario
   matrix before broader quality claims.
 
@@ -125,8 +130,9 @@ python scripts/a2a_smoke.py --base-url http://127.0.0.1:8000
 ```
 
 Use A2A when another agent needs to discover and call Dessert Ad Studio as a remote
-agent capability. Use the normal REST API for app/frontend calls. FastMCP remains a
-future tool-server layer for exposing lower-level typed tools.
+agent capability. Use the normal REST API for app/frontend calls. FastMCP now has
+a scaffold at `mcp_servers/dessert_ad_studio_server.py`, but it is still an
+optional tool-server layer until the `mcp` extra and runtime smoke are measured.
 
 Run Streamlit:
 
@@ -324,10 +330,12 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Extend the Agentic RAG control plane from local graph/SSE/WebSocket/SQLite/replay/trace first gates to reviewer approval UI, production stream replay retention policy, production trace retention policy, and production storage policy if needed.
+1. Extend the Agentic RAG control plane from local graph/tool-suite/SSE/WebSocket/SQLite/replay/trace first gates to reviewer approval UI, production stream replay retention policy, production trace retention policy, and production storage policy if needed.
 2. Promote the local Ragas/promptfoo-compatible eval gate to actual Ragas + promptfoo package execution after dependency/runtime ADR.
 3. Implement remediation for the failed paid `gpt-image-2` + `quality=medium` provider-quality gate before any further paid full-gate iteration.
 4. Add human visual review or provider-quality visual statistics for generated assets.
-5. Keep FastMCP/A2A as optional thin wrappers after the workflow/API evidence is stable.
+5. Bound and run the optional FastMCP package smoke before claiming MCP server execution.
 
-FastMCP is intentionally deferred. It can later expose the studio as agent-callable tools such as `generate_dessert_ad`, generation log lookup, result retrieval, and template scoring.
+FastMCP is still a thin wrapper, not the core product path. The current scaffold
+exposes local `search_marketing_guides`, `query_template_policy`, and
+`preview_generation_policy` tools; live MCP execution remains pending.

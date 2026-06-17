@@ -8,6 +8,7 @@
     "next_action": "wait_for_human_approval",
     "node_trace": [
       "plan_campaign",
+      "run_tool_suite",
       "retrieve_context",
       "build_citations",
       "guardrail_check",
@@ -21,7 +22,7 @@
     "retriever_backend": "keyword",
     "retrieved_docs_count": 3,
     "citation_count": 3,
-    "checkpoint_count": 7,
+    "checkpoint_count": 8,
     "request_summary_fields": [
       "campaign_purpose",
       "has_price_text",
@@ -43,6 +44,7 @@
     "next_action": "return_cited_ad_package",
     "node_trace": [
       "plan_campaign",
+      "run_tool_suite",
       "retrieve_context",
       "build_citations",
       "guardrail_check",
@@ -52,7 +54,7 @@
     "retriever_backend": "keyword",
     "retrieved_docs_count": 3,
     "citation_count": 3,
-    "checkpoint_count": 8,
+    "checkpoint_count": 9,
     "worker_status": "succeeded",
     "copy_backend": "mock",
     "image_backend": "mock",

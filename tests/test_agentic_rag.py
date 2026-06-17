@@ -55,6 +55,7 @@ def test_agentic_rag_graph_routes_paid_provider_to_human_approval_without_raw_in
     assert worker_calls == []
     assert result["node_trace"] == [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -141,7 +142,7 @@ def test_agentic_rag_guardrail_flags_unapproved_tool_and_budget() -> None:
             "plan": {
                 "tool_budget": {
                     "max_tool_calls": 1,
-                    "planned_tools": ["document_retrieval", "web_search"],
+                    "planned_tools": ["document_retrieval", "external_shell"],
                 }
             },
             "node_trace": ["plan_campaign", "retrieve_context", "build_citations"],
@@ -200,6 +201,7 @@ def test_agentic_rag_graph_executes_worker_after_guardrail_clear_without_raw_inp
     }
     assert result["node_trace"] == [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -254,6 +256,7 @@ def test_agentic_rag_graph_reflects_and_retries_worker_failure_without_error_det
     }
     assert result["node_trace"] == [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -290,6 +293,7 @@ def test_agentic_rag_graph_routes_low_cost_local_run_to_worker():
     assert result["approval"] == {"required": False, "reasons": []}
     assert result["node_trace"] == [
         "plan_campaign",
+        "run_tool_suite",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
@@ -393,6 +397,7 @@ def test_agentic_rag_graph_emits_redacted_openinference_spans():
     records = tracer.records()
     assert [record.name for record in records] == [
         "agentic_rag.plan_campaign",
+        "agentic_rag.run_tool_suite",
         "agentic_rag.retrieve_context",
         "agentic_rag.build_citations",
         "agentic_rag.guardrail_check",
@@ -401,6 +406,7 @@ def test_agentic_rag_graph_emits_redacted_openinference_spans():
     ]
     assert [record.attributes["openinference.span.kind"] for record in records] == [
         "AGENT",
+        "TOOL",
         "RETRIEVER",
         "CHAIN",
         "GUARDRAIL",
