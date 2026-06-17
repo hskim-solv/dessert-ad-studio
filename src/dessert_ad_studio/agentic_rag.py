@@ -8,6 +8,7 @@ from typing import Any, Callable, Literal, TypedDict
 from langgraph.graph import END, START, StateGraph
 
 from dessert_ad_studio.marketing_context import KeywordMarketingContextRetriever
+from dessert_ad_studio.observability import NoopWorkflowTracer, WorkflowTracer
 from dessert_ad_studio.schemas import (
     CampaignPurpose,
     GenerationRequest,
@@ -139,17 +140,44 @@ def build_agentic_rag_graph(
     *,
     checkpointer: Any | None = None,
     worker_executor: AgenticRagWorkerExecutor | None = None,
+    workflow_tracer: WorkflowTracer | None = None,
 ) -> Any:
+    tracer = workflow_tracer or NoopWorkflowTracer()
     workflow = StateGraph(AgenticRagState)
-    workflow.add_node("plan_campaign", _plan_campaign)
-    workflow.add_node("retrieve_context", _retrieve_context)
-    workflow.add_node("build_citations", _build_citations)
-    workflow.add_node("guardrail_check", _guardrail_check)
-    workflow.add_node("human_approval", _human_approval)
-    workflow.add_node("finalize", _finalize)
+    workflow.add_node(
+        "plan_campaign", _traced_node("plan_campaign", "agent", _plan_campaign, tracer)
+    )
+    workflow.add_node(
+        "retrieve_context",
+        _traced_node("retrieve_context", "retriever", _retrieve_context, tracer),
+    )
+    workflow.add_node(
+        "build_citations",
+        _traced_node("build_citations", "chain", _build_citations, tracer),
+    )
+    workflow.add_node(
+        "guardrail_check",
+        _traced_node("guardrail_check", "guardrail", _guardrail_check, tracer),
+    )
+    workflow.add_node(
+        "human_approval",
+        _traced_node("human_approval", "agent", _human_approval, tracer),
+    )
+    workflow.add_node("finalize", _traced_node("finalize", "chain", _finalize, tracer))
     if worker_executor is not None:
-        workflow.add_node("execute_worker", _execute_worker_node(worker_executor))
-        workflow.add_node("reflect_on_worker_failure", _reflect_on_worker_failure)
+        workflow.add_node(
+            "execute_worker",
+            _traced_node("execute_worker", "tool", _execute_worker_node(worker_executor), tracer),
+        )
+        workflow.add_node(
+            "reflect_on_worker_failure",
+            _traced_node(
+                "reflect_on_worker_failure",
+                "chain",
+                _reflect_on_worker_failure,
+                tracer,
+            ),
+        )
 
     workflow.add_edge(START, "plan_campaign")
     workflow.add_edge("plan_campaign", "retrieve_context")
@@ -270,6 +298,73 @@ def build_generation_workflow_executor(
         }
 
     return execute_generation_workflow
+
+
+def _traced_node(
+    node_name: str,
+    span_kind: str,
+    node: Callable[[AgenticRagState], dict[str, Any]],
+    workflow_tracer: WorkflowTracer,
+) -> Callable[[AgenticRagState], dict[str, Any]]:
+    def run_node(state: AgenticRagState) -> dict[str, Any]:
+        with workflow_tracer.span(
+            f"agentic_rag.{node_name}",
+            span_kind,
+            {
+                "agentic_rag.node": node_name,
+                "agentic_rag.requires_paid_provider": state.get("requires_paid_provider"),
+                "agentic_rag.has_reference_image": state.get("request_summary", {}).get(
+                    "has_reference_image"
+                ),
+            },
+        ) as span:
+            update = node(state)
+            span.set_attributes(_agentic_rag_span_attributes(update))
+            return update
+
+    return run_node
+
+
+def _agentic_rag_span_attributes(update: dict[str, Any]) -> dict[str, Any]:
+    attributes: dict[str, Any] = {}
+    if "status" in update:
+        attributes["agentic_rag.status"] = update["status"]
+    if "next_action" in update:
+        attributes["agentic_rag.next_action"] = update["next_action"]
+
+    approval = update.get("approval")
+    if isinstance(approval, dict):
+        attributes["agentic_rag.approval_required"] = bool(approval.get("required", False))
+        attributes["agentic_rag.approval_reason_count"] = len(approval.get("reasons", []))
+
+    marketing_context = update.get("marketing_context")
+    if isinstance(marketing_context, dict):
+        attributes["agentic_rag.retriever_backend"] = marketing_context.get("retriever_backend")
+        attributes["agentic_rag.retrieved_docs_count"] = marketing_context.get(
+            "retrieved_docs_count"
+        )
+
+    citations = update.get("citations")
+    if isinstance(citations, list):
+        attributes["agentic_rag.citation_count"] = len(citations)
+
+    worker_result = update.get("worker_result")
+    if isinstance(worker_result, dict):
+        attributes["agentic_rag.worker_status"] = worker_result.get("status")
+        attributes["agentic_rag.copy_backend"] = worker_result.get("copy_backend")
+        attributes["agentic_rag.image_backend"] = worker_result.get("image_backend")
+        attributes["agentic_rag.copy_option_count"] = worker_result.get("copy_option_count")
+        attributes["agentic_rag.used_reference"] = worker_result.get("used_reference")
+
+    reflection = update.get("reflection")
+    if isinstance(reflection, dict):
+        attributes["agentic_rag.reflection_attempts"] = reflection.get("attempts")
+        attributes["agentic_rag.reflection_retry_budget"] = reflection.get("retry_budget")
+
+    node_trace = update.get("node_trace")
+    if isinstance(node_trace, list):
+        attributes["agentic_rag.node_trace_length"] = len(node_trace)
+    return attributes
 
 
 def _plan_campaign(state: AgenticRagState) -> dict[str, Any]:

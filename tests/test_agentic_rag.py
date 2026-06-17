@@ -7,6 +7,7 @@ from dessert_ad_studio.agentic_rag import (
     build_agentic_rag_graph,
     build_agentic_rag_initial_state,
 )
+from dessert_ad_studio.observability import InMemoryWorkflowTracer
 from dessert_ad_studio.schemas import GenerationRequest
 
 
@@ -277,3 +278,63 @@ def test_agentic_rag_sqlite_checkpointer_persists_redacted_checkpoints(tmp_path)
         "c2VjcmV0LWltYWdlLWJ5dGVz",
     ]:
         assert raw_value.encode("utf-8") not in checkpoint_bytes
+
+
+def test_agentic_rag_graph_emits_redacted_openinference_spans():
+    tracer = InMemoryWorkflowTracer()
+
+    def worker_executor(_state: dict) -> dict:
+        return {
+            "status": "succeeded",
+            "copy_backend": "mock",
+            "image_backend": "mock",
+            "copy_option_count": 3,
+            "used_reference": False,
+            "elapsed_ms": 21.0,
+            "workflow_trace_steps": ["rank_templates", "generate_copy", "generate_image"],
+        }
+
+    graph = build_agentic_rag_graph(
+        worker_executor=worker_executor,
+        workflow_tracer=tracer,
+    )
+    state = build_agentic_rag_initial_state(
+        GenerationRequest(
+            campaign_purpose="new_menu",
+            product_name="비공개 말차 푸딩",
+            tone="premium",
+            template_hint="minimal_premium",
+            user_constraints="VIP 고객에게만 보일 문구",
+        ),
+        requires_paid_provider=False,
+        estimated_cost_usd=0.0,
+        approval_cost_threshold_usd=0.10,
+    )
+
+    result = graph.invoke(state)
+
+    assert result["status"] == "completed"
+    records = tracer.records()
+    assert [record.name for record in records] == [
+        "agentic_rag.plan_campaign",
+        "agentic_rag.retrieve_context",
+        "agentic_rag.build_citations",
+        "agentic_rag.guardrail_check",
+        "agentic_rag.execute_worker",
+        "agentic_rag.finalize",
+    ]
+    assert [record.attributes["openinference.span.kind"] for record in records] == [
+        "AGENT",
+        "RETRIEVER",
+        "CHAIN",
+        "GUARDRAIL",
+        "TOOL",
+        "CHAIN",
+    ]
+    assert records[0].attributes["agentic_rag.node"] == "plan_campaign"
+    assert records[-1].attributes["agentic_rag.status"] == "completed"
+    assert records[-1].attributes["agentic_rag.next_action"] == "return_cited_ad_package"
+
+    serialized = json.dumps([record.attributes for record in records], ensure_ascii=False)
+    assert "비공개 말차 푸딩" not in serialized
+    assert "VIP 고객에게만 보일 문구" not in serialized

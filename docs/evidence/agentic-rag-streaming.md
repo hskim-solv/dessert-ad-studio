@@ -77,5 +77,5 @@ system. The following remain pending:
 - production stream replay and retention policy
 - production Postgres or multi-instance graph checkpointing
 - reviewer approval UI
-- production trace integration for stream events
+- production trace retention policy for stream events
 - WebSocket support if bidirectional approval becomes necessary

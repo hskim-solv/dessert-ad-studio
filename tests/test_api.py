@@ -367,6 +367,45 @@ def test_agentic_rag_run_replay_returns_404_for_unknown_run(
     assert response.json()["detail"] == "Agentic RAG run replay not found."
 
 
+def test_agentic_rag_run_stream_uses_workflow_tracer_for_graph_nodes(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import api.main as api_main
+    from dessert_ad_studio.observability import InMemoryWorkflowTracer
+
+    tracer = InMemoryWorkflowTracer()
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path / "outputs"))
+    monkeypatch.setenv("GENERATION_LOG_PATH", str(tmp_path / "generations.jsonl"))
+    monkeypatch.setattr(api_main, "build_workflow_tracer", lambda: tracer)
+    payload = {
+        **base_payload(),
+        "product_name": "비공개 말차 푸딩",
+        "user_constraints": "VIP 고객에게만 보일 문구",
+    }
+
+    with client.stream("POST", "/agentic-rag/runs/stream", json=payload) as response:
+        body = response.read().decode("utf-8")
+
+    assert response.status_code == 200
+    assert [
+        record.name for record in tracer.records() if record.name.startswith("agentic_rag.")
+    ] == [
+        "agentic_rag.plan_campaign",
+        "agentic_rag.retrieve_context",
+        "agentic_rag.build_citations",
+        "agentic_rag.guardrail_check",
+        "agentic_rag.execute_worker",
+        "agentic_rag.finalize",
+    ]
+
+    serialized = json.dumps([record.attributes for record in tracer.records()], ensure_ascii=False)
+    assert "비공개 말차 푸딩" not in serialized
+    assert "VIP 고객에게만 보일 문구" not in serialized
+    assert "비공개 말차 푸딩" not in body
+    assert "VIP 고객에게만 보일 문구" not in body
+
+
 def test_agentic_rag_run_stream_routes_paid_provider_to_approval(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

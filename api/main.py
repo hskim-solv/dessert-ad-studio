@@ -455,6 +455,7 @@ async def _agentic_rag_sse_events(
     requires_paid_provider = _agentic_rag_requires_paid_provider(dependencies)
     checkpoint_db = _agentic_rag_checkpoint_db_path()
     run_id = f"agr-{uuid4()}"
+    workflow_tracer = build_workflow_tracer()
     state = build_agentic_rag_initial_state(
         request,
         requires_paid_provider=requires_paid_provider,
@@ -471,6 +472,7 @@ async def _agentic_rag_sse_events(
         graph = build_agentic_rag_graph(
             checkpointer=checkpointer,
             worker_executor=build_generation_workflow_executor(request, dependencies),
+            workflow_tracer=workflow_tracer,
         )
         config = {"configurable": {"thread_id": run_id}} if checkpointer is not None else None
 

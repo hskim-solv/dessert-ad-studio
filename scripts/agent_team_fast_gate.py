@@ -22,7 +22,9 @@ class FastGateLane:
 LANES: dict[str, FastGateLane] = {
     "agentic-rag": FastGateLane(
         name="agentic-rag",
-        purpose="LangGraph control-plane, SSE, SQLite checkpoint, and replay fast gate.",
+        purpose=(
+            "LangGraph control-plane, SSE, SQLite checkpoint, replay, and graph trace fast gate."
+        ),
         commands=(
             ".venv/bin/pytest tests/test_agentic_rag.py tests/test_agentic_rag_smoke_script.py "
             "tests/test_agentic_rag_stream_smoke_script.py "
@@ -33,9 +35,10 @@ LANES: dict[str, FastGateLane] = {
             ".venv/bin/python scripts/agentic_rag_graph_smoke.py --output /tmp/agentic-rag-graph-summary.json",
             ".venv/bin/python scripts/agentic_rag_stream_smoke.py --output /tmp/agentic-rag-stream-summary.json",
             ".venv/bin/python scripts/agentic_rag_sqlite_checkpoint_smoke.py --output /tmp/agentic-rag-sqlite-checkpoint-summary.json --checkpoint-db /tmp/agentic-rag-checkpoints.sqlite",
+            ".venv/bin/python scripts/agentic_rag_trace_smoke.py --output /tmp/agentic-rag-trace-summary.json",
         ),
         parallel_safe=True,
-        notes="Uses /tmp outputs for generated summaries and SQLite checkpoints.",
+        notes="Uses /tmp outputs for generated summaries, traces, and SQLite checkpoints.",
     ),
     "docs": FastGateLane(
         name="docs",

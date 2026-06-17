@@ -115,3 +115,41 @@ def test_agentic_rag_sqlite_checkpoint_smoke_writes_redacted_summary(
     ]:
         assert raw_value not in serialized
         assert raw_value.encode("utf-8") not in checkpoint_bytes
+
+
+def test_agentic_rag_trace_smoke_writes_redacted_summary(tmp_path: Path) -> None:
+    output_path = tmp_path / "agentic-rag-trace-summary.json"
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "scripts/agentic_rag_trace_smoke.py",
+            "--output",
+            str(output_path),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=30,
+    )
+
+    assert completed.returncode == 0, completed.stderr + completed.stdout
+    summary = json.loads(output_path.read_text(encoding="utf-8"))
+
+    assert summary["agentic_rag_trace_smoke"] == "passed"
+    assert summary["scope"] == "local_in_memory_openinference_trace_no_paid_api_call"
+    assert summary["span_names"] == [
+        "agentic_rag.plan_campaign",
+        "agentic_rag.retrieve_context",
+        "agentic_rag.build_citations",
+        "agentic_rag.guardrail_check",
+        "agentic_rag.execute_worker",
+        "agentic_rag.finalize",
+    ]
+    assert summary["span_kinds"] == ["AGENT", "RETRIEVER", "CHAIN", "GUARDRAIL", "TOOL", "CHAIN"]
+    assert summary["raw_inputs_committed"] is False
+
+    serialized = json.dumps(summary, ensure_ascii=False)
+    assert "비공개 말차 푸딩" not in serialized
+    assert "VIP 고객" not in serialized

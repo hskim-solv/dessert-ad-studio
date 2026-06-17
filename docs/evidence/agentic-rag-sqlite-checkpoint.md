@@ -60,4 +60,5 @@ Focused tests:
   multi-instance Postgres storage.
 - Reviewer approval UI, approval audit summary, and durable stream replay remain
   pending.
-- Production graph trace integration remains pending.
+- Production trace retention policy and Phoenix/OTLP deployment evidence remain
+  pending for Agentic RAG graph spans.

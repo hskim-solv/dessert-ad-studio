@@ -1,0 +1,43 @@
+{
+  "agentic_rag_trace_smoke": "passed",
+  "scope": "local_in_memory_openinference_trace_no_paid_api_call",
+  "evidence_date": "2026-06-17",
+  "final_status": "completed",
+  "final_next_action": "return_cited_ad_package",
+  "span_names": [
+    "agentic_rag.plan_campaign",
+    "agentic_rag.retrieve_context",
+    "agentic_rag.build_citations",
+    "agentic_rag.guardrail_check",
+    "agentic_rag.execute_worker",
+    "agentic_rag.finalize"
+  ],
+  "span_kinds": [
+    "AGENT",
+    "RETRIEVER",
+    "CHAIN",
+    "GUARDRAIL",
+    "TOOL",
+    "CHAIN"
+  ],
+  "span_count": 6,
+  "redacted_attribute_keys": [
+    "agentic_rag.approval_reason_count",
+    "agentic_rag.approval_required",
+    "agentic_rag.citation_count",
+    "agentic_rag.copy_backend",
+    "agentic_rag.copy_option_count",
+    "agentic_rag.has_reference_image",
+    "agentic_rag.image_backend",
+    "agentic_rag.next_action",
+    "agentic_rag.node",
+    "agentic_rag.node_trace_length",
+    "agentic_rag.requires_paid_provider",
+    "agentic_rag.retrieved_docs_count",
+    "agentic_rag.retriever_backend",
+    "agentic_rag.status",
+    "agentic_rag.used_reference",
+    "agentic_rag.worker_status"
+  ],
+  "raw_inputs_committed": false
+}
