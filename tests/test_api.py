@@ -423,7 +423,13 @@ def test_agentic_rag_run_approval_records_redacted_reviewer_decision(
     assert approval["approval_required"] is True
     assert approval["approval_reasons"] == ["paid_provider_requested"]
     assert approval["decision"] == "approved"
-    assert approval["next_action"] == "dispatch_generation_worker_after_approval"
+    assert approval["next_action"] == "return_cited_ad_package"
+    assert approval["post_approval_worker_resumed"] is True
+    assert approval["post_approval_worker_status"] == "succeeded"
+    assert approval["post_approval_status"] == "completed"
+    assert approval["copy_backend"] == "mock"
+    assert approval["image_backend"] == "mock"
+    assert approval["copy_option_count"] == 3
     assert len(approval["reviewer_id_sha256"]) == 64
     assert len(approval["comment_sha256"]) == 64
     assert approval["audit_persisted"] is False
@@ -462,6 +468,39 @@ def test_agentic_rag_run_approval_rejects_non_approval_run(
 
     assert approval_response.status_code == 409
     assert approval_response.json()["detail"] == "Agentic RAG run is not waiting for approval."
+
+
+def test_agentic_rag_run_rejection_does_not_resume_worker(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import api.main as api_main
+
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path / "outputs"))
+    monkeypatch.setenv("GENERATION_LOG_PATH", str(tmp_path / "generations.jsonl"))
+    monkeypatch.setenv(
+        "AGENTIC_RAG_CHECKPOINT_DB",
+        str(tmp_path / "agentic-rag-checkpoints.sqlite"),
+    )
+    monkeypatch.setattr(api_main, "_agentic_rag_requires_paid_provider", lambda deps: True)
+
+    with client.stream("POST", "/agentic-rag/runs/stream", json=base_payload()) as response:
+        body = response.read().decode("utf-8")
+
+    assert response.status_code == 200
+    run_id = _parse_sse_events(body)[0]["data"]["run_id"]
+
+    approval_response = client.post(
+        f"/agentic-rag/runs/{run_id}/approval",
+        json={"decision": "rejected", "reviewer_id": "reviewer@example.com"},
+    )
+
+    assert approval_response.status_code == 200
+    approval = approval_response.json()
+    assert approval["status"] == "rejected"
+    assert approval["next_action"] == "stop_run_without_worker"
+    assert approval["post_approval_worker_resumed"] is False
+    assert "post_approval_worker_status" not in approval
 
 
 def test_agentic_rag_run_stream_uses_workflow_tracer_for_graph_nodes(

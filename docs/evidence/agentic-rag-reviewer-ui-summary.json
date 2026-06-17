@@ -15,11 +15,14 @@
   "ui_decision": {
     "status": "approved",
     "decision": "approved",
-    "next_action": "dispatch_generation_worker_after_approval",
+    "next_action": "return_cited_ad_package",
     "reviewer_id_sha256": "18717f7f1f60f92207bd02972c16aec92f52b31c2a8442444df988d8e8503c5e",
     "comment_sha256": "bdcef6c791e1b6260a3f06642ab7dd3d511b0554c2dd13ca4d653ea5a6192e6e",
     "audit_persisted": false,
-    "raw_inputs_committed": false
+    "raw_inputs_committed": false,
+    "post_approval_worker_resumed": true,
+    "post_approval_worker_status": "succeeded",
+    "post_approval_status": "completed"
   },
   "privacy_boundary": {
     "raw_reviewer_id_committed": false,

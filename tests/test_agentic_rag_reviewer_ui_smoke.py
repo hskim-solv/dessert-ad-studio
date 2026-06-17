@@ -38,7 +38,10 @@ def test_agentic_rag_reviewer_ui_smoke_writes_redacted_summary(tmp_path: Path) -
     assert summary["approval_run"]["status"] == "needs_approval"
     assert summary["approval_run"]["next_action"] == "wait_for_human_approval"
     assert summary["ui_decision"]["status"] == "approved"
-    assert summary["ui_decision"]["next_action"] == "dispatch_generation_worker_after_approval"
+    assert summary["ui_decision"]["next_action"] == "return_cited_ad_package"
+    assert summary["ui_decision"]["post_approval_worker_resumed"] is True
+    assert summary["ui_decision"]["post_approval_worker_status"] == "succeeded"
+    assert summary["ui_decision"]["post_approval_status"] == "completed"
     assert len(summary["ui_decision"]["reviewer_id_sha256"]) == 64
     assert len(summary["ui_decision"]["comment_sha256"]) == 64
     assert summary["ui_decision"]["raw_inputs_committed"] is False

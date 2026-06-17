@@ -5,8 +5,8 @@ Date: 2026-06-17
 This evidence records the first local Streamlit reviewer approval UI gate for
 the Agentic RAG control plane. It proves that a reviewer-facing queue can submit
 an approval decision for an approval-routed run and merge the redacted decision
-metadata back into Streamlit session state without calling paid providers or
-committing raw reviewer input.
+metadata plus post-approval worker status back into Streamlit session state
+without calling paid providers or committing raw reviewer input.
 
 ## Scope
 
@@ -26,8 +26,8 @@ agentic_rag_runs
 POST /agentic-rag/runs/{run_id}/approval
 ```
 
-- Merges only redacted reviewer/comment hashes and decision metadata into the UI
-  run state.
+- Merges only redacted reviewer/comment hashes, decision metadata, and
+  post-approval worker status into the UI run state.
 
 ## Result
 
@@ -45,7 +45,10 @@ Current result:
 - approval run status: `needs_approval`
 - approval run next action: `wait_for_human_approval`
 - UI decision status: `approved`
-- UI decision next action: `dispatch_generation_worker_after_approval`
+- UI decision next action: `return_cited_ad_package`
+- post-approval worker resumed: `true`
+- post-approval worker status: `succeeded`
+- post-approval status: `completed`
 - raw reviewer id committed: `false`
 - raw reviewer comment committed: `false`
 - raw request committed: `false`
@@ -72,7 +75,8 @@ Focused tests:
 
 - This is a local Streamlit helper/UI first gate, not a full interactive
   stream-to-approval workflow.
-- It does not yet resume the graph worker after approval.
+- Post-approval worker resume uses same-process ephemeral request context.
 - It does not persist production approval audit records.
-- Bidirectional in-stream approval, production approval retention, production
-  replay retention, and production storage policy remain pending.
+- Bidirectional in-stream approval, durable cross-process resume, production
+  approval retention, production replay retention, and production storage policy
+  remain pending.

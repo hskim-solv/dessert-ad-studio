@@ -190,6 +190,9 @@ def _merge_agentic_rag_approval_decision(run: dict, approval: dict) -> dict:
         "comment_sha256": approval.get("comment_sha256"),
         "audit_persisted": approval.get("audit_persisted", False),
         "raw_inputs_committed": approval.get("raw_inputs_committed", False),
+        "post_approval_worker_resumed": approval.get("post_approval_worker_resumed", False),
+        "post_approval_worker_status": approval.get("post_approval_worker_status"),
+        "post_approval_status": approval.get("post_approval_status"),
     }
     updated.pop("approval_error", None)
     return updated

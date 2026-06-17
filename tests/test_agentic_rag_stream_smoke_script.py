@@ -149,8 +149,11 @@ def test_agentic_rag_approval_smoke_writes_redacted_summary(tmp_path: Path) -> N
     assert summary["approval_route_status"] == "needs_approval"
     assert summary["approval_route_next_action"] == "wait_for_human_approval"
     assert summary["approval_decision_status"] == "approved"
-    assert summary["approval_next_action"] == "dispatch_generation_worker_after_approval"
+    assert summary["approval_next_action"] == "return_cited_ad_package"
     assert summary["approval_reasons"] == ["paid_provider_requested"]
+    assert summary["post_approval_worker_resumed"] is True
+    assert summary["post_approval_worker_status"] == "succeeded"
+    assert summary["post_approval_status"] == "completed"
     assert summary["audit_persisted"] is False
     assert summary["raw_inputs_committed"] is False
     assert summary["reviewer_id_sha256_present"] is True

@@ -4,8 +4,8 @@ Date: 2026-06-17
 
 This evidence records the first local human-in-the-loop approval API gate for
 the Agentic RAG control plane. It proves that an approval-routed run can be
-reviewed through a redacted FastAPI approval endpoint without calling paid
-providers or storing raw reviewer input.
+reviewed through a redacted FastAPI approval endpoint and resumed through the
+local mock worker without calling paid providers or storing raw reviewer input.
 
 ## Scope
 
@@ -19,7 +19,8 @@ providers or storing raw reviewer input.
 POST /agentic-rag/runs/{run_id}/approval
 ```
 
-- Returns only redacted reviewer/comment hashes and decision metadata.
+- Returns only redacted reviewer/comment hashes, decision metadata, and
+  post-approval worker status.
 
 ## Result
 
@@ -36,8 +37,11 @@ Current result:
 - approval route status: `needs_approval`
 - approval route next action: `wait_for_human_approval`
 - approval decision status: `approved`
-- approval next action: `dispatch_generation_worker_after_approval`
+- approval next action: `return_cited_ad_package`
 - approval reason: `paid_provider_requested`
+- post-approval worker resumed: `true`
+- post-approval worker status: `succeeded`
+- post-approval status: `completed`
 - raw inputs committed: `false`
 - audit persisted: `false`
 
@@ -61,11 +65,12 @@ Focused tests:
 
 ## Limits
 
-- This is a local approval API/audit first gate.
-- It does not yet resume the graph worker after approval.
+- This is a local approval API/audit/resume first gate.
+- Post-approval worker resume uses same-process ephemeral request context; raw
+  request data is not persisted into SQLite checkpoints or evidence artifacts.
 - It does not persist approval audit records beyond the redacted summary
   artifact.
 - Reviewer approval UI now has a separate local first gate in
   `docs/evidence/agentic-rag-reviewer-ui.md`.
-- Bidirectional in-stream approval, post-approval worker resume, production
+- Bidirectional in-stream approval, durable cross-process resume, production
   approval audit retention, and production storage policy remain pending.

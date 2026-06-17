@@ -125,18 +125,24 @@ def test_agentic_rag_approval_payload_and_merge_keep_raw_reviewer_data_out() -> 
             "approval_required": True,
             "approval_reasons": ["paid_provider_requested"],
             "decision": "approved",
-            "next_action": "dispatch_generation_worker_after_approval",
+            "next_action": "return_cited_ad_package",
             "reviewer_id_sha256": "a" * 64,
             "comment_sha256": "b" * 64,
             "audit_persisted": False,
             "raw_inputs_committed": False,
+            "post_approval_worker_resumed": True,
+            "post_approval_worker_status": "succeeded",
+            "post_approval_status": "completed",
         },
     )
 
     assert merged["status"] == "approved"
-    assert merged["decision"]["next_action"] == "dispatch_generation_worker_after_approval"
+    assert merged["decision"]["next_action"] == "return_cited_ad_package"
     assert merged["decision"]["reviewer_id_sha256"] == "a" * 64
     assert merged["decision"]["comment_sha256"] == "b" * 64
     assert merged["decision"]["raw_inputs_committed"] is False
+    assert merged["decision"]["post_approval_worker_resumed"] is True
+    assert merged["decision"]["post_approval_worker_status"] == "succeeded"
+    assert merged["decision"]["post_approval_status"] == "completed"
     assert "reviewer_id" not in merged["decision"]
     assert "comment" not in merged["decision"]

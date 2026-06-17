@@ -6,6 +6,7 @@ import json
 import os
 from collections import defaultdict
 from contextlib import nullcontext
+from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from threading import Lock
@@ -81,6 +82,14 @@ _METRICS_LOCK = Lock()
 _HTTP_REQUESTS_TOTAL: defaultdict[tuple[str, str, str], int] = defaultdict(int)
 _HTTP_REQUEST_LATENCY_SECONDS_TOTAL: defaultdict[tuple[str, str], float] = defaultdict(float)
 _A2A_TASKS = A2ATaskStore()
+_AGENTIC_RAG_PENDING_APPROVAL_RUNS_LOCK = Lock()
+_AGENTIC_RAG_PENDING_APPROVAL_RUNS: dict[str, "_AgenticRagPendingApprovalContext"] = {}
+
+
+@dataclass(frozen=True)
+class _AgenticRagPendingApprovalContext:
+    request: GenerationRequest
+    dependencies: GenerationWorkflowDependencies
 
 
 class AgenticRagApprovalDecision(BaseModel):
@@ -523,6 +532,15 @@ async def _agentic_rag_run_events(
                 yield ("node_completed", payload)
                 await asyncio.sleep(0)
 
+    if final_status == "needs_approval" and final_next_action == "wait_for_human_approval":
+        _store_agentic_rag_pending_approval_context(
+            run_id,
+            request=request,
+            dependencies=dependencies,
+        )
+    else:
+        _pop_agentic_rag_pending_approval_context(run_id)
+
     run_completed = {
         "status": final_status,
         "raw_inputs_committed": False,
@@ -537,6 +555,26 @@ def _agentic_rag_checkpoint_db_path() -> Path | None:
     if not checkpoint_db:
         return None
     return Path(checkpoint_db)
+
+
+def _store_agentic_rag_pending_approval_context(
+    run_id: str,
+    *,
+    request: GenerationRequest,
+    dependencies: GenerationWorkflowDependencies,
+) -> None:
+    with _AGENTIC_RAG_PENDING_APPROVAL_RUNS_LOCK:
+        _AGENTIC_RAG_PENDING_APPROVAL_RUNS[run_id] = _AgenticRagPendingApprovalContext(
+            request=request,
+            dependencies=dependencies,
+        )
+
+
+def _pop_agentic_rag_pending_approval_context(
+    run_id: str,
+) -> _AgenticRagPendingApprovalContext | None:
+    with _AGENTIC_RAG_PENDING_APPROVAL_RUNS_LOCK:
+        return _AGENTIC_RAG_PENDING_APPROVAL_RUNS.pop(run_id, None)
 
 
 def _agentic_rag_stream_update(node_name: str, update: dict[str, Any]) -> dict[str, Any]:
@@ -820,6 +858,41 @@ def approve_agentic_rag_run(
         )
 
     approved = decision.decision == "approved"
+    pending_context = _pop_agentic_rag_pending_approval_context(run_id)
+    next_action = (
+        "dispatch_generation_worker_after_approval" if approved else "stop_run_without_worker"
+    )
+    post_approval: dict[str, Any] = {"post_approval_worker_resumed": False}
+    if approved and pending_context is not None:
+        try:
+            worker_result = build_generation_workflow_executor(
+                pending_context.request,
+                pending_context.dependencies,
+            )({})
+        except Exception as exc:
+            worker_result = {
+                "status": "failed",
+                "error_type": exc.__class__.__name__,
+            }
+        post_approval_status = (
+            "completed" if worker_result.get("status") == "succeeded" else "failed"
+        )
+        next_action = (
+            "return_cited_ad_package"
+            if worker_result.get("status") == "succeeded"
+            else "inspect_failed_run"
+        )
+        post_approval.update(
+            {
+                "post_approval_worker_resumed": True,
+                "post_approval_status": post_approval_status,
+                "post_approval_worker_status": worker_result.get("status"),
+            }
+        )
+        for key in ("copy_backend", "image_backend", "copy_option_count", "used_reference"):
+            if key in worker_result:
+                post_approval[key] = worker_result[key]
+
     return {
         "run_id": run_id,
         "status": decision.decision,
@@ -828,13 +901,12 @@ def approve_agentic_rag_run(
         "approval_required": bool(replay.get("approval_required", False)),
         "approval_reasons": list(replay.get("approval_reasons", [])),
         "decision": decision.decision,
-        "next_action": (
-            "dispatch_generation_worker_after_approval" if approved else "stop_run_without_worker"
-        ),
+        "next_action": next_action,
         "reviewer_id_sha256": _optional_sha256(decision.reviewer_id),
         "comment_sha256": _optional_sha256(decision.comment),
         "audit_persisted": False,
         "raw_inputs_committed": False,
+        **post_approval,
     }
 
 
