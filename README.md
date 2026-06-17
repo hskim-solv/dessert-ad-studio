@@ -60,6 +60,9 @@ Verified:
   eval, retrieval, chunking, pgvector, promptfoo, and guardrail evidence.
 - Demo video storyboard with an 8-shot, 180-second recording plan that references
   committed reviewer assets and keeps provider-quality image editing unproven.
+- Offline text-contamination proxy calibration for the provider-quality gate,
+  keeping dark non-text texture below threshold while preserving a dense
+  rendered-text negative case.
 - Local Agentic RAG eval gates: deterministic Ragas-compatible proxy metrics,
   real promptfoo package smoke, and GitHub Actions CI steps for both paths.
 - AI agent team operating model with main-writer ownership, read-only scouts,
@@ -75,7 +78,8 @@ Known gaps:
 
 - Paid OpenAI image-edit provider gates have failed; the deterministic
   preservation path and offline visual proxy pass, but provider-quality image
-  editing is not proven.
+  editing is not proven. The latest paid canary passed ROI and script cost
+  checks but failed latency and the pre-calibration text proxy.
 - Agentic RAG is still at first-gate maturity. Local SQLite checkpointing,
   SSE/WebSocket streaming, graph tracing, local tool-suite orchestration, and a
   local eval/guardrail plus promptfoo package gate are proven, and reviewer
@@ -353,7 +357,7 @@ docs/runbooks/gcp-flux2-validation.md
 
 1. Extend the Agentic RAG control plane from local graph/tool-suite/SSE/WebSocket/SQLite/replay/trace/run-metrics/reviewer-approval/resume plus bidirectional approval and retention-boundary first gates to durable cross-process resume, approved production storage, and deployment-specific external trace retention.
 2. Add Ragas live evaluator execution only after paid eval approval and trace/result payload review.
-3. Implement remediation for the failed paid `gpt-image-2` + `quality=medium` provider-quality gate before any further paid full-gate iteration.
+3. Rerun a one-sample paid `gpt-image-2` + `quality=medium` canary after the offline text-contamination proxy calibration, then decide whether latency remediation or a full gate is warranted.
 4. Add human visual review or provider-quality visual statistics for generated assets.
 5. Define MCP served transport/auth boundaries before claiming production MCP operation.
 

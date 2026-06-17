@@ -50,7 +50,7 @@ def test_provider_gate_postmortem_summarizes_latest_failed_paid_gate(
     ]
     assert summary["next_paid_gate_conditions"] == [
         "review generated outputs locally before another paid full gate",
-        "calibrate or replace the text-contamination proxy against manually reviewed outputs",
+        "rerun a one-sample paid canary after the offline text-contamination proxy calibration",
         "set an OpenAI dashboard hard budget because the script budget is post-response only",
         "keep deterministic Korean overlay rendering outside the image model",
     ]

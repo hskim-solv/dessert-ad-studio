@@ -123,9 +123,11 @@ Latest one-sample canary result:
 - estimated cost: `$0.08859` under the `$0.10` budget
 - elapsed time: `68.64s`, above the `30s` threshold
 - ROI preservation checks: passed
-- text-contamination proxy: failed with score `1.00`; manual local review of the
-  generated output found no visible text, so this is likely a proxy false
-  positive caused by dark components/edges rather than actual rendered text
+- pre-calibration text-contamination proxy: failed with score `1.00`; manual
+  local review of the generated output found no visible text, so this is likely
+  a proxy false positive caused by dark components/edges rather than actual
+  rendered text. The local proxy calibration is tracked separately in
+  [`text-contamination-proxy-calibration.md`](text-contamination-proxy-calibration.md).
 - provider-quality gate: failed; do not claim provider-quality image editing
 
 The `--max-estimated-cost-usd` guard uses the token usage returned by the image

@@ -492,7 +492,7 @@ def _text_contamination_risk_score(image: Image.Image) -> float:
     dark_mask = bytearray(1 if pixel < 150 else 0 for pixel in grayscale.tobytes())
     width, height = grayscale.size
     visited = bytearray(width * height)
-    text_like_components = 0
+    text_like_boxes: list[tuple[int, int, int, int]] = []
 
     for index, is_dark in enumerate(dark_mask):
         if not is_dark or visited[index]:
@@ -523,9 +523,34 @@ def _text_contamination_risk_score(image: Image.Image) -> float:
             width=component_width,
             height=component_height,
         ):
-            text_like_components += 1
+            text_like_boxes.append((min_x, min_y, max_x, max_y))
 
-    return min(1.0, text_like_components / 12)
+    return min(1.0, _count_text_like_runs(text_like_boxes) / 4)
+
+
+def _count_text_like_runs(boxes: list[tuple[int, int, int, int]]) -> int:
+    rows: dict[int, list[tuple[int, int, int, int]]] = {}
+    for box in boxes:
+        _, min_y, _, max_y = box
+        center_y = (min_y + max_y) // 2
+        row_key = round(center_y / 4)
+        rows.setdefault(row_key, []).append(box)
+
+    run_count = 0
+    for row_boxes in rows.values():
+        current_run = 0
+        previous_max_x: int | None = None
+        for min_x, _, max_x, _ in sorted(row_boxes):
+            if previous_max_x is None or min_x - previous_max_x <= 12:
+                current_run += 1
+            else:
+                if current_run >= 4:
+                    run_count += 1
+                current_run = 1
+            previous_max_x = max_x
+        if current_run >= 4:
+            run_count += 1
+    return run_count
 
 
 def _neighbor_indexes(*, x: int, y: int, width: int, height: int) -> tuple[int, ...]:

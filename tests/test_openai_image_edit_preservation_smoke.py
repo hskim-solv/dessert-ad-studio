@@ -12,6 +12,7 @@ from dessert_ad_studio.schemas import GenerationRequest
 from scripts.openai_image_edit_preservation_smoke import (
     PUBLIC_REFERENCE_SAMPLES,
     ReferenceSample,
+    _text_contamination_risk_score,
     build_live_image_edit_preservation_summary,
     build_provider_quality_gate_summary,
     select_reference_samples,
@@ -263,6 +264,16 @@ def test_provider_quality_gate_fails_for_low_roi_similarity_and_text_risk(
         result["metrics"]["text_contamination_risk_score"]
         > summary["thresholds"]["max_text_contamination_risk_score"]
     )
+
+
+def test_text_contamination_proxy_does_not_flag_dark_sprinkle_texture() -> None:
+    image = Image.new("RGB", (1024, 1024), color=(238, 232, 220))
+    draw = ImageDraw.Draw(image)
+    for y in range(80, 940, 45):
+        for x in range(80, 940, 45):
+            draw.rectangle((x, y, x + 3, y + 3), fill=(35, 30, 25))
+
+    assert _text_contamination_risk_score(image) <= 0.45
 
 
 def _write_reference(

@@ -1,0 +1,24 @@
+{
+  "text_contamination_proxy_calibration": "passed",
+  "scope": "offline_synthetic_no_paid_api_call",
+  "evidence_date": "2026-06-17",
+  "threshold": 0.45,
+  "cases": [
+    {
+      "name": "dark_sprinkle_texture_no_visible_text",
+      "expected": "pass",
+      "passed": true,
+      "max_score": 0.45,
+      "score": 0.0
+    },
+    {
+      "name": "dense_rendered_text",
+      "expected": "fail",
+      "passed": true,
+      "min_score_exclusive": 0.45,
+      "score": 1.0
+    }
+  ],
+  "paid_api_call_count": 0,
+  "raw_images_committed": false
+}

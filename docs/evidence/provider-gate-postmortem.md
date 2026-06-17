@@ -55,7 +55,11 @@ Before another paid image-edit provider gate:
 - review generated outputs locally;
 - use the 2026-06-17 one-sample canary result as the current baseline: API and
   cost guard passed, ROI preservation passed, latency failed, and the
-  text-contamination proxy likely over-flagged a no-visible-text output;
+  pre-calibration text-contamination proxy likely over-flagged a no-visible-text
+  output;
+- rerun a one-sample paid canary after the offline text-contamination proxy
+  calibration in
+  [`text-contamination-proxy-calibration.md`](text-contamination-proxy-calibration.md);
 - set an OpenAI dashboard hard budget because the script budget is
   post-response only;
 - keep deterministic Korean overlay rendering outside the image model.

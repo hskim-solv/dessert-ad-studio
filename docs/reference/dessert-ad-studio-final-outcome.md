@@ -216,8 +216,10 @@ Not yet proven:
 - Cloud deployment and demo video.
 - Provider-quality image editing. The first paid OpenAI image-edit gate failed;
   the strengthened `gpt-image-2` + `quality=medium` gate also failed. ROI
-  preservation checks passed, but latency, text-contamination, and cost guard
-  checks failed.
+  preservation and script cost guard checks passed, but latency and the
+  pre-calibration text-contamination checks failed. The offline
+  text-contamination proxy calibration is complete, but a paid canary has not
+  yet revalidated provider-quality image editing.
 - Production async operation. Kubernetes now has a local/test async overlay
   smoke, first reliability matrix, single worker outage/restore evidence, and
   explicit retry/timeout/cancel non-support evidence, but not multi-worker
@@ -272,7 +274,7 @@ flowchart LR
 | Latency | Mock path p95 <= 2 seconds; OpenAI path p95 <= 30 seconds; FLUX2/GPU path measured and documented separately. |
 | Copy quality | Across 10-20 representative samples: Korean text presence 100%, product-name inclusion >= 90%, prohibited-claim violations 0. |
 | Retrieval quality | Retrieval eval set category hit rate >= 80%; prohibited-claims guidance hit rate 100%. |
-| Image quality | Product-preservation checklist pass rate >= 80%; Korean overlay rendering failures 0. Deterministic public-sample preservation first gate: pass rate 1.00, minimum top-region pixel match 1.00. Offline visual proxy gate passes 6 committed banners and includes a blank-image negative regression. Paid OpenAI image-edit gates failed and are documented as model-quality evidence, not hidden. The latest `gpt-image-2`/`medium` run passed ROI color/hash/edge preservation checks but failed latency, text-contamination, and cost guard checks. |
+| Image quality | Product-preservation checklist pass rate >= 80%; Korean overlay rendering failures 0. Deterministic public-sample preservation first gate: pass rate 1.00, minimum top-region pixel match 1.00. Offline visual proxy gate passes 6 committed banners and includes a blank-image negative regression. Paid OpenAI image-edit gates failed and are documented as model-quality evidence, not hidden. The latest `gpt-image-2`/`medium` run passed ROI color/hash/edge preservation and script cost guard checks but failed latency and pre-calibration text-contamination checks. Offline text-contamination proxy calibration is complete; paid provider-quality image editing remains unproven until a later canary passes. |
 | Error handling | Backend failures map to Korean `AdBackendError`; unknown backend, unsupported reference image, and missing API key fail clearly. |
 | Regression guard | `pytest`, `ruff`, API smoke, retrieval eval, and workflow eval commands are documented and reproducible. |
 
@@ -300,7 +302,7 @@ flowchart LR
 | M4 Real product analysis | Replace mock product analysis with a real VLM-backed analyzer while preserving redaction policy. | Complete first analyzer gate: OpenAI Responses Vision adapter, ADR, no-network tests, env/compose wiring, one redacted live smoke, 10-case synthetic reference eval, pass rate 1.00, p95 latency 13.15s. |
 | M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields, and `docs/evidence/cost-guard-summary.json`. |
 | M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, Streamlit reviewer screenshots at `docs/evidence/streamlit-reviewer-flow.md`, demo video storyboard at `docs/evidence/demo-video-storyboard.md`, real-sample preservation evidence at `docs/evidence/real-sample-preservation.md`, paid OpenAI image-edit failure evidence at `docs/evidence/openai-image-edit-preservation.md`, README links, reproducible command map. |
-| M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, live worker outage/restore smoke, explicit retry/timeout/cancel non-support, 30-scenario product-like eval, offline visual proxy gate, paid provider-quality failure evidence, provider-gate postmortem, one-sample canary CLI, first trace/log privacy allowlist gate, and first cost guard are complete. Next evidence should cover text/latency/cost remediation for the failed provider gate plus human/provider visual quality review. |
+| M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, live worker outage/restore smoke, explicit retry/timeout/cancel non-support, 30-scenario product-like eval, offline visual proxy gate, paid provider-quality failure evidence, provider-gate postmortem, one-sample canary CLI, first trace/log privacy allowlist gate, first cost guard, and offline text-contamination proxy calibration are complete. Next evidence should cover a post-calibration paid canary, latency remediation, plus human/provider visual quality review. |
 | M8 Agentic RAG graph | Add the LangGraph control plane without discarding existing workflow evidence. | First gate complete: ADR 0012/0014/0017/0018, `langgraph` and `langgraph-checkpoint-sqlite` dependencies, typed state schema, deterministic planner/tool-suite/retriever/citation/guardrail/worker/reflection/HITL/finalize nodes, conditional approval route, local mock worker route through the existing generation workflow, local web/SQL/internal API tool summaries, FastMCP import/tool-call smoke, in-memory and local SQLite checkpoint proof, redacted smoke summaries, focused tests, local FastAPI SSE wiring, local SQLite replay summary, local OpenInference graph-node trace proof, local run metrics for latency/token/cost/tool success/failure plus failed-run analysis, local approval API first gate, local reviewer approval UI first gate, same-process post-approval worker resume first gate, and retention boundary policy. Pending: live web search, production SQL policy, production MCP transport/auth, durable cross-process resume, approved production storage implementation, deployment-specific trace retention evidence, and live provider token/cost telemetry. |
 | M9 Agentic RAG eval/guardrail gate | Prove answer/ad package faithfulness, citation quality, and tool safety. | First gate complete: 13-case local golden dataset, Ragas-compatible deterministic summary fields, faithfulness/answer relevancy/context precision/context recall proxy scores 1.00, prompt-injection HITL route, 7-tool allowlist/budget tests, redaction checks, fast-gate command, real promptfoo package smoke, reviewer-facing offline eval report, and GitHub Actions CI steps for both the compatibility script and promptfoo package gate. ADR 0016 keeps Ragas live metrics behind paid/API-key approval. Pending: run Ragas live gate only after paid eval approval. |
 | M10 Streaming and reviewer approval | Make long-running graph execution reviewable in real time. | First gate complete: ADR 0013/0018, async FastAPI `POST /agentic-rag/runs/stream`, WebSocket `/agentic-rag/runs/ws`, SSE `text/event-stream`, 9 redacted node progress events/messages including local tool suite and worker completion, durable `agr-*` run id, local SQLite replay endpoint, paid-provider approval route tests, bidirectional WebSocket approval/resume, redacted approval decision API summary, Streamlit reviewer approval UI first gate, same-process post-approval worker resume, and retention boundary policy. Pending: durable cross-process resume, approved production replay/audit storage, and production graceful fallback states. |
@@ -376,13 +378,14 @@ trace/log privacy allowlist gate is complete, the first cost guard is complete,
 live worker outage/restore evidence is complete, retry/timeout/cancel
 non-support is explicit, and the strengthened paid provider-quality image-edit
 gate has failed with redacted evidence and an offline postmortem. The remaining
-portfolio gap is text/latency/cost remediation for provider-quality image
-editing plus human/provider generated-asset quality review. A one-sample
-`--sample-slug` canary is available before another paid full-gate iteration.
+portfolio gap is a post-calibration paid canary, latency remediation, and
+human/provider generated-asset quality review. A one-sample `--sample-slug`
+canary is available before another paid full-gate iteration.
 
 The next architectural milestone is to extend the local graph/SSE/checkpoint/
 trace/run-metrics/reviewer-approval/resume gates plus the retention boundary to
 durable cross-process resume, approved production storage, production MCP
-transport/auth, and provider-backed token/cost telemetry while preserving the current evidence base. Paid provider-quality image-edit
-remediation remains a downstream tool-quality track, not the main architecture
-blocker.
+transport/auth, and provider-backed token/cost telemetry while preserving the
+current evidence base. Paid provider-quality image-edit remediation remains a
+downstream tool-quality track; the next paid step is a post-calibration
+one-sample canary, not a broad full gate.

@@ -16,7 +16,7 @@ PRESERVATION_CHECKS = (
 )
 NEXT_PAID_GATE_CONDITIONS = [
     "review generated outputs locally before another paid full gate",
-    "calibrate or replace the text-contamination proxy against manually reviewed outputs",
+    "rerun a one-sample paid canary after the offline text-contamination proxy calibration",
     "set an OpenAI dashboard hard budget because the script budget is post-response only",
     "keep deterministic Korean overlay rendering outside the image model",
 ]
