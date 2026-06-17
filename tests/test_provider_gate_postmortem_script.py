@@ -49,7 +49,7 @@ def test_provider_gate_postmortem_summarizes_latest_failed_paid_gate(
     ]
     assert summary["next_paid_gate_conditions"] == [
         "review ignored generated outputs locally before another paid run",
-        "run a one-sample paid canary before the three-sample provider gate",
+        "run a one-sample paid canary with --sample-slug before the three-sample provider gate",
         "set an OpenAI dashboard hard budget because the script budget is post-response only",
         "keep deterministic Korean overlay rendering outside the image model",
     ]

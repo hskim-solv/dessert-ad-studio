@@ -83,6 +83,35 @@ PUBLIC_REFERENCE_SAMPLES = (
 )
 
 
+def select_reference_samples(
+    *,
+    reference_set: str,
+    reference_path: Path,
+    sample_slug: str | None = None,
+) -> tuple[ReferenceSample, ...]:
+    if reference_set == "public-samples":
+        if sample_slug is None:
+            return PUBLIC_REFERENCE_SAMPLES
+        selected = tuple(
+            sample for sample in PUBLIC_REFERENCE_SAMPLES if sample.slug == sample_slug
+        )
+        if selected:
+            return selected
+        available = ", ".join(sample.slug for sample in PUBLIC_REFERENCE_SAMPLES)
+        raise ValueError(f"unknown public sample slug: {sample_slug}; available: {available}")
+
+    if sample_slug is not None:
+        raise ValueError("--sample-slug requires --reference-set public-samples")
+    return (
+        ReferenceSample(
+            slug=reference_path.stem,
+            product_name="말차 푸딩",
+            reference_path=reference_path,
+            roi=(0.15, 0.10, 0.85, 0.78),
+        ),
+    )
+
+
 def build_live_image_edit_preservation_summary(
     *,
     reference_path: Path,
@@ -567,16 +596,31 @@ def main() -> int:
     parser.add_argument("--model-id", default=os.getenv("IMAGE_MODEL_ID"))
     parser.add_argument("--quality", default=os.getenv("IMAGE_QUALITY"))
     parser.add_argument(
+        "--sample-slug",
+        help=(
+            "Run one public sample by slug before the full provider gate. "
+            "Requires --reference-set public-samples."
+        ),
+    )
+    parser.add_argument(
         "--max-estimated-cost-usd",
         type=float,
         default=_optional_float_env("OPENAI_MAX_ESTIMATED_COST_USD"),
         help="Fail the smoke if estimated OpenAI image cost exceeds this budget.",
     )
     args = parser.parse_args()
+    try:
+        selected_samples = select_reference_samples(
+            reference_set=args.reference_set,
+            reference_path=args.reference,
+            sample_slug=args.sample_slug,
+        )
+    except ValueError as exc:
+        parser.error(str(exc))
 
     if args.reference_set == "public-samples":
         summary = build_provider_quality_gate_summary(
-            samples=PUBLIC_REFERENCE_SAMPLES,
+            samples=selected_samples,
             output_dir=args.output_dir,
             summary_path=args.summary,
             evidence_date=args.date,

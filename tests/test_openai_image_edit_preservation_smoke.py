@@ -5,13 +5,16 @@ import json
 from pathlib import Path
 
 from PIL import Image, ImageDraw
+import pytest
 
 from dessert_ad_studio.backends.base import ImageResult
 from dessert_ad_studio.schemas import GenerationRequest
 from scripts.openai_image_edit_preservation_smoke import (
+    PUBLIC_REFERENCE_SAMPLES,
     ReferenceSample,
     build_live_image_edit_preservation_summary,
     build_provider_quality_gate_summary,
+    select_reference_samples,
 )
 
 
@@ -118,6 +121,36 @@ def test_build_provider_quality_gate_summary_checks_multiple_samples_and_redacts
     assert "원본 사진의 상품 형태" not in serialized
     assert "reference_image_b64" not in serialized
     assert "b64_json" not in serialized
+
+
+def test_select_reference_samples_allows_one_public_canary() -> None:
+    samples = select_reference_samples(
+        reference_set="public-samples",
+        reference_path=Path("unused.png"),
+        sample_slug="matcha-pudding",
+    )
+
+    assert [sample.slug for sample in samples] == ["matcha-pudding"]
+    assert samples[0].product_name == "말차 푸딩"
+
+
+def test_select_reference_samples_rejects_unknown_public_canary() -> None:
+    with pytest.raises(ValueError, match="unknown public sample slug"):
+        select_reference_samples(
+            reference_set="public-samples",
+            reference_path=Path("unused.png"),
+            sample_slug="unknown",
+        )
+
+
+def test_select_reference_samples_returns_all_public_samples_by_default() -> None:
+    samples = select_reference_samples(
+        reference_set="public-samples",
+        reference_path=Path("unused.png"),
+        sample_slug=None,
+    )
+
+    assert samples == PUBLIC_REFERENCE_SAMPLES
 
 
 def test_provider_quality_gate_summary_includes_cost_guard(

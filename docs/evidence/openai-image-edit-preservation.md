@@ -90,6 +90,18 @@ Latest paid provider-quality run:
   --date 2026-06-17
 ```
 
+One-sample canary before another paid three-sample gate:
+
+```bash
+.venv/bin/python scripts/openai_image_edit_preservation_smoke.py \
+  --reference-set public-samples \
+  --sample-slug matcha-pudding \
+  --model-id gpt-image-2 \
+  --quality medium \
+  --max-estimated-cost-usd 0.10 \
+  --date 2026-06-17
+```
+
 The `--max-estimated-cost-usd` guard uses the token usage returned by the image
 API. If pricing for the selected model is unavailable and no override is set,
 the budget gate fails closed instead of silently passing.
