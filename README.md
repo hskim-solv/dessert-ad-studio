@@ -67,6 +67,9 @@ Verified:
   fallback summary.
 - Reviewer-facing offline Agentic RAG eval report that consolidates golden
   eval, retrieval, chunking, pgvector, promptfoo, and guardrail evidence.
+- Final readiness audit that maps the portfolio goal to 9 capability
+  categories, separates local first gates from user-gated production work, and
+  keeps provider-quality image editing in the `not_claimed` boundary.
 - No-external-call Agentic RAG pending decision register that lists the 9
   user-gated items, approval reasons, no-claim boundaries, and next evidence
   artifacts.

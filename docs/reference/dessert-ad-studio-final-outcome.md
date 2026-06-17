@@ -206,6 +206,11 @@ Verified:
   centralized with approval reason, current boundary, no-claim rule, and next
   evidence artifact. Evidence is recorded in
   [`docs/evidence/agentic-rag-decision-register.md`](../evidence/agentic-rag-decision-register.md).
+- Agentic RAG final readiness audit: the final portfolio target is mapped to 9
+  capability categories, local first-gate evidence is verified, production
+  completion remains false, and provider-quality image editing stays in the
+  `not_claimed` boundary. Evidence is recorded in
+  [`docs/evidence/agentic-rag-final-readiness.md`](../evidence/agentic-rag-final-readiness.md).
 
 Not yet proven:
 

@@ -1,0 +1,211 @@
+{
+  "agentic_rag_final_readiness": "passed",
+  "scope": "portfolio_boundary_audit_no_paid_api_call",
+  "evidence_date": "2026-06-17",
+  "source_artifacts": [
+    "docs/reference/dessert-ad-studio-final-outcome.md",
+    "README.md",
+    "docs/evidence/README.md",
+    "docs/evidence/assets/architecture.svg",
+    "docs/evidence/agentic-rag-graph-summary.json",
+    "docs/evidence/agentic-rag-stream-summary.json",
+    "docs/evidence/agentic-rag-websocket-summary.json",
+    "docs/evidence/agentic-rag-sqlite-checkpoint-summary.json",
+    "docs/evidence/agentic-rag-approval-summary.json",
+    "docs/evidence/agentic-rag-cross-process-resume-summary.json",
+    "docs/evidence/agentic-rag-tools-summary.json",
+    "docs/evidence/agentic-rag-mcp-server-summary.json",
+    "docs/evidence/agentic-rag-eval-report-summary.json",
+    "docs/evidence/agentic-rag-trace-summary.json",
+    "docs/evidence/agentic-rag-run-metrics-summary.json",
+    "docs/evidence/agentic-rag-retention-policy-summary.json",
+    "docs/evidence/rag-baseline-results.json",
+    "docs/evidence/rag-chunking-comparison-results.json",
+    "docs/evidence/pgvector-baseline-results.json",
+    "docs/evidence/k8s-live-smoke-summary.json",
+    "docs/evidence/demo-video-storyboard-summary.json",
+    "docs/evidence/agentic-rag-decision-register-summary.json",
+    "docs/evidence/provider-visual-review-summary.json",
+    "docs/evidence/provider-gate-postmortem-summary.json"
+  ],
+  "missing_artifacts": [],
+  "capabilities": [
+    {
+      "id": "backend_async_streaming",
+      "description": "FastAPI async SSE/WebSocket run streaming and replay",
+      "status": "first_gate_passed",
+      "passed": true,
+      "checks_passed": 4,
+      "checks_total": 4,
+      "evidence": [
+        "docs/evidence/agentic-rag-streaming.md",
+        "docs/evidence/agentic-rag-stream-summary.json",
+        "docs/evidence/agentic-rag-websocket-summary.json"
+      ]
+    },
+    {
+      "id": "langgraph_orchestration",
+      "description": "LangGraph typed graph, conditional routing, retry/reflection, checkpointing, HITL",
+      "status": "first_gate_passed",
+      "passed": true,
+      "checks_passed": 4,
+      "checks_total": 4,
+      "evidence": [
+        "docs/evidence/agentic-rag-graph.md",
+        "docs/evidence/agentic-rag-sqlite-checkpoint.md",
+        "docs/evidence/agentic-rag-approval.md",
+        "docs/evidence/agentic-rag-cross-process-resume.md"
+      ]
+    },
+    {
+      "id": "rag_retrieval",
+      "description": "Document retrieval, chunking comparison, embeddings, pgvector hybrid retrieval, citations, fallback",
+      "status": "first_gate_passed",
+      "passed": true,
+      "checks_passed": 4,
+      "checks_total": 4,
+      "evidence": [
+        "docs/evidence/rag-baseline.md",
+        "docs/evidence/rag-chunking-comparison.md",
+        "docs/evidence/pgvector-retrieval.md",
+        "docs/evidence/agentic-rag-eval-report-summary.json"
+      ]
+    },
+    {
+      "id": "tool_suite_and_mcp",
+      "description": "Document retrieval, web search, SQL, internal API, generation workflow, and FastMCP tool server",
+      "status": "first_gate_passed",
+      "passed": true,
+      "checks_passed": 4,
+      "checks_total": 4,
+      "evidence": [
+        "docs/evidence/agentic-rag-tools.md",
+        "docs/evidence/agentic-rag-tools-summary.json",
+        "docs/evidence/agentic-rag-mcp-server-summary.json"
+      ]
+    },
+    {
+      "id": "evaluation_and_ci",
+      "description": "Ragas-compatible golden eval, promptfoo regression, guardrail gate, and reviewer eval report",
+      "status": "first_gate_passed_with_live_ragas_pending",
+      "passed": true,
+      "checks_passed": 5,
+      "checks_total": 5,
+      "evidence": [
+        "docs/evidence/agentic-rag-eval-guardrail.md",
+        "docs/evidence/agentic-rag-eval-report.md",
+        "docs/evidence/agentic-rag-eval-report-summary.json"
+      ]
+    },
+    {
+      "id": "observability",
+      "description": "OpenInference/Phoenix-compatible traces, latency, token/cost, tool success/failure, failed-run analysis",
+      "status": "first_gate_passed",
+      "passed": true,
+      "checks_passed": 4,
+      "checks_total": 4,
+      "evidence": [
+        "docs/evidence/agentic-rag-trace.md",
+        "docs/evidence/agentic-rag-run-metrics.md",
+        "docs/evidence/agentops-phoenix.md"
+      ]
+    },
+    {
+      "id": "guardrails_privacy",
+      "description": "Structured validation, tool allowlist, prompt injection, tool budget, redaction, fallback, retention boundary",
+      "status": "first_gate_passed_with_production_storage_pending",
+      "passed": true,
+      "checks_passed": 4,
+      "checks_total": 4,
+      "evidence": [
+        "docs/evidence/agentic-rag-eval-guardrail.md",
+        "docs/evidence/agentic-rag-retention-policy.md",
+        "docs/evidence/agentic-rag-decision-register-summary.json"
+      ]
+    },
+    {
+      "id": "deployment_packaging",
+      "description": "Docker/GitHub Actions/Kubernetes evidence, architecture diagram, storyboard, eval report",
+      "status": "first_gate_passed_with_cloud_demo_file_pending",
+      "passed": true,
+      "checks_passed": 5,
+      "checks_total": 5,
+      "evidence": [
+        "docs/evidence/k8s-deployment.md",
+        "docs/evidence/assets/architecture.svg",
+        "docs/evidence/demo-video-storyboard.md",
+        "docs/evidence/agentic-rag-eval-report.md"
+      ]
+    },
+    {
+      "id": "provider_quality_claim_boundary",
+      "description": "Provider-quality image editing remains unproven until latency strategy and later paid gate pass",
+      "status": "not_claimed",
+      "passed": true,
+      "checks_passed": 4,
+      "checks_total": 4,
+      "evidence": [
+        "docs/evidence/provider-visual-review.md",
+        "docs/evidence/provider-gate-postmortem.md",
+        "docs/evidence/openai-image-edit-preservation.md"
+      ]
+    }
+  ],
+  "capability_counts": {
+    "total": 9,
+    "passed": 9,
+    "first_gate_statuses": [
+      "first_gate_passed",
+      "first_gate_passed_with_cloud_demo_file_pending",
+      "first_gate_passed_with_live_ragas_pending",
+      "first_gate_passed_with_production_storage_pending"
+    ],
+    "not_claimed": 1
+  },
+  "pending_decision_register": {
+    "decision_count": 9,
+    "decisions_requiring_user_approval": 9,
+    "production_claim_added": false,
+    "decision_ids": [
+      "ragas_live_eval",
+      "live_web_search_provider_smoke",
+      "credentialed_production_db_smoke",
+      "production_mcp_remote_auth",
+      "live_provider_cross_process_resume",
+      "production_replay_audit_storage",
+      "external_trace_backend_customer_capture",
+      "image_edit_latency_strategy",
+      "cloud_deployment_and_recorded_demo"
+    ]
+  },
+  "provider_quality_boundary": {
+    "provider_quality_claimed": false,
+    "provider_quality_unproven": true,
+    "latest_paid_canary": {
+      "api_reached": true,
+      "model_id": "gpt-image-2",
+      "quality": "medium",
+      "sample_count": 1,
+      "elapsed_ms": 66984,
+      "cost_guard_passed": true,
+      "estimated_cost_usd": 0.08859,
+      "roi_preservation_checks_passed": true,
+      "text_contamination_passed": true,
+      "latency_passed": false,
+      "root_causes": [
+        "latency_threshold_exceeded"
+      ]
+    },
+    "root_causes": [
+      "latency_threshold_exceeded"
+    ]
+  },
+  "completion_claim": {
+    "production_complete": false,
+    "reason": "Local first gates and reviewer packaging are consolidated, but live/API-key, credentialed DB, production MCP auth, external trace, cloud/demo, and image latency decisions remain user-gated."
+  },
+  "privacy_boundary": {
+    "paid_api_call_count": 0,
+    "raw_inputs_committed": false
+  }
+}
