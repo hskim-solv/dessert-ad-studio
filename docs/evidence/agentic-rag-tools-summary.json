@@ -26,6 +26,36 @@
       "ad-policy-local-guides"
     ]
   },
+  "live_web_search_runtime_policy": {
+    "status": "first_gate_complete",
+    "live_provider_configured": false,
+    "live_provider_smoke": "pending_user_approval",
+    "allowed_provider_types": [
+      "search_api",
+      "mcp_web_search"
+    ],
+    "query_redaction": {
+      "raw_query_committed": false,
+      "raw_user_inputs_committed": false,
+      "secrets_committed": false,
+      "query_hash_required": true
+    },
+    "request_policy": {
+      "domain_allowlist_required": true,
+      "max_results": 5,
+      "timeout_ms": 3000,
+      "follow_redirects": false,
+      "safe_search_required": true
+    },
+    "response_policy": {
+      "source_url_required": true,
+      "title_required": true,
+      "snippet_max_chars": 280,
+      "citation_required": true,
+      "raw_html_committed": false
+    },
+    "retention_status": "summary_only_no_raw_page_storage"
+  },
   "sql_query": {
     "tool": "sql_query",
     "mode": "sqlite_allowlisted_query",

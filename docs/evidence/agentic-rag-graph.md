@@ -99,6 +99,7 @@ Focused tests:
 This is not yet the full Agentic RAG system. The following remain pending:
 
 - production Postgres or multi-instance checkpointer policy
-- live web search, credentialed production DB connection/audit-retention smoke,
-  production MCP auth provider, and remote client transport/auth smoke
+- live web search provider smoke, credentialed production DB
+  connection/audit-retention smoke, production MCP auth provider, and remote
+  client transport/auth smoke
 - production/live citation assembly over generated ad packages

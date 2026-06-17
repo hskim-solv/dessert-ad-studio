@@ -51,7 +51,8 @@
   },
   "limits": {
     "ragas_live_gate": "pending_paid_api_approval",
-    "live_web_search": "pending_runtime_security_policy",
+    "live_web_search_runtime_policy": "first_gate_complete",
+    "live_web_search_provider_smoke": "pending_user_approval",
     "local_sql_runtime_policy": "first_gate_complete",
     "production_db_access_audit_policy": "first_gate_complete",
     "credentialed_production_db_smoke": "pending_user_approval",

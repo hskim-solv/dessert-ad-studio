@@ -96,7 +96,8 @@ def build_agentic_rag_eval_report_summary(*, evidence_date: str) -> dict[str, An
         },
         "limits": {
             "ragas_live_gate": "pending_paid_api_approval",
-            "live_web_search": "pending_runtime_security_policy",
+            "live_web_search_runtime_policy": "first_gate_complete",
+            "live_web_search_provider_smoke": "pending_user_approval",
             "local_sql_runtime_policy": "first_gate_complete",
             "production_db_access_audit_policy": "first_gate_complete",
             "credentialed_production_db_smoke": "pending_user_approval",
@@ -171,14 +172,15 @@ external MCP transports.
 
 ## Limits
 
-Ragas live metrics remain pending until paid/API-key approval. Live web search,
-credentialed production DB connection smoke, and production MCP auth/remote
-client smoke also remain pending runtime-security work. The local SQL runtime
-policy, production DB access/audit policy, and MCP loopback transport/auth
-boundary first gates are complete, but they are not live production traffic,
-approved production audit retention, or production MCP auth. This report is a
-reviewer-facing consolidation of the local deterministic gates, not a
-replacement for production traffic evidence.
+Ragas live metrics remain pending until paid/API-key approval. Live web search
+provider smoke, credentialed production DB connection smoke, and production MCP
+auth/remote client smoke also remain pending user-approved runtime-security
+work. The live web search runtime policy, local SQL runtime policy, production
+DB access/audit policy, and MCP loopback transport/auth boundary first gates
+are complete, but they are not live production traffic, approved production
+audit retention, or production MCP auth. This report is a reviewer-facing
+consolidation of the local deterministic gates, not a replacement for
+production traffic evidence.
 """
 
 

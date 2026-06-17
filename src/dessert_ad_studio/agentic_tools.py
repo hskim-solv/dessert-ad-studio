@@ -17,6 +17,33 @@ WEB_SEARCH_SNAPSHOT = (
         "supports": ("claim_guardrails", "citation_required"),
     },
 )
+LIVE_WEB_SEARCH_RUNTIME_POLICY = {
+    "status": "first_gate_complete",
+    "live_provider_configured": False,
+    "live_provider_smoke": "pending_user_approval",
+    "allowed_provider_types": ["search_api", "mcp_web_search"],
+    "query_redaction": {
+        "raw_query_committed": False,
+        "raw_user_inputs_committed": False,
+        "secrets_committed": False,
+        "query_hash_required": True,
+    },
+    "request_policy": {
+        "domain_allowlist_required": True,
+        "max_results": 5,
+        "timeout_ms": 3000,
+        "follow_redirects": False,
+        "safe_search_required": True,
+    },
+    "response_policy": {
+        "source_url_required": True,
+        "title_required": True,
+        "snippet_max_chars": 280,
+        "citation_required": True,
+        "raw_html_committed": False,
+    },
+    "retention_status": "summary_only_no_raw_page_storage",
+}
 
 TEMPLATE_POLICY_ROWS = (
     ("minimal_premium", 0.78, "premium_claims_need_evidence"),
@@ -86,6 +113,10 @@ def run_web_search_tool(*, query: str) -> dict[str, Any]:
         "result_count": len(matches),
         "source_ids": [entry["source_id"] for entry in matches],
     }
+
+
+def build_live_web_search_runtime_policy() -> dict[str, Any]:
+    return deepcopy(LIVE_WEB_SEARCH_RUNTIME_POLICY)
 
 
 def run_sql_query_tool(*, query_id: str) -> dict[str, Any]:

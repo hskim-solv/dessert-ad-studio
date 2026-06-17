@@ -96,7 +96,7 @@ ad generation while keeping proven and pending scope explicit.
 
 - Duration: `20s`
 - Visual: Show provider-quality failure and final outcome pending rows.
-- Narration: Provider-quality OpenAI image editing is not claimed as proven; live web search, credentialed production DB smoke, production MCP auth, cloud deployment, and the final recorded video remain pending.
+- Narration: Provider-quality OpenAI image editing is not claimed as proven; live web search provider smoke, credentialed production DB smoke, production MCP auth, cloud deployment, and the final recorded video remain pending.
 - Evidence:
   - `docs/evidence/openai-image-edit-preservation.md`
   - `docs/evidence/provider-gate-postmortem.md`
