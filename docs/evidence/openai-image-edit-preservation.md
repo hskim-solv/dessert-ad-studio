@@ -29,6 +29,9 @@ prove provider-quality image editing. It reinforces the production boundary:
 image models should produce or edit visuals, while Korean marketing copy should
 be rendered deterministically by the overlay layer.
 
+Offline postmortem:
+[`provider-gate-postmortem.md`](provider-gate-postmortem.md).
+
 ## Historical Initial Run
 
 The first paid run used `gpt-image-1-mini`, `quality=low`, and one

@@ -20,7 +20,7 @@ deployment readiness, privacy boundaries, and model-backed product analysis.
 docker compose config -q
 ```
 
-Latest local regression snapshot: `222 passed, 1 warning`.
+Latest local regression snapshot: `224 passed, 1 warning`.
 
 ## Evidence Map
 
@@ -39,6 +39,7 @@ Latest local regression snapshot: `222 passed, 1 warning`.
 | Streamlit reviewer flow | [`streamlit-reviewer-flow.md`](streamlit-reviewer-flow.md), [`assets/streamlit-reviewer-input.png`](assets/streamlit-reviewer-input.png), [`assets/streamlit-reviewer-result.png`](assets/streamlit-reviewer-result.png) | Local reviewer flow shows input form, revision request, generated banner, revised copy, and download action | See the API, Streamlit, and Playwright capture steps in the evidence note |
 | Real-sample preservation | [`real-sample-preservation.md`](real-sample-preservation.md), [`real-sample-preservation-results.json`](real-sample-preservation-results.json), [`assets/real-sample-preservation/`](assets/real-sample-preservation/) | 3 public sample photos, pass rate 1.00, minimum top-region pixel match 1.00 for deterministic composition | `.venv/bin/python scripts/build_real_sample_preservation_evidence.py --date 2026-06-16` |
 | OpenAI image-edit preservation | [`openai-image-edit-preservation.md`](openai-image-edit-preservation.md), [`openai-image-edit-preservation-live-summary.json`](openai-image-edit-preservation-live-summary.json) | Strengthened paid `gpt-image-2`/`medium` provider-quality gate failed: pass rate 0.00, ROI preservation checks passed, latency/text-contamination/cost guard failed, estimated cost `$0.2658` over `$0.20` budget | `.venv/bin/python scripts/openai_image_edit_preservation_smoke.py --reference-set public-samples --model-id gpt-image-2 --quality medium --max-estimated-cost-usd 0.20 --date 2026-06-17` |
+| Provider gate postmortem | [`provider-gate-postmortem.md`](provider-gate-postmortem.md), [`provider-gate-postmortem-summary.json`](provider-gate-postmortem-summary.json) | Offline postmortem complete: root causes are latency threshold exceeded, text-contamination heuristic failed, and cost budget exceeded; ROI preservation checks passed | `.venv/bin/python scripts/analyze_provider_gate_failure.py --input docs/evidence/openai-image-edit-preservation-live-summary.json --output docs/evidence/provider-gate-postmortem-summary.json` |
 | Adversarial portfolio review | [`../reference/adversarial-portfolio-review.md`](../reference/adversarial-portfolio-review.md) | Three independent subagents identified overclaiming and converted it into an M7 hardening roadmap | Review-only artifact; no paid/API calls |
 | Architecture preview | [`assets/architecture.svg`](assets/architecture.svg) | README-ready architecture image maps UX, workflow, RAG/eval/ops/deploy/privacy layers | `rsvg-convert docs/evidence/assets/architecture.svg -o /tmp/dessert-ad-studio-architecture.png` |
 | Kubernetes deployability | [`k8s-deployment.md`](k8s-deployment.md), [`k8s-live-smoke-summary.json`](k8s-live-smoke-summary.json), [`k8s-async-smoke-summary.json`](k8s-async-smoke-summary.json), [`k8s-async-failure-smoke.md`](k8s-async-failure-smoke.md), [`k8s-async-failure-smoke-summary.json`](k8s-async-failure-smoke-summary.json) | Base, GPU, AgentOps, and async overlays render; live `kind` smokes passed base API/Triton `/generate`, async Redis/RQ worker plus Postgres history, and worker outage/restore behavior | `.venv/bin/python scripts/k8s_async_failure_smoke.py --context kind-dessert-ad-studio --namespace dessert-ad-studio --local-port 18082 --timeout 240 --pending-observation-count 3 --poll-interval 2 --summary docs/evidence/k8s-async-failure-smoke-summary.json` |
@@ -72,5 +73,7 @@ Latest local regression snapshot: `222 passed, 1 warning`.
 - Do not claim provider-quality image editing from the paid OpenAI gate; the
   latest `gpt-image-2`/`medium` run failed latency, text-contamination, and cost
   checks.
+- Treat the provider-gate postmortem as the precondition for any further paid
+  iteration.
 - Add human visual review or provider-quality visual statistics before making
   broader generated-asset quality claims.

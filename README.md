@@ -304,7 +304,7 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Diagnose the failed paid `gpt-image-2` + `quality=medium` provider-quality gate before any further paid iteration.
+1. Implement remediation for the failed paid `gpt-image-2` + `quality=medium` provider-quality gate before any further paid iteration.
 2. Add human visual review or provider-quality visual statistics for generated assets.
 3. Keep FastMCP/A2A as optional thin wrappers after the workflow/API evidence is stable.
 
