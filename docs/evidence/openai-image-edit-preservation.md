@@ -13,7 +13,7 @@ metric summary.
 - Model: `gpt-image-2`
 - Quality: `medium`
 - Reference set: one committed public sample, `matcha-pudding`
-- Elapsed: `72,962 ms`
+- Elapsed: `66,984 ms`
 - Usage: `2,953 total_tokens`
 - Estimated cost: `$0.08859`
 - Budget guard: passed under `$0.10`
@@ -122,7 +122,7 @@ Latest one-sample canary result:
 - sample: `matcha-pudding`
 - model/quality: `gpt-image-2` / `medium`
 - estimated cost: `$0.08859` under the `$0.10` budget
-- elapsed time: `72.96s`, above the `30s` threshold
+- elapsed time: `66.98s`, above the `30s` threshold
 - ROI preservation checks: passed
 - post-calibration text-contamination proxy: passed with score `0.00`; manual
   local review of the generated output found no visible text.

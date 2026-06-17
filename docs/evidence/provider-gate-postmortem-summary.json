@@ -4,7 +4,7 @@
     "model_id": "gpt-image-2",
     "quality": "medium",
     "sample_count": 1,
-    "elapsed_ms": 72962,
+    "elapsed_ms": 66984,
     "total_tokens": 2953,
     "estimated_cost_usd": 0.08859,
     "budget_max_usd": 0.1,
@@ -17,9 +17,9 @@
   },
   "preservation_result": {
     "roi_preservation_checks_passed": true,
-    "minimum_roi_color_histogram_similarity": 0.804179,
+    "minimum_roi_color_histogram_similarity": 0.640503,
     "minimum_roi_average_hash_similarity": 0.765625,
-    "minimum_roi_edge_similarity": 0.734375
+    "minimum_roi_edge_similarity": 0.75
   },
   "failure_counts": {
     "sample_elapsed_ms_le_threshold": 1

@@ -4,7 +4,7 @@
   "model_id": "gpt-image-2",
   "quality": "medium",
   "used_reference": true,
-  "elapsed_ms": 72962,
+  "elapsed_ms": 66984,
   "usage": {
     "sample_count": 1,
     "total_tokens": 2953
@@ -52,16 +52,16 @@
     "sample_count": 1,
     "passed_count": 0,
     "pass_rate": 0.0,
-    "min_roi_color_histogram_similarity": 0.804179,
+    "min_roi_color_histogram_similarity": 0.640503,
     "min_roi_average_hash_similarity": 0.765625,
-    "min_roi_edge_similarity": 0.734375,
+    "min_roi_edge_similarity": 0.75,
     "max_text_contamination_risk_score": 0.0
   },
   "sample_results": [
     {
       "slug": "matcha-pudding",
       "product_name": "말차 푸딩",
-      "elapsed_ms": 72675,
+      "elapsed_ms": 66751,
       "usage": {
         "total_tokens": 2953
       },
@@ -80,8 +80,8 @@
         "exists": true,
         "committed": false,
         "path": "redacted_outputs_path",
-        "sha256": "c9d088091c2549147eaf6c30007c8db1e524712bc6afaf4abaa24841df50be70",
-        "bytes": 1390938
+        "sha256": "db818dec67d43ce20a2dc0120d899bb3e7bcc51a4d088545f0bf07cea822de89",
+        "bytes": 1335567
       },
       "prompt": {
         "length": 276,
@@ -99,11 +99,11 @@
           1024
         ],
         "generated_nonblank": true,
-        "color_histogram_similarity": 0.790349,
-        "average_hash_similarity": 0.65625,
-        "roi_color_histogram_similarity": 0.804179,
+        "color_histogram_similarity": 0.62796,
+        "average_hash_similarity": 0.703125,
+        "roi_color_histogram_similarity": 0.640503,
         "roi_average_hash_similarity": 0.765625,
-        "roi_edge_similarity": 0.734375,
+        "roi_edge_similarity": 0.75,
         "text_contamination_risk_score": 0.0
       },
       "checklist": {
@@ -140,8 +140,8 @@
     "exists": true,
     "committed": false,
     "path": "redacted_outputs_path",
-    "sha256": "c9d088091c2549147eaf6c30007c8db1e524712bc6afaf4abaa24841df50be70",
-    "bytes": 1390938
+    "sha256": "db818dec67d43ce20a2dc0120d899bb3e7bcc51a4d088545f0bf07cea822de89",
+    "bytes": 1335567
   },
   "prompt": {
     "length": 276,
@@ -159,11 +159,11 @@
       1024
     ],
     "generated_nonblank": true,
-    "color_histogram_similarity": 0.790349,
-    "average_hash_similarity": 0.65625,
-    "roi_color_histogram_similarity": 0.804179,
+    "color_histogram_similarity": 0.62796,
+    "average_hash_similarity": 0.703125,
+    "roi_color_histogram_similarity": 0.640503,
     "roi_average_hash_similarity": 0.765625,
-    "roi_edge_similarity": 0.734375,
+    "roi_edge_similarity": 0.75,
     "text_contamination_risk_score": 0.0
   },
   "checklist": {
