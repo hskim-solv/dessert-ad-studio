@@ -3,6 +3,8 @@
   "scope": "local_fastapi_sse_no_paid_api_call",
   "evidence_date": "2026-06-17",
   "media_type": "text/event-stream; charset=utf-8",
+  "run_id_prefix": "agr",
+  "checkpointing_enabled": true,
   "event_names": [
     "run_started",
     "node_completed",
@@ -25,5 +27,18 @@
   "final_next_action": "return_cited_ad_package",
   "worker_status": "succeeded",
   "copy_option_count": 3,
+  "replay_status": "completed",
+  "replay_next_action": "return_cited_ad_package",
+  "replay_checkpoint_backend": "sqlite",
+  "replay_checkpoint_count": 8,
+  "replay_node_sequence": [
+    "plan_campaign",
+    "retrieve_context",
+    "build_citations",
+    "guardrail_check",
+    "execute_worker",
+    "finalize"
+  ],
+  "replay_raw_inputs_committed": false,
   "raw_inputs_committed": false
 }

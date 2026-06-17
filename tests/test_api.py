@@ -300,6 +300,73 @@ def test_agentic_rag_run_stream_emits_redacted_worker_events(
         assert raw_value not in body
 
 
+def test_agentic_rag_run_replay_returns_redacted_sqlite_checkpoint_summary(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path / "outputs"))
+    monkeypatch.setenv("GENERATION_LOG_PATH", str(tmp_path / "generations.jsonl"))
+    monkeypatch.setenv(
+        "AGENTIC_RAG_CHECKPOINT_DB",
+        str(tmp_path / "agentic-rag-checkpoints.sqlite"),
+    )
+    payload = {
+        **base_payload(),
+        "product_name": "비공개 말차 푸딩",
+        "user_constraints": "VIP 고객에게만 보일 문구",
+    }
+
+    with client.stream("POST", "/agentic-rag/runs/stream", json=payload) as response:
+        body = response.read().decode("utf-8")
+
+    assert response.status_code == 200
+    events = _parse_sse_events(body)
+    run_id = events[0]["data"]["run_id"]
+    assert run_id.startswith("agr-")
+    assert events[0]["data"]["checkpointing_enabled"] is True
+
+    replay_response = client.get(f"/agentic-rag/runs/{run_id}/replay")
+
+    assert replay_response.status_code == 200
+    replay = replay_response.json()
+    assert replay["run_id"] == run_id
+    assert replay["checkpoint_backend"] == "sqlite"
+    assert replay["checkpoint_count"] >= 1
+    assert replay["status"] == "completed"
+    assert replay["next_action"] == "return_cited_ad_package"
+    assert replay["node_trace"] == [
+        "plan_campaign",
+        "retrieve_context",
+        "build_citations",
+        "guardrail_check",
+        "execute_worker",
+        "finalize",
+    ]
+    assert replay["worker_status"] == "succeeded"
+    assert replay["copy_option_count"] == 3
+    assert replay["raw_inputs_committed"] is False
+
+    serialized = json.dumps(replay, ensure_ascii=False)
+    for raw_value in ["비공개 말차 푸딩", "VIP 고객에게만 보일 문구"]:
+        assert raw_value not in body
+        assert raw_value not in serialized
+
+
+def test_agentic_rag_run_replay_returns_404_for_unknown_run(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv(
+        "AGENTIC_RAG_CHECKPOINT_DB",
+        str(tmp_path / "agentic-rag-checkpoints.sqlite"),
+    )
+
+    response = client.get("/agentic-rag/runs/agr-missing/replay")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Agentic RAG run replay not found."
+
+
 def test_agentic_rag_run_stream_routes_paid_provider_to_approval(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

@@ -32,6 +32,8 @@ def test_agentic_rag_stream_smoke_writes_summary(tmp_path: Path) -> None:
     assert summary["agentic_rag_stream_smoke"] == "passed"
     assert summary["scope"] == "local_fastapi_sse_no_paid_api_call"
     assert summary["media_type"].startswith("text/event-stream")
+    assert summary["run_id_prefix"] == "agr"
+    assert summary["checkpointing_enabled"] is True
     assert summary["event_names"] == [
         "run_started",
         "node_completed",
@@ -52,6 +54,12 @@ def test_agentic_rag_stream_smoke_writes_summary(tmp_path: Path) -> None:
     ]
     assert summary["final_status"] == "completed"
     assert summary["final_next_action"] == "return_cited_ad_package"
+    assert summary["replay_status"] == "completed"
+    assert summary["replay_next_action"] == "return_cited_ad_package"
+    assert summary["replay_checkpoint_backend"] == "sqlite"
+    assert summary["replay_checkpoint_count"] >= 1
+    assert summary["replay_node_sequence"] == summary["node_sequence"]
+    assert summary["replay_raw_inputs_committed"] is False
     assert summary["raw_inputs_committed"] is False
 
     serialized = json.dumps(summary, ensure_ascii=False)

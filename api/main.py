@@ -4,6 +4,7 @@ import asyncio
 import json
 import os
 from collections import defaultdict
+from contextlib import nullcontext
 from functools import lru_cache
 from pathlib import Path
 from threading import Lock
@@ -26,6 +27,8 @@ from dessert_ad_studio.agentic_rag import (
     build_agentic_rag_graph,
     build_agentic_rag_initial_state,
     build_generation_workflow_executor,
+    load_agentic_rag_sqlite_replay_summary,
+    open_agentic_rag_sqlite_checkpointer,
 )
 from dessert_ad_studio.backends.base import AdBackendError, CopyBackend, ImageBackend
 from dessert_ad_studio.backends.flux2 import Flux2Backend
@@ -450,9 +453,8 @@ async def _agentic_rag_sse_events(
     dependencies: GenerationWorkflowDependencies,
 ) -> AsyncIterator[str]:
     requires_paid_provider = _agentic_rag_requires_paid_provider(dependencies)
-    graph = build_agentic_rag_graph(
-        worker_executor=build_generation_workflow_executor(request, dependencies),
-    )
+    checkpoint_db = _agentic_rag_checkpoint_db_path()
+    run_id = f"agr-{uuid4()}"
     state = build_agentic_rag_initial_state(
         request,
         requires_paid_provider=requires_paid_provider,
@@ -460,23 +462,42 @@ async def _agentic_rag_sse_events(
         approval_cost_threshold_usd=0.0,
     )
 
-    yield _sse_event(
-        "run_started",
-        {
-            "status": "started",
-            "stream_protocol": "sse",
-            "raw_inputs_committed": False,
-        },
+    checkpointer_context = (
+        open_agentic_rag_sqlite_checkpointer(checkpoint_db)
+        if checkpoint_db is not None
+        else nullcontext(None)
     )
-    final_status = "started"
-    final_next_action = None
-    for chunk in graph.stream(state, stream_mode="updates"):
-        for node_name, update in chunk.items():
-            payload = _agentic_rag_stream_update(node_name, update)
-            final_status = payload.get("status", final_status)
-            final_next_action = payload.get("next_action", final_next_action)
-            yield _sse_event("node_completed", payload)
-            await asyncio.sleep(0)
+    with checkpointer_context as checkpointer:
+        graph = build_agentic_rag_graph(
+            checkpointer=checkpointer,
+            worker_executor=build_generation_workflow_executor(request, dependencies),
+        )
+        config = {"configurable": {"thread_id": run_id}} if checkpointer is not None else None
+
+        yield _sse_event(
+            "run_started",
+            {
+                "run_id": run_id,
+                "status": "started",
+                "stream_protocol": "sse",
+                "checkpointing_enabled": checkpointer is not None,
+                "raw_inputs_committed": False,
+            },
+        )
+        final_status = "started"
+        final_next_action = None
+        stream = (
+            graph.stream(state, config, stream_mode="updates")
+            if config is not None
+            else graph.stream(state, stream_mode="updates")
+        )
+        for chunk in stream:
+            for node_name, update in chunk.items():
+                payload = _agentic_rag_stream_update(node_name, update)
+                final_status = payload.get("status", final_status)
+                final_next_action = payload.get("next_action", final_next_action)
+                yield _sse_event("node_completed", payload)
+                await asyncio.sleep(0)
 
     run_completed = {
         "status": final_status,
@@ -485,6 +506,13 @@ async def _agentic_rag_sse_events(
     if final_next_action is not None:
         run_completed["next_action"] = final_next_action
     yield _sse_event("run_completed", run_completed)
+
+
+def _agentic_rag_checkpoint_db_path() -> Path | None:
+    checkpoint_db = os.getenv("AGENTIC_RAG_CHECKPOINT_DB", "").strip()
+    if not checkpoint_db:
+        return None
+    return Path(checkpoint_db)
 
 
 def _agentic_rag_stream_update(node_name: str, update: dict[str, Any]) -> dict[str, Any]:
@@ -650,6 +678,24 @@ async def stream_agentic_rag_run(request: GenerationRequest) -> StreamingRespons
         _agentic_rag_sse_events(request, dependencies),
         media_type="text/event-stream",
     )
+
+
+@app.get("/agentic-rag/runs/{run_id}/replay")
+def get_agentic_rag_run_replay(run_id: str) -> dict[str, Any]:
+    checkpoint_db = _agentic_rag_checkpoint_db_path()
+    if checkpoint_db is None or not checkpoint_db.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Agentic RAG run replay not found.",
+        )
+
+    replay = load_agentic_rag_sqlite_replay_summary(checkpoint_db, run_id=run_id)
+    if replay is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Agentic RAG run replay not found.",
+        )
+    return replay
 
 
 @app.post("/generation-jobs", status_code=202)

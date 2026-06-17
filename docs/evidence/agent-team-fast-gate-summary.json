@@ -1,0 +1,25 @@
+{
+  "agent_team_operating_model": "passed",
+  "evidence_date": "2026-06-17",
+  "default_mode": "main_writer_plus_read_only_scouts",
+  "writer_subagents": "opt_in_disjoint_write_scopes_only",
+  "fast_gate_lanes": [
+    "agentic-rag",
+    "compose",
+    "docs",
+    "offline-eval",
+    "paid-provider"
+  ],
+  "parallel_safe_lanes": [
+    "agentic-rag",
+    "compose",
+    "docs",
+    "offline-eval"
+  ],
+  "tripwire_lanes": [
+    "paid-provider"
+  ],
+  "task_lock_template": "docs/agent-workflow/tasks/README.md",
+  "fast_gate_cli": "scripts/agent_team_fast_gate.py",
+  "raw_inputs_committed": false
+}

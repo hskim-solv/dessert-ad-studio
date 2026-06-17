@@ -78,6 +78,26 @@ class AgenticRagState(TypedDict, total=False):
     node_trace: list[str]
 
 
+class AgenticRagReplaySummary(TypedDict, total=False):
+    run_id: str
+    checkpoint_backend: str
+    checkpoint_count: int
+    status: AgenticRagStatus
+    next_action: AgenticRagNextAction
+    node_trace: list[str]
+    approval_required: bool
+    approval_reasons: list[str]
+    retriever_backend: str
+    retrieved_docs_count: int
+    citation_count: int
+    worker_status: str
+    copy_backend: str
+    image_backend: str
+    copy_option_count: int
+    used_reference: bool
+    raw_inputs_committed: bool
+
+
 def build_agentic_rag_initial_state(
     request: GenerationRequest,
     *,
@@ -177,6 +197,56 @@ def open_agentic_rag_sqlite_checkpointer(db_path: str | Path):
     with SqliteSaver.from_conn_string(str(path)) as checkpointer:
         checkpointer.setup()
         yield checkpointer
+
+
+def load_agentic_rag_sqlite_replay_summary(
+    db_path: str | Path,
+    *,
+    run_id: str,
+) -> AgenticRagReplaySummary | None:
+    config = {"configurable": {"thread_id": run_id}}
+    with open_agentic_rag_sqlite_checkpointer(db_path) as checkpointer:
+        checkpoints = list(checkpointer.list(config))
+
+    if not checkpoints:
+        return None
+
+    latest_state = checkpoints[0].checkpoint.get("channel_values", {})
+    summary: AgenticRagReplaySummary = {
+        "run_id": run_id,
+        "checkpoint_backend": "sqlite",
+        "checkpoint_count": len(checkpoints),
+        "raw_inputs_committed": False,
+    }
+    if "status" in latest_state:
+        summary["status"] = latest_state["status"]
+    if "next_action" in latest_state:
+        summary["next_action"] = latest_state["next_action"]
+    if isinstance(latest_state.get("node_trace"), list):
+        summary["node_trace"] = list(latest_state["node_trace"])
+
+    approval = latest_state.get("approval")
+    if isinstance(approval, dict):
+        summary["approval_required"] = bool(approval.get("required", False))
+        summary["approval_reasons"] = list(approval.get("reasons", []))
+
+    marketing_context = latest_state.get("marketing_context")
+    if isinstance(marketing_context, dict):
+        summary["retriever_backend"] = marketing_context.get("retriever_backend")
+        summary["retrieved_docs_count"] = marketing_context.get("retrieved_docs_count")
+
+    citations = latest_state.get("citations")
+    if isinstance(citations, list):
+        summary["citation_count"] = len(citations)
+
+    worker_result = latest_state.get("worker_result")
+    if isinstance(worker_result, dict):
+        summary["worker_status"] = worker_result.get("status")
+        for key in ("copy_backend", "image_backend", "copy_option_count", "used_reference"):
+            if key in worker_result:
+                summary[key] = worker_result[key]
+
+    return summary
 
 
 def build_generation_workflow_executor(

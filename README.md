@@ -35,9 +35,11 @@ Verified:
   HITL routing, keyword retrieval, citations, checkpoint evidence, local mock
   worker execution, retry/reflection test coverage, and redacted summary
   artifact.
-- FastAPI async SSE run-streaming first gate for the Agentic RAG control plane,
-  with node progress events through the local mock worker and redacted event
-  payloads.
+- FastAPI async SSE run-streaming and local SQLite replay first gate for the
+  Agentic RAG control plane, with node progress events through the local mock
+  worker and redacted event/replay payloads.
+- AI agent team operating model with main-writer ownership, read-only scouts,
+  task-lock template, lane fast gates, and paid-provider tripwires.
 - Docker Compose smoke, Redis/RQ job path, redacted Postgres history, and
   local AgentOps trace evidence.
 - Kubernetes manifests that render through Kustomize with probes, ingress, HPA,
@@ -52,8 +54,8 @@ Known gaps:
   editing is not proven.
 - Agentic RAG is still at first-gate maturity. Local SQLite checkpointing is
   proven, but reviewer approval UI, WebSocket/bidirectional approval,
-  production stream replay, production storage policy, and full agent eval gates
-  are still pending.
+  production stream replay retention policy, production storage policy, graph
+  trace integration, and full agent eval gates are still pending.
 - Current eval sets are demo-scale and need a larger real/product-like scenario
   matrix before broader quality claims.
 
@@ -319,7 +321,7 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Extend the Agentic RAG control plane from local graph/SSE/SQLite first gates to reviewer approval UI, production stream replay, graph trace integration, and production storage policy if needed.
+1. Extend the Agentic RAG control plane from local graph/SSE/SQLite/replay first gates to reviewer approval UI, production stream replay retention policy, graph trace integration, and production storage policy if needed.
 2. Add Ragas + promptfoo golden eval gates, prompt-injection/tool-budget tests, and citation-quality reporting.
 3. Implement remediation for the failed paid `gpt-image-2` + `quality=medium` provider-quality gate before any further paid full-gate iteration.
 4. Add human visual review or provider-quality visual statistics for generated assets.

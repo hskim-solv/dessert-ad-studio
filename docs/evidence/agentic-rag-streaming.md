@@ -22,6 +22,8 @@ call paid providers, web search, cloud services, or MCP tools.
   - `execute_worker`
   - `finalize`
 - redacted event payloads only
+- durable `run_id` emitted in `run_started`
+- local SQLite replay endpoint: `GET /agentic-rag/runs/{run_id}/replay`
 - paid-provider approval route covered by focused API test
 
 ## Result
@@ -41,6 +43,11 @@ Current result:
 - final next action: `return_cited_ad_package`
 - worker status: `succeeded`
 - copy options: `3`
+- checkpointing enabled: `true`
+- replay checkpoint backend: `sqlite`
+- replay checkpoints: `8`
+- replay status: `completed`
+- replay next action: `return_cited_ad_package`
 - raw inputs committed: `false`
 
 ## Reproduce
@@ -56,6 +63,8 @@ Focused tests:
 ```bash
 .venv/bin/pytest \
   tests/test_api.py::test_agentic_rag_run_stream_emits_redacted_worker_events \
+  tests/test_api.py::test_agentic_rag_run_replay_returns_redacted_sqlite_checkpoint_summary \
+  tests/test_api.py::test_agentic_rag_run_replay_returns_404_for_unknown_run \
   tests/test_api.py::test_agentic_rag_run_stream_routes_paid_provider_to_approval \
   tests/test_agentic_rag_stream_smoke_script.py -q
 ```
@@ -65,8 +74,8 @@ Focused tests:
 This proves the first local SSE surface, not the full production streaming
 system. The following remain pending:
 
-- durable run IDs and replay
-- SQLite/Postgres graph checkpointing
+- production stream replay and retention policy
+- production Postgres or multi-instance graph checkpointing
 - reviewer approval UI
 - production trace integration for stream events
 - WebSocket support if bidirectional approval becomes necessary

@@ -20,7 +20,7 @@ deployment readiness, privacy boundaries, and model-backed product analysis.
 docker compose config -q
 ```
 
-Latest local regression snapshot: `237 passed`.
+Latest local regression snapshot: `242 passed`.
 
 ## Evidence Map
 
@@ -30,7 +30,8 @@ Latest local regression snapshot: `237 passed`.
 | Hybrid vector retrieval | [`pgvector-retrieval.md`](pgvector-retrieval.md), [`pgvector-baseline-results.json`](pgvector-baseline-results.json), [`pgvector-db-smoke-results.json`](pgvector-db-smoke-results.json) | pgvector hybrid preserves hit rate 1.00 and improves precision to 1.00 on the current 10-sample set | `.venv/bin/python scripts/eval_pgvector_marketing_context.py --output docs/evidence/pgvector-baseline-results.json` |
 | Agentic RAG graph first gate | [`agentic-rag-graph.md`](agentic-rag-graph.md), [`agentic-rag-graph-summary.json`](agentic-rag-graph-summary.json) | Offline LangGraph control plane passed: typed state, conditional HITL route, keyword retrieval, 3 citations, 7 approval checkpoints, local mock worker execution, 8 worker checkpoints, retry/reflection test coverage, redacted summary artifact | `.venv/bin/python scripts/agentic_rag_graph_smoke.py --date 2026-06-17 --output docs/evidence/agentic-rag-graph-summary.json` |
 | Agentic RAG SQLite checkpoint | [`agentic-rag-sqlite-checkpoint.md`](agentic-rag-sqlite-checkpoint.md), [`agentic-rag-sqlite-checkpoint-summary.json`](agentic-rag-sqlite-checkpoint-summary.json) | Local SQLite checkpointer passed: `langgraph-checkpoint-sqlite`, 8 persisted checkpoints, reopened connection lists 8 checkpoints, worker route completed, raw inputs absent from checkpoint file | `.venv/bin/python scripts/agentic_rag_sqlite_checkpoint_smoke.py --date 2026-06-17 --output docs/evidence/agentic-rag-sqlite-checkpoint-summary.json` |
-| Agentic RAG SSE streaming | [`agentic-rag-streaming.md`](agentic-rag-streaming.md), [`agentic-rag-stream-summary.json`](agentic-rag-stream-summary.json) | Local FastAPI SSE stream passed: async route, `text/event-stream`, 8 events, node progress through local mock worker, paid-provider approval route test, redacted event payloads | `.venv/bin/python scripts/agentic_rag_stream_smoke.py --date 2026-06-17 --output docs/evidence/agentic-rag-stream-summary.json` |
+| Agentic RAG SSE streaming and replay | [`agentic-rag-streaming.md`](agentic-rag-streaming.md), [`agentic-rag-stream-summary.json`](agentic-rag-stream-summary.json) | Local FastAPI SSE stream passed: async route, `text/event-stream`, 8 events, durable `agr-*` run id, SQLite replay endpoint, 8 replay checkpoints, node progress through local mock worker, paid-provider approval route test, redacted event/replay payloads | `.venv/bin/python scripts/agentic_rag_stream_smoke.py --date 2026-06-17 --output docs/evidence/agentic-rag-stream-summary.json` |
+| AI agent team operating model | [`agent-team-operating-model.md`](agent-team-operating-model.md), [`agent-team-fast-gate-summary.json`](agent-team-fast-gate-summary.json), [`../agent-workflow/README.md`](../agent-workflow/README.md) | ADR-backed operating model passed: main writer plus read-only scouts by default, task-lock template, lane fast-gate CLI, paid-provider tripwire lane, dry-run tests | `.venv/bin/pytest tests/test_agent_team_fast_gate.py -q` |
 | Async job reliability | [`generation-jobs.md`](generation-jobs.md) | Redis/RQ queue, redacted Postgres history, job status API, Streamlit polling/history UX | See focused test and smoke commands in the evidence note |
 | Async reliability matrix | [`async-reliability-matrix.md`](async-reliability-matrix.md), [`async-reliability-matrix.json`](async-reliability-matrix.json) | Burst submit, failure state, queue enqueue failure, duplicate polling, worker startup wait, K8s async smoke, live worker outage/restore, and explicit retry/timeout/cancel non-support evidence passed | `.venv/bin/pytest tests/test_async_reliability.py tests/test_generation_jobs.py::test_generation_worker_waits_for_redis_until_ready tests/test_api.py::test_generation_job_policy_reports_explicit_async_limits tests/test_api.py::test_cancel_generation_job_is_explicit_non_support tests/test_k8s_async_failure_smoke.py -q` |
 | AgentOps observability | [`agentops-phoenix.md`](agentops-phoenix.md), [`assets/phoenix-workflow-trace.png`](assets/phoenix-workflow-trace.png), [`assets/phoenix-trace-detail.png`](assets/phoenix-trace-detail.png) | OTEL console smoke, Phoenix OTLP trace export, UI screenshots, trace count verification, trace/log privacy allowlist tests | `WORKFLOW_TRACING=otel WORKFLOW_TRACE_EXPORT=console .venv/bin/python scripts/otel_trace_smoke.py` |
@@ -62,6 +63,7 @@ Latest local regression snapshot: `237 passed`.
 | LangGraph control plane | [`docs/adr/0012-langgraph-agentic-rag-control-plane.md`](../adr/0012-langgraph-agentic-rag-control-plane.md) |
 | Agentic RAG run streaming | [`docs/adr/0013-agentic-rag-run-streaming-protocol.md`](../adr/0013-agentic-rag-run-streaming-protocol.md) |
 | Agentic RAG durable checkpointer | [`docs/adr/0014-agentic-rag-durable-checkpointer.md`](../adr/0014-agentic-rag-durable-checkpointer.md) |
+| Agent team operating model | [`docs/adr/0015-agent-team-operating-model.md`](../adr/0015-agent-team-operating-model.md) |
 
 ## Privacy And Storage Boundary
 
@@ -77,9 +79,9 @@ Latest local regression snapshot: `237 passed`.
 
 ## Next Packaging Polish
 
-- Extend the M8/M10 Agentic RAG first gates from local graph/SSE/SQLite proof to
-  reviewer approval UI, production stream replay, Postgres or production storage
-  policy if needed, and graph trace integration.
+- Extend the M8/M10 Agentic RAG first gates from local graph/SSE/SQLite/replay
+  proof to reviewer approval UI, production stream replay retention policy,
+  Postgres or production storage policy if needed, and graph trace integration.
 - Do not claim provider-quality image editing from the paid OpenAI gate; the
   latest `gpt-image-2`/`medium` run failed latency, text-contamination, and cost
   checks.

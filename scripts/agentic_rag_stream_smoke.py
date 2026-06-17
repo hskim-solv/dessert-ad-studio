@@ -14,6 +14,10 @@ sys.path.insert(0, str(ROOT / "src"))
 
 os.environ.setdefault("OUTPUT_DIR", "outputs/agentic-rag-stream-smoke")
 os.environ.setdefault("GENERATION_LOG_PATH", "logs/agentic-rag-stream-smoke-generations.jsonl")
+os.environ.setdefault(
+    "AGENTIC_RAG_CHECKPOINT_DB",
+    "outputs/agentic-rag-checkpoints/agentic-rag-stream-smoke.sqlite",
+)
 
 from fastapi.testclient import TestClient  # noqa: E402
 
@@ -40,6 +44,14 @@ def build_agentic_rag_stream_summary(*, evidence_date: str) -> dict[str, Any]:
         raise RuntimeError(f"stream endpoint failed with HTTP {response.status_code}: {body}")
 
     events = _parse_sse_events(body)
+    run_id = events[0]["data"]["run_id"]
+    replay_response = client.get(f"/agentic-rag/runs/{run_id}/replay")
+    replay = replay_response.json()
+    if replay_response.status_code != 200:
+        raise RuntimeError(
+            f"replay endpoint failed with HTTP {replay_response.status_code}: {replay}"
+        )
+
     node_sequence = [
         event["data"].get("node") for event in events if event["event"] == "node_completed"
     ]
@@ -49,12 +61,20 @@ def build_agentic_rag_stream_summary(*, evidence_date: str) -> dict[str, Any]:
         "scope": "local_fastapi_sse_no_paid_api_call",
         "evidence_date": evidence_date,
         "media_type": response.headers["content-type"],
+        "run_id_prefix": run_id.split("-", maxsplit=1)[0],
+        "checkpointing_enabled": events[0]["data"]["checkpointing_enabled"],
         "event_names": [event["event"] for event in events],
         "node_sequence": node_sequence,
         "final_status": final_event["data"]["status"],
         "final_next_action": final_event["data"].get("next_action"),
         "worker_status": _first_event_value(events, "worker_status"),
         "copy_option_count": _first_event_value(events, "copy_option_count"),
+        "replay_status": replay["status"],
+        "replay_next_action": replay["next_action"],
+        "replay_checkpoint_backend": replay["checkpoint_backend"],
+        "replay_checkpoint_count": replay["checkpoint_count"],
+        "replay_node_sequence": replay["node_trace"],
+        "replay_raw_inputs_committed": replay["raw_inputs_committed"],
         "raw_inputs_committed": False,
     }
 
