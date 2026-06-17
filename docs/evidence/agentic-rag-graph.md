@@ -89,7 +89,7 @@ Focused tests:
 
 This is not yet the full Agentic RAG system. The following remain pending:
 
-- persistent SQLite/Postgres checkpointer
+- production Postgres or multi-instance checkpointer policy
 - SSE/WebSocket streaming
 - production API graph wiring
 - Ragas and promptfoo eval gates

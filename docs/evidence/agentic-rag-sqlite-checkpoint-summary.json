@@ -1,0 +1,39 @@
+{
+  "agentic_rag_sqlite_checkpoint_smoke": "passed",
+  "scope": "local_sqlite_langgraph_checkpointer_no_paid_api_call",
+  "evidence_date": "2026-06-17",
+  "langgraph_version": "1.2.5",
+  "langgraph_checkpoint_sqlite_version": "3.1.0",
+  "checkpoint_backend": "sqlite",
+  "checkpoint_path_committed": false,
+  "checkpoint_file_created": true,
+  "checkpoint_count": 8,
+  "reopened_checkpoint_count": 8,
+  "raw_inputs_found_in_checkpoint": false,
+  "worker_call_count": 1,
+  "final_status": "completed",
+  "next_action": "return_cited_ad_package",
+  "node_trace": [
+    "plan_campaign",
+    "retrieve_context",
+    "build_citations",
+    "guardrail_check",
+    "execute_worker",
+    "finalize"
+  ],
+  "request_summary_fields": [
+    "campaign_purpose",
+    "has_price_text",
+    "has_reference_image",
+    "has_revision_request",
+    "has_user_constraints",
+    "product_name_sha256",
+    "reference_image_name_sha256",
+    "retrieval_query",
+    "revision_request_sha256",
+    "template_hint",
+    "tone",
+    "user_constraints_sha256"
+  ],
+  "raw_inputs_committed": false
+}

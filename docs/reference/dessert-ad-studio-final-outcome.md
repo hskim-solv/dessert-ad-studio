@@ -134,12 +134,18 @@ Verified:
   streams local graph progress through `execute_worker`, and has a paid-provider
   approval-route test. Evidence is recorded in
   [`docs/evidence/agentic-rag-streaming.md`](../evidence/agentic-rag-streaming.md).
+- First durable SQLite checkpoint gate: local `langgraph-checkpoint-sqlite`
+  persists 8 checkpoints, a reopened connection lists the same 8 checkpoints,
+  the worker route completes, and raw inputs are absent from the SQLite file.
+  Evidence is recorded in
+  [`docs/evidence/agentic-rag-sqlite-checkpoint.md`](../evidence/agentic-rag-sqlite-checkpoint.md).
 
 Not yet proven:
 
-- Full LangGraph production orchestration. The first offline graph gate is
-  complete, but durable SQLite/Postgres checkpointing, production graph trace
-  integration, durable run replay, and reviewer approval UI remain pending.
+- Full LangGraph production orchestration. The first offline graph, SSE, and
+  local SQLite checkpoint gates are complete, but production graph trace
+  integration, durable run replay, reviewer approval UI, and Postgres or
+  production storage policy remain pending.
 - Full production streaming. SSE first gate is complete; WebSocket,
   bidirectional approval, durable replay, and production stream trace
   integration remain pending.
@@ -235,7 +241,7 @@ flowchart LR
 | M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields, and `docs/evidence/cost-guard-summary.json`. |
 | M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, Streamlit reviewer screenshots at `docs/evidence/streamlit-reviewer-flow.md`, real-sample preservation evidence at `docs/evidence/real-sample-preservation.md`, paid OpenAI image-edit failure evidence at `docs/evidence/openai-image-edit-preservation.md`, README links, reproducible command map. |
 | M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, live worker outage/restore smoke, explicit retry/timeout/cancel non-support, 30-scenario product-like eval, offline visual proxy gate, paid provider-quality failure evidence, provider-gate postmortem, one-sample canary CLI, first trace/log privacy allowlist gate, and first cost guard are complete. Next evidence should cover text/latency/cost remediation for the failed provider gate plus human/provider visual quality review. |
-| M8 Agentic RAG graph | Add the LangGraph control plane without discarding existing workflow evidence. | First gate complete: ADR 0012, `langgraph` dependency, typed state schema, deterministic planner/retriever/citation/guardrail/worker/reflection/HITL/finalize nodes, conditional approval route, local mock worker route through the existing generation workflow, in-memory checkpoint proof, redacted smoke summary, focused tests, and local FastAPI SSE wiring. Pending: durable SQLite/Postgres checkpointing, graph trace integration, durable run replay, and reviewer approval UI. |
+| M8 Agentic RAG graph | Add the LangGraph control plane without discarding existing workflow evidence. | First gate complete: ADR 0012/0014, `langgraph` and `langgraph-checkpoint-sqlite` dependencies, typed state schema, deterministic planner/retriever/citation/guardrail/worker/reflection/HITL/finalize nodes, conditional approval route, local mock worker route through the existing generation workflow, in-memory and local SQLite checkpoint proof, redacted smoke summaries, focused tests, and local FastAPI SSE wiring. Pending: graph trace integration, durable run replay, reviewer approval UI, and Postgres or production storage policy if needed. |
 | M9 Agentic RAG eval/guardrail gate | Prove answer/ad package faithfulness, citation quality, and tool safety. | Pending: golden dataset, Ragas faithfulness/answer relevancy/context precision/recall, promptfoo regression, prompt-injection tests, tool budget tests, and CI eval command. |
 | M10 Streaming and reviewer approval | Make long-running graph execution reviewable in real time. | First gate complete: ADR 0013, async FastAPI `POST /agentic-rag/runs/stream`, SSE `text/event-stream`, redacted node progress events, local mock worker completion stream, and paid-provider approval route test. Pending: reviewer approval UI, approval audit summary, durable replay, WebSocket only if bidirectional approval is required, and production graceful fallback states. |
 | M11 Cloud/demo packaging | Show deployability beyond local/kind evidence. | Pending: one selected AWS/GCP/Azure deployment path, architecture diagram update, demo video, and eval report. |
@@ -269,6 +275,7 @@ These decisions still need explicit selection before implementation:
 | Agentic RAG final architecture | Decided: Agentic RAG control plane over existing multimodal workflow | See ADR 0011. Specific library-level implementation decisions still need focused ADRs when candidates are non-trivial. |
 | Agent framework implementation | Decided: LangGraph StateGraph for the control plane | See ADR 0012. Reevaluate if privacy-safe checkpointing or production worker integration becomes awkward. |
 | Streaming protocol | Decided: SSE first, WebSocket only if bidirectional approval becomes necessary | See ADR 0013. Reevaluate if reviewer approval needs live client-to-server decisions inside a stream. |
+| Durable checkpointing | Decided: local SQLite first gate with `langgraph-checkpoint-sqlite` | See ADR 0014. Reevaluate for Postgres when multi-instance workers, approval audit retention, or cloud persistent storage become required. |
 | Agent eval stack | Target: Ragas plus promptfoo | Keep deterministic local evals until dependencies and CI runtime are bounded. |
 | Serving optimization lane | Keep Triton/ONNX proof | Add vLLM/TensorRT/SGLang only with a targeted benchmark and role-specific portfolio reason. |
 | MCP/A2A | Later thin wrapper | Add only after the core workflow/API is stable and documented. |

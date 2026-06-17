@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
 from hashlib import sha256
+from pathlib import Path
 from typing import Any, Callable, Literal, TypedDict
 
 from langgraph.graph import END, START, StateGraph
@@ -163,6 +165,18 @@ def build_agentic_rag_graph(
     workflow.add_edge("human_approval", END)
     workflow.add_edge("finalize", END)
     return workflow.compile(checkpointer=checkpointer)
+
+
+@contextmanager
+def open_agentic_rag_sqlite_checkpointer(db_path: str | Path):
+    path = Path(db_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    from langgraph.checkpoint.sqlite import SqliteSaver
+
+    with SqliteSaver.from_conn_string(str(path)) as checkpointer:
+        checkpointer.setup()
+        yield checkpointer
 
 
 def build_generation_workflow_executor(

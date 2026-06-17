@@ -2,6 +2,7 @@ import json
 
 from langgraph.checkpoint.memory import InMemorySaver
 
+from dessert_ad_studio import agentic_rag as agentic_rag_module
 from dessert_ad_studio.agentic_rag import (
     build_agentic_rag_graph,
     build_agentic_rag_initial_state,
@@ -220,3 +221,59 @@ def test_agentic_rag_graph_routes_low_cost_local_run_to_worker():
     assert result["plan"]["worker"] == "generation_workflow"
     assert result["marketing_context"]["retriever_backend"] == "keyword"
     assert result["citations"]
+
+
+def test_agentic_rag_sqlite_checkpointer_persists_redacted_checkpoints(tmp_path):
+    assert hasattr(agentic_rag_module, "open_agentic_rag_sqlite_checkpointer")
+
+    db_path = tmp_path / "agentic-rag-checkpoints.sqlite"
+    config = {"configurable": {"thread_id": "sqlite-worker-route"}}
+    worker_calls: list[dict] = []
+
+    def worker_executor(state: dict) -> dict:
+        worker_calls.append(state)
+        return {
+            "status": "succeeded",
+            "copy_backend": "mock",
+            "image_backend": "mock",
+            "copy_option_count": 3,
+            "used_reference": False,
+            "elapsed_ms": 19.0,
+            "workflow_trace_steps": ["rank_templates", "generate_copy", "generate_image"],
+        }
+
+    state = build_agentic_rag_initial_state(
+        sensitive_request(),
+        requires_paid_provider=False,
+        estimated_cost_usd=0.0,
+        approval_cost_threshold_usd=0.10,
+    )
+
+    with agentic_rag_module.open_agentic_rag_sqlite_checkpointer(db_path) as checkpointer:
+        graph = build_agentic_rag_graph(
+            checkpointer=checkpointer,
+            worker_executor=worker_executor,
+        )
+        result = graph.invoke(state, config)
+        checkpoints = list(checkpointer.list(config))
+
+    assert len(worker_calls) == 1
+    assert result["status"] == "completed"
+    assert result["next_action"] == "return_cited_ad_package"
+    assert db_path.exists()
+    assert len(checkpoints) >= 1
+
+    with agentic_rag_module.open_agentic_rag_sqlite_checkpointer(db_path) as checkpointer:
+        persisted_checkpoints = list(checkpointer.list(config))
+
+    assert len(persisted_checkpoints) == len(checkpoints)
+
+    checkpoint_bytes = db_path.read_bytes()
+    for raw_value in [
+        "비공개 말차 푸딩",
+        "VIP 고객에게만 보일 문구",
+        "비공개 할인 강조",
+        "secret-reference.png",
+        "c2VjcmV0LWltYWdlLWJ5dGVz",
+    ]:
+        assert raw_value.encode("utf-8") not in checkpoint_bytes

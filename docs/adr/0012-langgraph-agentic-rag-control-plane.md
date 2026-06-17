@@ -61,6 +61,12 @@ The first implementation is deliberately narrow:
   image/copy providers in this slice
 - keep production API/streaming graph wiring for a later milestone
 
+Follow-up decisions:
+
+- ADR 0013 selected SSE as the first run streaming protocol.
+- ADR 0014 selected local SQLite `SqliteSaver` as the first durable
+  checkpointer gate.
+
 ## 결과 및 재평가 조건 (Consequences)
 
 - 이 선택으로 감수하는 것:
@@ -73,7 +79,9 @@ The first implementation is deliberately narrow:
 - 재평가 트리거:
   - LangGraph cannot keep raw customer/product inputs out of persisted state
     without harming core functionality.
-  - Checkpointing needs production durability before demo, in which case
-    SQLite/Postgres saver selection needs a follow-up ADR.
+  - Checkpointing needs production durability before demo. ADR 0014 covers the
+    first local SQLite gate; Postgres or cloud persistent storage still needs
+    reevaluation if multi-instance workers or approval audit retention are
+    required.
   - The graph integration creates regressions in the existing FastAPI,
     Redis/RQ, generation history, or workflow test suite.

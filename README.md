@@ -50,9 +50,10 @@ Known gaps:
 - Paid OpenAI image-edit provider gates have failed; the deterministic
   preservation path and offline visual proxy pass, but provider-quality image
   editing is not proven.
-- Agentic RAG is still at first-gate maturity. Durable checkpointing, reviewer
-  approval UI, WebSocket/bidirectional approval, production stream replay, and
-  full agent eval gates are still pending.
+- Agentic RAG is still at first-gate maturity. Local SQLite checkpointing is
+  proven, but reviewer approval UI, WebSocket/bidirectional approval,
+  production stream replay, production storage policy, and full agent eval gates
+  are still pending.
 - Current eval sets are demo-scale and need a larger real/product-like scenario
   matrix before broader quality claims.
 
@@ -318,7 +319,7 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Extend the Agentic RAG control plane from local graph/SSE first gates to durable checkpointing, reviewer approval UI, production stream replay, and graph trace integration.
+1. Extend the Agentic RAG control plane from local graph/SSE/SQLite first gates to reviewer approval UI, production stream replay, graph trace integration, and production storage policy if needed.
 2. Add Ragas + promptfoo golden eval gates, prompt-injection/tool-budget tests, and citation-quality reporting.
 3. Implement remediation for the failed paid `gpt-image-2` + `quality=medium` provider-quality gate before any further paid full-gate iteration.
 4. Add human visual review or provider-quality visual statistics for generated assets.
