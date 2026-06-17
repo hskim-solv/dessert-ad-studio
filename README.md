@@ -41,6 +41,8 @@ Verified:
 - FastAPI async SSE run-streaming and local SQLite replay first gate for the
   Agentic RAG control plane, with node progress events through the local mock
   worker and redacted event/replay payloads.
+- Local HITL approval API first gate for approval-routed runs, with redacted
+  reviewer/comment hashes and no persistent audit-retention claim.
 - Local OpenInference trace first gate for Agentic RAG graph nodes, with
   redacted span attributes and API stream tracer wiring.
 - Local Agentic RAG eval gates: deterministic Ragas-compatible proxy metrics,
@@ -61,8 +63,9 @@ Known gaps:
   editing is not proven.
 - Agentic RAG is still at first-gate maturity. Local SQLite checkpointing,
   SSE/WebSocket streaming, graph tracing, local tool-suite orchestration, and a
-  local eval/guardrail plus promptfoo package gate are proven, but reviewer approval UI, bidirectional
-  approval, live web search, production SQL policy, production MCP transport/auth,
+  local eval/guardrail plus promptfoo package gate are proven, but reviewer
+  approval UI, post-approval worker resume, bidirectional approval, live web
+  search, production SQL policy, production MCP transport/auth,
   production stream replay retention policy, production storage policy,
   production trace retention policy, and Ragas live evaluator execution are
   still pending.

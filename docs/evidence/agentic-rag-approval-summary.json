@@ -1,0 +1,19 @@
+{
+  "agentic_rag_approval_smoke": "passed",
+  "scope": "local_fastapi_hitl_approval_no_paid_api_call",
+  "evidence_date": "2026-06-17",
+  "run_id_prefix": "agr",
+  "stream_protocol": "sse",
+  "checkpointing_enabled": true,
+  "approval_route_status": "needs_approval",
+  "approval_route_next_action": "wait_for_human_approval",
+  "approval_decision_status": "approved",
+  "approval_next_action": "dispatch_generation_worker_after_approval",
+  "approval_reasons": [
+    "paid_provider_requested"
+  ],
+  "audit_persisted": false,
+  "reviewer_id_sha256_present": true,
+  "comment_sha256_present": true,
+  "raw_inputs_committed": false
+}

@@ -171,17 +171,23 @@ Verified:
   [`docs/evidence/agentic-rag-eval-guardrail.md`](../evidence/agentic-rag-eval-guardrail.md).
   ADR `0016-agentic-rag-eval-runtime` keeps Ragas live metrics behind
   paid/API-key approval.
+- First Agentic RAG HITL approval API gate: approval-routed runs can be reviewed
+  through `POST /agentic-rag/runs/{run_id}/approval`, returning only redacted
+  reviewer/comment hashes and decision metadata. Evidence is recorded in
+  [`docs/evidence/agentic-rag-approval.md`](../evidence/agentic-rag-approval.md).
 
 Not yet proven:
 
 - Full LangGraph production orchestration. The first offline graph, SSE, local
   SQLite checkpoint, local replay, local graph trace, and local run-metrics
-  gates are complete, but reviewer approval UI, Postgres or production storage
-  policy, production trace retention policy, and live provider token/cost
-  telemetry remain pending.
+  gates plus local approval API first gate are complete, but reviewer approval
+  UI, post-approval worker resume, Postgres or production storage policy,
+  production trace retention policy, and live provider token/cost telemetry
+  remain pending.
 - Full production streaming. SSE, WebSocket, and local SQLite replay first gates are
-  complete; bidirectional approval, production replay retention
-  policy, and production stream trace integration remain pending.
+  complete; bidirectional approval, production replay retention policy,
+  approval audit retention, and production stream trace integration remain
+  pending.
 - Actual Ragas live execution in CI. Promptfoo package execution is now bounded
   and part of default CI, but evaluator-LLM Ragas live metrics remain
   paid/API-key gated.
@@ -278,9 +284,9 @@ flowchart LR
 | M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields, and `docs/evidence/cost-guard-summary.json`. |
 | M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, Streamlit reviewer screenshots at `docs/evidence/streamlit-reviewer-flow.md`, real-sample preservation evidence at `docs/evidence/real-sample-preservation.md`, paid OpenAI image-edit failure evidence at `docs/evidence/openai-image-edit-preservation.md`, README links, reproducible command map. |
 | M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, live worker outage/restore smoke, explicit retry/timeout/cancel non-support, 30-scenario product-like eval, offline visual proxy gate, paid provider-quality failure evidence, provider-gate postmortem, one-sample canary CLI, first trace/log privacy allowlist gate, and first cost guard are complete. Next evidence should cover text/latency/cost remediation for the failed provider gate plus human/provider visual quality review. |
-| M8 Agentic RAG graph | Add the LangGraph control plane without discarding existing workflow evidence. | First gate complete: ADR 0012/0014/0017, `langgraph` and `langgraph-checkpoint-sqlite` dependencies, typed state schema, deterministic planner/tool-suite/retriever/citation/guardrail/worker/reflection/HITL/finalize nodes, conditional approval route, local mock worker route through the existing generation workflow, local web/SQL/internal API tool summaries, FastMCP import/tool-call smoke, in-memory and local SQLite checkpoint proof, redacted smoke summaries, focused tests, local FastAPI SSE wiring, local SQLite replay summary, local OpenInference graph-node trace proof, and local run metrics for latency/token/cost/tool success/failure plus failed-run analysis. Pending: live web search, production SQL policy, production MCP transport/auth, reviewer approval UI, Postgres or production storage policy if needed, production trace retention policy, and live provider token/cost telemetry. |
+| M8 Agentic RAG graph | Add the LangGraph control plane without discarding existing workflow evidence. | First gate complete: ADR 0012/0014/0017, `langgraph` and `langgraph-checkpoint-sqlite` dependencies, typed state schema, deterministic planner/tool-suite/retriever/citation/guardrail/worker/reflection/HITL/finalize nodes, conditional approval route, local mock worker route through the existing generation workflow, local web/SQL/internal API tool summaries, FastMCP import/tool-call smoke, in-memory and local SQLite checkpoint proof, redacted smoke summaries, focused tests, local FastAPI SSE wiring, local SQLite replay summary, local OpenInference graph-node trace proof, local run metrics for latency/token/cost/tool success/failure plus failed-run analysis, and local approval API first gate. Pending: live web search, production SQL policy, production MCP transport/auth, reviewer approval UI, post-approval worker resume, Postgres or production storage policy if needed, production trace retention policy, and live provider token/cost telemetry. |
 | M9 Agentic RAG eval/guardrail gate | Prove answer/ad package faithfulness, citation quality, and tool safety. | First gate complete: 13-case local golden dataset, Ragas-compatible deterministic summary fields, faithfulness/answer relevancy/context precision/context recall proxy scores 1.00, prompt-injection HITL route, 7-tool allowlist/budget tests, redaction checks, fast-gate command, real promptfoo package smoke, and GitHub Actions CI steps for both the compatibility script and promptfoo package gate. ADR 0016 keeps Ragas live metrics behind paid/API-key approval. Pending: run Ragas live gate only after paid eval approval. |
-| M10 Streaming and reviewer approval | Make long-running graph execution reviewable in real time. | First gate complete: ADR 0013, async FastAPI `POST /agentic-rag/runs/stream`, WebSocket `/agentic-rag/runs/ws`, SSE `text/event-stream`, 9 redacted node progress events/messages including local tool suite and worker completion, durable `agr-*` run id, local SQLite replay endpoint, and paid-provider approval route tests. Pending: reviewer approval UI, approval audit summary, bidirectional in-stream approval flow if required, production replay retention policy, and production graceful fallback states. |
+| M10 Streaming and reviewer approval | Make long-running graph execution reviewable in real time. | First gate complete: ADR 0013, async FastAPI `POST /agentic-rag/runs/stream`, WebSocket `/agentic-rag/runs/ws`, SSE `text/event-stream`, 9 redacted node progress events/messages including local tool suite and worker completion, durable `agr-*` run id, local SQLite replay endpoint, paid-provider approval route tests, and redacted approval decision API summary. Pending: reviewer approval UI, post-approval worker resume, bidirectional in-stream approval flow if required, production replay retention policy, production approval audit retention, and production graceful fallback states. |
 | M11 Cloud/demo packaging | Show deployability beyond local/kind evidence. | Pending: one selected AWS/GCP/Azure deployment path, architecture diagram update, demo video, and eval report. |
 
 ## Failure Conditions

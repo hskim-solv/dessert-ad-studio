@@ -379,6 +379,91 @@ def test_agentic_rag_run_replay_returns_404_for_unknown_run(
     assert response.json()["detail"] == "Agentic RAG run replay not found."
 
 
+def test_agentic_rag_run_approval_records_redacted_reviewer_decision(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import api.main as api_main
+
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path / "outputs"))
+    monkeypatch.setenv("GENERATION_LOG_PATH", str(tmp_path / "generations.jsonl"))
+    monkeypatch.setenv(
+        "AGENTIC_RAG_CHECKPOINT_DB",
+        str(tmp_path / "agentic-rag-checkpoints.sqlite"),
+    )
+    monkeypatch.setattr(api_main, "_agentic_rag_requires_paid_provider", lambda deps: True)
+    payload = {
+        **base_payload(),
+        "product_name": "비공개 말차 푸딩",
+        "user_constraints": "VIP 고객에게만 보일 문구",
+    }
+
+    with client.stream("POST", "/agentic-rag/runs/stream", json=payload) as response:
+        body = response.read().decode("utf-8")
+
+    assert response.status_code == 200
+    events = _parse_sse_events(body)
+    run_id = events[0]["data"]["run_id"]
+
+    approval_response = client.post(
+        f"/agentic-rag/runs/{run_id}/approval",
+        json={
+            "decision": "approved",
+            "reviewer_id": "reviewer@example.com",
+            "comment": "VIP 고객 원문이 담긴 비공개 승인 메모",
+        },
+    )
+
+    assert approval_response.status_code == 200
+    approval = approval_response.json()
+    assert approval["run_id"] == run_id
+    assert approval["status"] == "approved"
+    assert approval["previous_status"] == "needs_approval"
+    assert approval["previous_next_action"] == "wait_for_human_approval"
+    assert approval["approval_required"] is True
+    assert approval["approval_reasons"] == ["paid_provider_requested"]
+    assert approval["decision"] == "approved"
+    assert approval["next_action"] == "dispatch_generation_worker_after_approval"
+    assert len(approval["reviewer_id_sha256"]) == 64
+    assert len(approval["comment_sha256"]) == 64
+    assert approval["audit_persisted"] is False
+    assert approval["raw_inputs_committed"] is False
+
+    serialized = json.dumps(approval, ensure_ascii=False)
+    for raw_value in [
+        "비공개 말차 푸딩",
+        "VIP 고객에게만 보일 문구",
+        "reviewer@example.com",
+        "VIP 고객 원문이 담긴 비공개 승인 메모",
+    ]:
+        assert raw_value not in serialized
+
+
+def test_agentic_rag_run_approval_rejects_non_approval_run(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path / "outputs"))
+    monkeypatch.setenv("GENERATION_LOG_PATH", str(tmp_path / "generations.jsonl"))
+    monkeypatch.setenv(
+        "AGENTIC_RAG_CHECKPOINT_DB",
+        str(tmp_path / "agentic-rag-checkpoints.sqlite"),
+    )
+
+    with client.stream("POST", "/agentic-rag/runs/stream", json=base_payload()) as response:
+        body = response.read().decode("utf-8")
+
+    assert response.status_code == 200
+    run_id = _parse_sse_events(body)[0]["data"]["run_id"]
+    approval_response = client.post(
+        f"/agentic-rag/runs/{run_id}/approval",
+        json={"decision": "approved"},
+    )
+
+    assert approval_response.status_code == 409
+    assert approval_response.json()["detail"] == "Agentic RAG run is not waiting for approval."
+
+
 def test_agentic_rag_run_stream_uses_workflow_tracer_for_graph_nodes(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

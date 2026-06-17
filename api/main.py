@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import os
 from collections import defaultdict
@@ -9,13 +10,13 @@ from functools import lru_cache
 from pathlib import Path
 from threading import Lock
 from time import perf_counter
-from typing import Any, AsyncIterator
+from typing import Any, AsyncIterator, Literal
 from uuid import uuid4
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request, Response, WebSocket
 from fastapi.responses import StreamingResponse
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from dessert_ad_studio.a2a import (
     A2AInputError,
@@ -80,6 +81,12 @@ _METRICS_LOCK = Lock()
 _HTTP_REQUESTS_TOTAL: defaultdict[tuple[str, str, str], int] = defaultdict(int)
 _HTTP_REQUEST_LATENCY_SECONDS_TOTAL: defaultdict[tuple[str, str], float] = defaultdict(float)
 _A2A_TASKS = A2ATaskStore()
+
+
+class AgenticRagApprovalDecision(BaseModel):
+    decision: Literal["approved", "rejected"]
+    reviewer_id: str | None = None
+    comment: str | None = None
 
 
 class _BestEffortGenerationLogger:
@@ -784,6 +791,57 @@ def get_agentic_rag_run_replay(run_id: str) -> dict[str, Any]:
             detail="Agentic RAG run replay not found.",
         )
     return replay
+
+
+@app.post("/agentic-rag/runs/{run_id}/approval")
+def approve_agentic_rag_run(
+    run_id: str,
+    decision: AgenticRagApprovalDecision,
+) -> dict[str, Any]:
+    checkpoint_db = _agentic_rag_checkpoint_db_path()
+    if checkpoint_db is None or not checkpoint_db.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Agentic RAG run replay not found.",
+        )
+
+    replay = load_agentic_rag_sqlite_replay_summary(checkpoint_db, run_id=run_id)
+    if replay is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Agentic RAG run replay not found.",
+        )
+    if replay.get("status") != "needs_approval" or replay.get("next_action") != (
+        "wait_for_human_approval"
+    ):
+        raise HTTPException(
+            status_code=409,
+            detail="Agentic RAG run is not waiting for approval.",
+        )
+
+    approved = decision.decision == "approved"
+    return {
+        "run_id": run_id,
+        "status": decision.decision,
+        "previous_status": replay.get("status"),
+        "previous_next_action": replay.get("next_action"),
+        "approval_required": bool(replay.get("approval_required", False)),
+        "approval_reasons": list(replay.get("approval_reasons", [])),
+        "decision": decision.decision,
+        "next_action": (
+            "dispatch_generation_worker_after_approval" if approved else "stop_run_without_worker"
+        ),
+        "reviewer_id_sha256": _optional_sha256(decision.reviewer_id),
+        "comment_sha256": _optional_sha256(decision.comment),
+        "audit_persisted": False,
+        "raw_inputs_committed": False,
+    }
+
+
+def _optional_sha256(value: str | None) -> str | None:
+    if value is None:
+        return None
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
 @app.post("/generation-jobs", status_code=202)

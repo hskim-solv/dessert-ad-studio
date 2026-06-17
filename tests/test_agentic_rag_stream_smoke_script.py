@@ -121,3 +121,46 @@ def test_agentic_rag_websocket_smoke_writes_summary(tmp_path: Path) -> None:
     serialized = json.dumps(summary, ensure_ascii=False)
     for raw_value in ["비공개 말차 푸딩", "VIP 고객"]:
         assert raw_value not in serialized
+
+
+def test_agentic_rag_approval_smoke_writes_redacted_summary(tmp_path: Path) -> None:
+    output_path = tmp_path / "agentic-rag-approval-summary.json"
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "scripts/agentic_rag_approval_smoke.py",
+            "--output",
+            str(output_path),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=60,
+    )
+
+    assert completed.returncode == 0, completed.stderr + completed.stdout
+    summary = json.loads(output_path.read_text(encoding="utf-8"))
+
+    assert summary["agentic_rag_approval_smoke"] == "passed"
+    assert summary["scope"] == "local_fastapi_hitl_approval_no_paid_api_call"
+    assert summary["run_id_prefix"] == "agr"
+    assert summary["approval_route_status"] == "needs_approval"
+    assert summary["approval_route_next_action"] == "wait_for_human_approval"
+    assert summary["approval_decision_status"] == "approved"
+    assert summary["approval_next_action"] == "dispatch_generation_worker_after_approval"
+    assert summary["approval_reasons"] == ["paid_provider_requested"]
+    assert summary["audit_persisted"] is False
+    assert summary["raw_inputs_committed"] is False
+    assert summary["reviewer_id_sha256_present"] is True
+    assert summary["comment_sha256_present"] is True
+
+    serialized = json.dumps(summary, ensure_ascii=False)
+    for raw_value in [
+        "비공개 말차 푸딩",
+        "VIP 고객",
+        "reviewer@example.com",
+        "비공개 승인 메모",
+    ]:
+        assert raw_value not in serialized
