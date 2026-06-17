@@ -31,13 +31,37 @@
   "trace_retention": {
     "raw_model_inputs_allowed": false,
     "external_trace_payload_review_required": true,
-    "production_trace_retention": "pending_deployment_policy"
+    "deployment_trace_retention_contract": "first_gate_complete",
+    "external_backend_configured": false,
+    "production_customer_traffic_allowed": false,
+    "production_trace_retention": "contract_defined_backend_pending",
+    "retention_days": 7,
+    "allowed_attribute_prefixes": [
+      "agentic_rag.node",
+      "agentic_rag.status",
+      "agentic_rag.latency_ms",
+      "agentic_rag.tool_name",
+      "agentic_rag.error_type",
+      "agentic_rag.cost.estimated_usd"
+    ],
+    "blocked_payloads": [
+      "raw_prompt",
+      "raw_model_input",
+      "raw_model_response",
+      "raw_reference_image",
+      "raw_reviewer_comment",
+      "api_key",
+      "authorization_header",
+      "customer_email"
+    ]
   },
   "requires_user_decision_before": [
     "durable_raw_request_storage",
     "live_provider_cross_process_resume_store",
     "production_approval_audit_retention",
-    "external_trace_payload_retention"
+    "external_trace_backend_selection",
+    "retention_days_above_7",
+    "production_customer_trace_capture"
   ],
   "raw_inputs_committed": false
 }

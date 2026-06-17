@@ -55,8 +55,11 @@ Verified:
   with replay-backed pending state, redacted reviewer/comment hashes, and no
   paid API calls.
 - Agentic RAG retention boundary policy for replay, approval, resume, and trace
-  payloads, keeping durable raw request storage, live-provider cross-process
-  resume, and external trace payload retention behind explicit user decision.
+  payloads, including a deployment trace retention contract that allows only
+  redacted node/status/latency/tool/error/cost attributes and keeps durable raw
+  request storage, live-provider cross-process resume, external backend
+  selection, and production customer trace capture behind explicit user
+  decision.
 - Local OpenInference trace first gate for Agentic RAG graph nodes, with
   redacted span attributes and API stream tracer wiring.
 - Local Agentic RAG run-metrics first gate for latency, mock token/cost,
@@ -98,8 +101,8 @@ Known gaps:
   recorded. Live web search provider smoke, credentialed production DB
   connection/audit-retention smoke, production MCP auth provider selection and
   remote client smoke, live-provider cross-process resume, approved production
-  storage, deployment-specific external trace retention, and Ragas live
-  evaluator execution are still pending.
+  storage, external trace backend selection/production customer trace capture,
+  and Ragas live evaluator execution are still pending.
 - Current eval sets are demo-scale and need a larger real/product-like scenario
   matrix before broader quality claims.
 
@@ -368,7 +371,7 @@ docs/runbooks/gcp-flux2-validation.md
 
 ## Roadmap
 
-1. Extend the Agentic RAG control plane from local graph/tool-suite/SSE/WebSocket/SQLite/replay/trace/run-metrics/reviewer-approval/resume plus mock-only redacted cross-process resume, bidirectional approval, retention-boundary, live web search runtime policy, and production DB access/audit policy first gates to live web search provider smoke if approved, live-provider cross-process resume, credentialed production DB smoke if approved, approved production storage, and deployment-specific external trace retention.
+1. Extend the Agentic RAG control plane from local graph/tool-suite/SSE/WebSocket/SQLite/replay/trace/run-metrics/reviewer-approval/resume plus mock-only redacted cross-process resume, bidirectional approval, retention-boundary, deployment trace retention contract, live web search runtime policy, and production DB access/audit policy first gates to live web search provider smoke if approved, live-provider cross-process resume, credentialed production DB smoke if approved, approved production storage, and external trace backend/customer-traffic capture if approved.
 2. Add Ragas live evaluator execution only after paid eval approval and trace/result payload review.
 3. Decide the paid image-edit latency strategy: keep the 30s production-style threshold and leave provider-quality unproven, relax the portfolio evidence threshold with explicit rationale, or try a different model/quality before any full three-sample paid gate.
 4. Expand provider visual review from the current offline first gate to a

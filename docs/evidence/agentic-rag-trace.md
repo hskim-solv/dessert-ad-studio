@@ -67,5 +67,7 @@ Focused tests:
 - This proves local in-memory trace attributes and API wiring.
 - Phoenix/OTLP export for Agentic RAG graph spans still depends on the existing
   AgentOps/Phoenix runtime path.
-- Production trace retention and customer-data policy still require a
-  deployment-specific attribute review.
+- Deployment trace retention now has a first-gate attribute contract in
+  [`agentic-rag-retention-policy.md`](agentic-rag-retention-policy.md);
+  external backend selection and production customer trace capture remain
+  pending user decisions.

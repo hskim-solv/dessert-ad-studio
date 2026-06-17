@@ -15,10 +15,15 @@ production storage or live-provider cross-process resume claim is made.
 - Mock/local approval runs may resume from redacted SQLite replay when their
   checkpointed resume policy is `mock_generation_worker`.
 - External trace retention excludes raw model inputs, raw images, raw reviewer
-  comments, and raw provider responses.
+  comments, raw provider responses, API keys, authorization headers, and
+  customer email.
+- Deployment trace retention contract is defined for reviewer evidence:
+  external backends may receive only redacted Agentic RAG node/status/latency/
+  tool/error/cost attributes, with a 7-day default retention target.
 - Durable raw request storage, live-provider cross-process resume, production
-  approval audit retention, and external trace payload retention require a
-  separate user decision.
+  approval audit retention, external trace backend selection, retention above
+  7 days, and production customer trace capture require a separate user
+  decision.
 
 Decision record:
 
@@ -46,6 +51,10 @@ Current result:
 - live-provider cross-process resume: `pending_user_decision`
 - persistent approval audit claim: `false`
 - raw model inputs in traces allowed: `false`
+- deployment trace retention contract: `first_gate_complete`
+- external trace backend configured: `false`
+- production customer traffic trace capture allowed: `false`
+- trace retention days: `7`
 - raw inputs committed: `false`
 
 ## Reproduce
@@ -69,3 +78,5 @@ Focused test:
   retention period, deletion behavior, and user/project/entity scope are
   decided.
 - Live-provider cross-process resume remains pending.
+- External trace backend selection and production customer trace capture remain
+  pending user decisions.

@@ -44,8 +44,9 @@ This gate verifies that persistent workflow trace/log surfaces and image-failure
 usage logs do not store raw product names, user constraints, revision requests,
 reference filenames, generated copy text, raw prompt summaries, or raw image
 paths. The durable fields use `has_*` booleans and `*_sha256` identifiers
-instead. Production trace rollout still requires a deployment-specific
-attribute review before customer traffic is stored in an external trace backend.
+instead. Agentic RAG deployment trace retention now has a first-gate attribute
+contract in `agentic-rag-retention-policy.md`; external backend selection and
+production customer trace capture remain pending user decisions.
 
 ### Compose Configuration
 

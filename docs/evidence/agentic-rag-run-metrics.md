@@ -69,5 +69,6 @@ Focused test:
   cost telemetry remain provider-gated.
 - It proves summary-level failed-run analysis and redacted graceful fallback,
   not a production incident dashboard.
-- Production retention policy still requires a deployment-specific review
-  before storing external traces or run metrics.
+- Deployment trace retention now has a first-gate attribute contract in
+  `agentic-rag-retention-policy.md`; external backend selection and production
+  customer trace/run-metrics capture remain pending user decisions.

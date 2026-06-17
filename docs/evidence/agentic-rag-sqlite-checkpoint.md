@@ -61,7 +61,8 @@ Focused tests:
 
 - This proves local durable SQLite checkpoint persistence, not production
   multi-instance Postgres storage.
-- Reviewer approval UI, approval audit summary, and durable stream replay remain
-  pending.
-- Production trace retention policy and Phoenix/OTLP deployment evidence remain
-  pending for Agentic RAG graph spans.
+- Reviewer approval UI and approval audit summary now have first-gate evidence,
+  but durable production stream replay remains pending.
+- Deployment trace retention now has a first-gate attribute contract in
+  `agentic-rag-retention-policy.md`; Phoenix/OTLP production backend selection
+  and customer trace capture remain pending user decisions.

@@ -14,6 +14,24 @@ RAW_SENTINELS = (
     "VIP 고객에게만 보일 문구",
     "reviewer@example.com",
 )
+ALLOWED_TRACE_ATTRIBUTE_PREFIXES = [
+    "agentic_rag.node",
+    "agentic_rag.status",
+    "agentic_rag.latency_ms",
+    "agentic_rag.tool_name",
+    "agentic_rag.error_type",
+    "agentic_rag.cost.estimated_usd",
+]
+BLOCKED_TRACE_PAYLOADS = [
+    "raw_prompt",
+    "raw_model_input",
+    "raw_model_response",
+    "raw_reference_image",
+    "raw_reviewer_comment",
+    "api_key",
+    "authorization_header",
+    "customer_email",
+]
 
 
 def build_agentic_rag_retention_policy_summary(*, evidence_date: str) -> dict[str, Any]:
@@ -50,13 +68,21 @@ def build_agentic_rag_retention_policy_summary(*, evidence_date: str) -> dict[st
         "trace_retention": {
             "raw_model_inputs_allowed": False,
             "external_trace_payload_review_required": True,
-            "production_trace_retention": "pending_deployment_policy",
+            "deployment_trace_retention_contract": "first_gate_complete",
+            "external_backend_configured": False,
+            "production_customer_traffic_allowed": False,
+            "production_trace_retention": "contract_defined_backend_pending",
+            "retention_days": 7,
+            "allowed_attribute_prefixes": ALLOWED_TRACE_ATTRIBUTE_PREFIXES,
+            "blocked_payloads": BLOCKED_TRACE_PAYLOADS,
         },
         "requires_user_decision_before": [
             "durable_raw_request_storage",
             "live_provider_cross_process_resume_store",
             "production_approval_audit_retention",
-            "external_trace_payload_retention",
+            "external_trace_backend_selection",
+            "retention_days_above_7",
+            "production_customer_trace_capture",
         ],
         "raw_inputs_committed": False,
     }

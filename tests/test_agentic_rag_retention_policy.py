@@ -47,11 +47,37 @@ def test_agentic_rag_retention_policy_smoke_writes_summary(tmp_path: Path) -> No
         summary["resume_retention"]["live_provider_cross_process_resume"] == "pending_user_decision"
     )
     assert summary["trace_retention"]["raw_model_inputs_allowed"] is False
+    assert (
+        summary["trace_retention"]["deployment_trace_retention_contract"] == "first_gate_complete"
+    )
+    assert summary["trace_retention"]["external_backend_configured"] is False
+    assert summary["trace_retention"]["production_customer_traffic_allowed"] is False
+    assert summary["trace_retention"]["retention_days"] == 7
+    assert summary["trace_retention"]["allowed_attribute_prefixes"] == [
+        "agentic_rag.node",
+        "agentic_rag.status",
+        "agentic_rag.latency_ms",
+        "agentic_rag.tool_name",
+        "agentic_rag.error_type",
+        "agentic_rag.cost.estimated_usd",
+    ]
+    assert summary["trace_retention"]["blocked_payloads"] == [
+        "raw_prompt",
+        "raw_model_input",
+        "raw_model_response",
+        "raw_reference_image",
+        "raw_reviewer_comment",
+        "api_key",
+        "authorization_header",
+        "customer_email",
+    ]
     assert summary["requires_user_decision_before"] == [
         "durable_raw_request_storage",
         "live_provider_cross_process_resume_store",
         "production_approval_audit_retention",
-        "external_trace_payload_retention",
+        "external_trace_backend_selection",
+        "retention_days_above_7",
+        "production_customer_trace_capture",
     ]
     assert summary["raw_inputs_committed"] is False
 

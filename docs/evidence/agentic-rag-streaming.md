@@ -114,5 +114,5 @@ streaming system. The following remain pending:
 
 - production stream replay and retention policy
 - production Postgres or multi-instance graph checkpointing
-- production trace retention policy for stream events
+- external trace backend selection and production customer stream trace capture
 - live-provider cross-process resume and approved production replay/audit storage
