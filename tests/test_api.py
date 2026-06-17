@@ -365,6 +365,8 @@ def test_agentic_rag_run_replay_returns_redacted_sqlite_checkpoint_summary(
     ]
     assert replay["worker_status"] == "succeeded"
     assert replay["copy_option_count"] == 3
+    assert replay["cited_ad_package_ready"] is True
+    assert replay["cited_ad_package_source_doc_count"] >= 1
     assert replay["raw_inputs_committed"] is False
 
     serialized = json.dumps(replay, ensure_ascii=False)
@@ -639,6 +641,12 @@ def test_agentic_rag_run_websocket_emits_redacted_worker_events(
         "execute_worker",
         "finalize",
     ]
+    finalize_message = next(
+        message for message in messages if message["data"].get("node") == "finalize"
+    )
+    assert finalize_message["data"]["cited_ad_package_ready"] is True
+    assert finalize_message["data"]["cited_ad_package_source_doc_count"] >= 1
+    assert finalize_message["data"]["raw_assets_committed"] is False
     assert messages[-1]["data"] == {
         "status": "completed",
         "next_action": "return_cited_ad_package",

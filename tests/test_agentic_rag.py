@@ -199,6 +199,16 @@ def test_agentic_rag_graph_executes_worker_after_guardrail_clear_without_raw_inp
         "elapsed_ms": 18.5,
         "workflow_trace_steps": ["rank_templates", "generate_copy", "generate_image"],
     }
+    assert result["cited_ad_package"] == {
+        "status": "ready",
+        "citation_count": len(result["citations"]),
+        "citation_source_doc_ids": [citation["source_doc_id"] for citation in result["citations"]],
+        "copy_backend": "mock",
+        "image_backend": "mock",
+        "copy_option_count": 3,
+        "used_reference": False,
+        "raw_assets_committed": False,
+    }
     assert result["node_trace"] == [
         "plan_campaign",
         "run_tool_suite",

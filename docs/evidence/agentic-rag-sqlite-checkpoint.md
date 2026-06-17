@@ -30,10 +30,13 @@ Current result:
 - `scope`: `local_sqlite_langgraph_checkpointer_no_paid_api_call`
 - `checkpoint_backend`: `sqlite`
 - `checkpoint_file_created`: `true`
-- checkpoints: `8`
-- reopened checkpoints: `8`
+- checkpoints: `9`
+- reopened checkpoints: `9`
 - final status: `completed`
 - next action: `return_cited_ad_package`
+- cited ad package ready: `true`
+- cited package source docs: `3`
+- raw assets committed: `false`
 - raw inputs found in checkpoint: `false`
 - raw inputs committed: `false`
 

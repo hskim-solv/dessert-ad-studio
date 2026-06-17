@@ -58,6 +58,8 @@ Current SSE result:
 - replay checkpoints: `9`
 - replay status: `completed`
 - replay next action: `return_cited_ad_package`
+- replay cited ad package ready: `true`
+- replay cited package source docs: `3`
 - raw inputs committed: `false`
 
 Current WebSocket result:

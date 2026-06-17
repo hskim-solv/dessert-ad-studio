@@ -34,8 +34,8 @@ Verified:
   pgvector storage/query lane.
 - Offline LangGraph control-plane first gate with typed state, conditional
   HITL routing, local tool-suite node, keyword retrieval, citations, checkpoint
-  evidence, local mock worker execution, retry/reflection test coverage, and
-  redacted summary artifact.
+  evidence, local mock worker execution, redacted cited ad package summary,
+  retry/reflection test coverage, and redacted summary artifact.
 - Local Agentic RAG tool-suite first gate with document retrieval, local
   web-search snapshot, allowlisted SQLite SQL query, in-process internal API
   policy preview, and FastMCP package import/tool-call smoke.

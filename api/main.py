@@ -615,6 +615,14 @@ def _agentic_rag_stream_update(node_name: str, update: dict[str, Any]) -> dict[s
             if key in worker_result:
                 payload[key] = worker_result[key]
 
+    cited_ad_package = update.get("cited_ad_package")
+    if isinstance(cited_ad_package, dict):
+        payload["cited_ad_package_ready"] = cited_ad_package.get("status") == "ready"
+        source_doc_ids = cited_ad_package.get("citation_source_doc_ids", [])
+        if isinstance(source_doc_ids, list):
+            payload["cited_ad_package_source_doc_count"] = len(source_doc_ids)
+        payload["raw_assets_committed"] = cited_ad_package.get("raw_assets_committed", False)
+
     reflection = update.get("reflection")
     if isinstance(reflection, dict):
         payload["reflection"] = {

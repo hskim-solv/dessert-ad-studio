@@ -70,6 +70,9 @@
       "generate_image",
       "write_log"
     ],
+    "cited_ad_package_ready": true,
+    "cited_ad_package_source_doc_count": 3,
+    "raw_assets_committed": false,
     "raw_inputs_committed": false
   }
 }

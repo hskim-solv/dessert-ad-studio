@@ -19,6 +19,8 @@ image/copy generation workflow as a worker node after guardrails pass.
   dispatch.
 - Worker execution through the existing `run_generation_workflow()` path using
   local mock backends.
+- Redacted cited ad package summary that binds retrieved source document ids to
+  generated worker artifact metadata without storing raw assets.
 - Retry/reflection behavior covered by focused tests without persisting raw
   exception detail.
 - In-memory checkpointer for local proof only.
@@ -64,6 +66,9 @@ Worker route:
 - copy backend: `mock`
 - image backend: `mock`
 - copy options: `3`
+- cited ad package ready: `true`
+- cited package source docs: `3`
+- raw assets committed: `false`
 - node trace:
   - `plan_campaign`
   - `run_tool_suite`
@@ -94,8 +99,5 @@ Focused tests:
 This is not yet the full Agentic RAG system. The following remain pending:
 
 - production Postgres or multi-instance checkpointer policy
-- SSE/WebSocket streaming
-- production API graph wiring
-- Ragas and promptfoo eval gates
 - live web search, production SQL access, and proven MCP package execution
-- production citation assembly over generated ad packages
+- production/live citation assembly over generated ad packages

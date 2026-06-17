@@ -85,6 +85,7 @@ def build_sqlite_checkpoint_summary(
 
     checkpoint_bytes = checkpoint_db.read_bytes()
     raw_inputs_found = any(value.encode("utf-8") in checkpoint_bytes for value in RAW_VALUES)
+    cited_ad_package = result["cited_ad_package"]
 
     return {
         "agentic_rag_sqlite_checkpoint_smoke": "passed",
@@ -103,6 +104,9 @@ def build_sqlite_checkpoint_summary(
         "worker_call_count": len(worker_calls),
         "final_status": result["status"],
         "next_action": result["next_action"],
+        "cited_ad_package_ready": cited_ad_package["status"] == "ready",
+        "cited_ad_package_source_doc_count": len(cited_ad_package["citation_source_doc_ids"]),
+        "raw_assets_committed": cited_ad_package["raw_assets_committed"],
         "node_trace": result["node_trace"],
         "request_summary_fields": sorted(result["request_summary"].keys()),
         "raw_inputs_committed": False,

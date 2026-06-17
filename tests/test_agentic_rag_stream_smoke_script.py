@@ -61,6 +61,8 @@ def test_agentic_rag_stream_smoke_writes_summary(tmp_path: Path) -> None:
     assert summary["replay_checkpoint_backend"] == "sqlite"
     assert summary["replay_checkpoint_count"] >= 1
     assert summary["replay_node_sequence"] == summary["node_sequence"]
+    assert summary["replay_cited_ad_package_ready"] is True
+    assert summary["replay_cited_ad_package_source_doc_count"] >= 1
     assert summary["replay_raw_inputs_committed"] is False
     assert summary["raw_inputs_committed"] is False
 

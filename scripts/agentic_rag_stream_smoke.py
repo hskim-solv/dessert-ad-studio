@@ -74,6 +74,8 @@ def build_agentic_rag_stream_summary(*, evidence_date: str) -> dict[str, Any]:
         "replay_checkpoint_backend": replay["checkpoint_backend"],
         "replay_checkpoint_count": replay["checkpoint_count"],
         "replay_node_sequence": replay["node_trace"],
+        "replay_cited_ad_package_ready": replay["cited_ad_package_ready"],
+        "replay_cited_ad_package_source_doc_count": replay["cited_ad_package_source_doc_count"],
         "replay_raw_inputs_committed": replay["raw_inputs_committed"],
         "raw_inputs_committed": False,
     }

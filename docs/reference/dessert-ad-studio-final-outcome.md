@@ -127,8 +127,8 @@ Verified:
   planner/tool-suite/retriever/citation/guardrail/HITL/finalize nodes, conditional
   approval routing, local mock worker execution through the existing generation
   workflow, retry/reflection test coverage, in-memory checkpoint proof,
-  3 citations, 8 approval checkpoints, 9 worker checkpoints, and redacted
-  summary evidence in
+  3 citations, redacted cited ad package summary, 8 approval checkpoints,
+  9 worker checkpoints, and redacted summary evidence in
   [`docs/evidence/agentic-rag-graph.md`](../evidence/agentic-rag-graph.md).
 - First FastAPI async SSE/WebSocket streaming and replay gate:
   `POST /agentic-rag/runs/stream` returns `text/event-stream`, WebSocket
@@ -140,8 +140,9 @@ Verified:
   approval/resume for approval-routed runs. Evidence is recorded in
   [`docs/evidence/agentic-rag-streaming.md`](../evidence/agentic-rag-streaming.md).
 - First durable SQLite checkpoint gate: local `langgraph-checkpoint-sqlite`
-  persists 8 checkpoints, a reopened connection lists the same 8 checkpoints,
-  the worker route completes, and raw inputs are absent from the SQLite file.
+  persists 9 checkpoints, a reopened connection lists the same 9 checkpoints,
+  the worker route completes, redacted cited package metadata is present, and
+  raw inputs are absent from the SQLite file.
   Evidence is recorded in
   [`docs/evidence/agentic-rag-sqlite-checkpoint.md`](../evidence/agentic-rag-sqlite-checkpoint.md).
 - AI agent team operating model: ADR 0015, main-writer ownership, read-only
@@ -211,8 +212,9 @@ Not yet proven:
   in-process internal API, document retrieval, and local FastMCP package smoke
   are present; live web search, production SQL policy, and production MCP
   transport/auth remain pending.
-- Production-grade citation assembly across retrieved documents and generated
-  ad outputs.
+- Full production citation assembly across live retrieved documents and
+  generated ad outputs. A local redacted cited package first gate is complete;
+  production/live source contracts and approved storage remain pending.
 - Cloud deployment and demo video.
 - Provider-quality image editing. The first paid OpenAI image-edit gate failed;
   the strengthened `gpt-image-2` + `quality=medium` gate also failed. ROI
@@ -303,7 +305,7 @@ flowchart LR
 | M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields, and `docs/evidence/cost-guard-summary.json`. |
 | M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, Streamlit reviewer screenshots at `docs/evidence/streamlit-reviewer-flow.md`, demo video storyboard at `docs/evidence/demo-video-storyboard.md`, real-sample preservation evidence at `docs/evidence/real-sample-preservation.md`, paid OpenAI image-edit failure evidence at `docs/evidence/openai-image-edit-preservation.md`, README links, reproducible command map. |
 | M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, live worker outage/restore smoke, explicit retry/timeout/cancel non-support, 30-scenario product-like eval, offline visual proxy gate, paid provider-quality failure evidence, provider-gate postmortem, one-sample canary CLI, first trace/log privacy allowlist gate, first cost guard, and offline text-contamination proxy calibration are complete. Next evidence should cover a post-calibration paid canary, latency remediation, plus human/provider visual quality review. |
-| M8 Agentic RAG graph | Add the LangGraph control plane without discarding existing workflow evidence. | First gate complete: ADR 0012/0014/0017/0018, `langgraph` and `langgraph-checkpoint-sqlite` dependencies, typed state schema, deterministic planner/tool-suite/retriever/citation/guardrail/worker/reflection/HITL/finalize nodes, conditional approval route, local mock worker route through the existing generation workflow, local web/SQL/internal API tool summaries, FastMCP import/tool-call smoke, in-memory and local SQLite checkpoint proof, redacted smoke summaries, focused tests, local FastAPI SSE wiring, local SQLite replay summary, local OpenInference graph-node trace proof, local run metrics for latency/token/cost/tool success/failure plus failed-run analysis, local approval API first gate, local reviewer approval UI first gate, same-process post-approval worker resume first gate, and retention boundary policy. Pending: live web search, production SQL policy, production MCP transport/auth, durable cross-process resume, approved production storage implementation, deployment-specific trace retention evidence, and live provider token/cost telemetry. |
+| M8 Agentic RAG graph | Add the LangGraph control plane without discarding existing workflow evidence. | First gate complete: ADR 0012/0014/0017/0018, `langgraph` and `langgraph-checkpoint-sqlite` dependencies, typed state schema, deterministic planner/tool-suite/retriever/citation/guardrail/worker/reflection/HITL/finalize nodes, conditional approval route, local mock worker route through the existing generation workflow, redacted cited ad package summary, local web/SQL/internal API tool summaries, FastMCP import/tool-call smoke, in-memory and local SQLite checkpoint proof, redacted smoke summaries, focused tests, local FastAPI SSE wiring, local SQLite replay summary, local OpenInference graph-node trace proof, local run metrics for latency/token/cost/tool success/failure plus failed-run analysis, local approval API first gate, local reviewer approval UI first gate, same-process post-approval worker resume first gate, and retention boundary policy. Pending: live web search, production SQL policy, production MCP transport/auth, durable cross-process resume, approved production storage implementation, deployment-specific trace retention evidence, and live provider token/cost telemetry. |
 | M9 Agentic RAG eval/guardrail gate | Prove answer/ad package faithfulness, citation quality, and tool safety. | First gate complete: 13-case local golden dataset, Ragas-compatible deterministic summary fields, faithfulness/answer relevancy/context precision/context recall proxy scores 1.00, prompt-injection HITL route, 7-tool allowlist/budget tests, redaction checks, fast-gate command, real promptfoo package smoke, reviewer-facing offline eval report, and GitHub Actions CI steps for both the compatibility script and promptfoo package gate. ADR 0016 keeps Ragas live metrics behind paid/API-key approval. Pending: run Ragas live gate only after paid eval approval. |
 | M10 Streaming and reviewer approval | Make long-running graph execution reviewable in real time. | First gate complete: ADR 0013/0018, async FastAPI `POST /agentic-rag/runs/stream`, WebSocket `/agentic-rag/runs/ws`, SSE `text/event-stream`, 9 redacted node progress events/messages including local tool suite and worker completion, durable `agr-*` run id, local SQLite replay endpoint, paid-provider approval route tests, bidirectional WebSocket approval/resume, redacted approval decision API summary, Streamlit reviewer approval UI first gate, same-process post-approval worker resume, and retention boundary policy. Pending: durable cross-process resume, approved production replay/audit storage, and production graceful fallback states. |
 | M11 Cloud/demo packaging | Show deployability beyond local/kind evidence. | In progress: offline Agentic RAG eval report is complete at `docs/evidence/agentic-rag-eval-report.md`; demo video storyboard is complete at `docs/evidence/demo-video-storyboard.md`. Pending: one selected AWS/GCP/Azure deployment path, architecture diagram update, and final recorded demo video. |

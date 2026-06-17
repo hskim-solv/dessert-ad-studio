@@ -80,6 +80,17 @@ class AgenticRagCitation(TypedDict):
     supports: str
 
 
+class AgenticRagCitedAdPackage(TypedDict):
+    status: str
+    citation_count: int
+    citation_source_doc_ids: list[str]
+    copy_backend: str
+    image_backend: str
+    copy_option_count: int
+    used_reference: bool
+    raw_assets_committed: bool
+
+
 class AgenticRagState(TypedDict, total=False):
     request_summary: AgenticRagRequestSummary
     requires_paid_provider: bool
@@ -91,6 +102,7 @@ class AgenticRagState(TypedDict, total=False):
     citations: list[AgenticRagCitation]
     approval: AgenticRagApproval
     worker_result: dict[str, Any]
+    cited_ad_package: AgenticRagCitedAdPackage
     reflection: dict[str, Any]
     status: AgenticRagStatus
     next_action: AgenticRagNextAction
@@ -114,6 +126,8 @@ class AgenticRagReplaySummary(TypedDict, total=False):
     image_backend: str
     copy_option_count: int
     used_reference: bool
+    cited_ad_package_ready: bool
+    cited_ad_package_source_doc_count: int
     raw_inputs_committed: bool
 
 
@@ -300,6 +314,13 @@ def load_agentic_rag_sqlite_replay_summary(
         for key in ("copy_backend", "image_backend", "copy_option_count", "used_reference"):
             if key in worker_result:
                 summary[key] = worker_result[key]
+
+    cited_ad_package = latest_state.get("cited_ad_package")
+    if isinstance(cited_ad_package, dict):
+        summary["cited_ad_package_ready"] = cited_ad_package.get("status") == "ready"
+        source_doc_ids = cited_ad_package.get("citation_source_doc_ids", [])
+        if isinstance(source_doc_ids, list):
+            summary["cited_ad_package_source_doc_count"] = len(source_doc_ids)
 
     return summary
 
@@ -559,6 +580,7 @@ def _finalize(state: AgenticRagState) -> dict[str, Any]:
         return {
             "status": "completed",
             "next_action": "return_cited_ad_package",
+            "cited_ad_package": _build_cited_ad_package_summary(state, worker_result),
             "node_trace": _trace_after(state, "finalize"),
         }
     if worker_result and worker_result.get("status") == "failed":
@@ -571,6 +593,23 @@ def _finalize(state: AgenticRagState) -> dict[str, Any]:
         "status": "ready_for_worker",
         "next_action": "dispatch_generation_worker",
         "node_trace": _trace_after(state, "finalize"),
+    }
+
+
+def _build_cited_ad_package_summary(
+    state: AgenticRagState,
+    worker_result: dict[str, Any],
+) -> AgenticRagCitedAdPackage:
+    citations = state.get("citations", [])
+    return {
+        "status": "ready",
+        "citation_count": len(citations),
+        "citation_source_doc_ids": [citation["source_doc_id"] for citation in citations],
+        "copy_backend": str(worker_result.get("copy_backend", "")),
+        "image_backend": str(worker_result.get("image_backend", "")),
+        "copy_option_count": int(worker_result.get("copy_option_count", 0)),
+        "used_reference": bool(worker_result.get("used_reference", False)),
+        "raw_assets_committed": False,
     }
 
 

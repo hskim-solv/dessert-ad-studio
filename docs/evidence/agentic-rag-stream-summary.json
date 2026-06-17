@@ -42,6 +42,8 @@
     "execute_worker",
     "finalize"
   ],
+  "replay_cited_ad_package_ready": true,
+  "replay_cited_ad_package_source_doc_count": 3,
   "replay_raw_inputs_committed": false,
   "raw_inputs_committed": false
 }

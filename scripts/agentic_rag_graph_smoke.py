@@ -109,6 +109,7 @@ def _run_worker_route() -> dict[str, Any]:
     result = graph.invoke(state, {"configurable": {"thread_id": thread_id}})
     checkpoints = list(checkpointer.list({"configurable": {"thread_id": thread_id}}))
     worker_result = result["worker_result"]
+    cited_ad_package = result["cited_ad_package"]
     return {
         "status": result["status"],
         "next_action": result["next_action"],
@@ -123,6 +124,9 @@ def _run_worker_route() -> dict[str, Any]:
         "copy_option_count": worker_result["copy_option_count"],
         "used_reference": worker_result["used_reference"],
         "workflow_trace_steps": worker_result["workflow_trace_steps"],
+        "cited_ad_package_ready": cited_ad_package["status"] == "ready",
+        "cited_ad_package_source_doc_count": len(cited_ad_package["citation_source_doc_ids"]),
+        "raw_assets_committed": cited_ad_package["raw_assets_committed"],
         "raw_inputs_committed": False,
     }
 

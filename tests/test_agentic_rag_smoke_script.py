@@ -48,6 +48,9 @@ def test_agentic_rag_graph_smoke_writes_redacted_summary(tmp_path: Path) -> None
     assert summary["worker_route"]["next_action"] == "return_cited_ad_package"
     assert summary["worker_route"]["worker_status"] == "succeeded"
     assert summary["worker_route"]["copy_option_count"] == 3
+    assert summary["worker_route"]["cited_ad_package_ready"] is True
+    assert summary["worker_route"]["cited_ad_package_source_doc_count"] >= 1
+    assert summary["worker_route"]["raw_assets_committed"] is False
     assert summary["worker_route"]["node_trace"] == [
         "plan_campaign",
         "run_tool_suite",
@@ -105,6 +108,9 @@ def test_agentic_rag_sqlite_checkpoint_smoke_writes_redacted_summary(
     assert summary["raw_inputs_found_in_checkpoint"] is False
     assert summary["final_status"] == "completed"
     assert summary["next_action"] == "return_cited_ad_package"
+    assert summary["cited_ad_package_ready"] is True
+    assert summary["cited_ad_package_source_doc_count"] >= 1
+    assert summary["raw_assets_committed"] is False
 
     serialized = json.dumps(summary, ensure_ascii=False)
     checkpoint_bytes = checkpoint_path.read_bytes()
