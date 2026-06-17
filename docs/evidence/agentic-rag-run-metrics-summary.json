@@ -1,0 +1,98 @@
+{
+  "agentic_rag_run_metrics_smoke": "passed",
+  "scope": "local_agentic_rag_metrics_no_paid_api_call",
+  "evidence_date": "2026-06-17",
+  "paid_api_call_count": 0,
+  "final_status": "completed",
+  "final_next_action": "return_cited_ad_package",
+  "latency": {
+    "span_count": 7,
+    "total_elapsed_ms": 1.296,
+    "max_elapsed_ms": 0.891,
+    "by_node": [
+      {
+        "name": "agentic_rag.plan_campaign",
+        "kind": "AGENT",
+        "elapsed_ms": 0.052,
+        "error_type": null
+      },
+      {
+        "name": "agentic_rag.run_tool_suite",
+        "kind": "TOOL",
+        "elapsed_ms": 0.891,
+        "error_type": null
+      },
+      {
+        "name": "agentic_rag.retrieve_context",
+        "kind": "RETRIEVER",
+        "elapsed_ms": 0.214,
+        "error_type": null
+      },
+      {
+        "name": "agentic_rag.build_citations",
+        "kind": "CHAIN",
+        "elapsed_ms": 0.022,
+        "error_type": null
+      },
+      {
+        "name": "agentic_rag.guardrail_check",
+        "kind": "GUARDRAIL",
+        "elapsed_ms": 0.025,
+        "error_type": null
+      },
+      {
+        "name": "agentic_rag.execute_worker",
+        "kind": "TOOL",
+        "elapsed_ms": 0.053,
+        "error_type": null
+      },
+      {
+        "name": "agentic_rag.finalize",
+        "kind": "CHAIN",
+        "elapsed_ms": 0.039,
+        "error_type": null
+      }
+    ]
+  },
+  "token_usage": {
+    "estimated_total_tokens": 0,
+    "source": "mock_worker_and_local_tools_no_llm_call"
+  },
+  "cost": {
+    "estimated_total_usd": 0.0,
+    "source": "mock_worker_and_local_tools_no_paid_provider"
+  },
+  "tool_calls": {
+    "planned_tools": [
+      "document_retrieval",
+      "web_search",
+      "sql_query",
+      "internal_api",
+      "citation_builder",
+      "guardrail_check",
+      "generation_workflow"
+    ],
+    "planned_count": 7,
+    "max_tool_calls": 7,
+    "result_keys": [
+      "internal_api",
+      "sql_query",
+      "web_search"
+    ],
+    "result_count": 3,
+    "success_count": 3,
+    "failure_count": 0
+  },
+  "failed_run_analysis": {
+    "status": "failed",
+    "next_action": "inspect_failed_run",
+    "worker_error_types": [
+      "RuntimeError"
+    ],
+    "retry_attempts": 1,
+    "retry_budget": 1,
+    "failed_span_count": 2,
+    "raw_error_message_committed": false
+  },
+  "raw_inputs_committed": false
+}

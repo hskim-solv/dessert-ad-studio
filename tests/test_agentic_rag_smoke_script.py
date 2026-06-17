@@ -166,6 +166,52 @@ def test_agentic_rag_trace_smoke_writes_redacted_summary(tmp_path: Path) -> None
     assert "VIP 고객" not in serialized
 
 
+def test_agentic_rag_run_metrics_smoke_writes_redacted_summary(tmp_path: Path) -> None:
+    output_path = tmp_path / "agentic-rag-run-metrics-summary.json"
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "scripts/agentic_rag_run_metrics_smoke.py",
+            "--output",
+            str(output_path),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=60,
+    )
+
+    assert completed.returncode == 0, completed.stderr + completed.stdout
+    summary = json.loads(output_path.read_text(encoding="utf-8"))
+
+    assert summary["agentic_rag_run_metrics_smoke"] == "passed"
+    assert summary["scope"] == "local_agentic_rag_metrics_no_paid_api_call"
+    assert summary["paid_api_call_count"] == 0
+    assert summary["token_usage"]["estimated_total_tokens"] == 0
+    assert summary["cost"]["estimated_total_usd"] == 0.0
+    assert summary["latency"]["span_count"] >= 7
+    assert summary["latency"]["total_elapsed_ms"] >= 0.0
+    assert summary["tool_calls"]["planned_count"] == 7
+    assert summary["tool_calls"]["result_count"] == 3
+    assert summary["tool_calls"]["success_count"] == 3
+    assert summary["tool_calls"]["failure_count"] == 0
+    assert summary["failed_run_analysis"]["status"] == "failed"
+    assert summary["failed_run_analysis"]["next_action"] == "inspect_failed_run"
+    assert summary["failed_run_analysis"]["worker_error_types"] == ["RuntimeError"]
+    assert summary["failed_run_analysis"]["retry_attempts"] == 1
+    assert summary["raw_inputs_committed"] is False
+
+    serialized = json.dumps(summary, ensure_ascii=False)
+    for raw_value in [
+        "비공개 말차 푸딩",
+        "VIP 고객",
+        "raw private customer text",
+    ]:
+        assert raw_value not in serialized
+
+
 def test_agentic_rag_tools_smoke_writes_redacted_summary(tmp_path: Path) -> None:
     output_path = tmp_path / "agentic-rag-tools-summary.json"
 
