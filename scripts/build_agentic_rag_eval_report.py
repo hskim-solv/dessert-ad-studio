@@ -14,6 +14,7 @@ KEYWORD_RETRIEVAL_SUMMARY = Path("docs/evidence/rag-baseline-results.json")
 CHUNKING_SUMMARY = Path("docs/evidence/rag-chunking-comparison-results.json")
 PGVECTOR_SUMMARY = Path("docs/evidence/pgvector-baseline-results.json")
 PROMPTFOO_SUMMARY = Path("docs/evidence/agentic-rag-promptfoo-package-summary.json")
+DECISION_REGISTER_SUMMARY = Path("docs/evidence/agentic-rag-decision-register-summary.json")
 
 
 def build_agentic_rag_eval_report_summary(*, evidence_date: str) -> dict[str, Any]:
@@ -22,6 +23,7 @@ def build_agentic_rag_eval_report_summary(*, evidence_date: str) -> dict[str, An
     chunking = _read_json(CHUNKING_SUMMARY)
     pgvector = _read_json(PGVECTOR_SUMMARY)
     promptfoo = _read_json(PROMPTFOO_SUMMARY)
+    decision_register = _read_json(DECISION_REGISTER_SUMMARY)
 
     ragas_metrics = eval_guardrail["ragas_compatible_metrics"]
     prompt_injection = eval_guardrail["prompt_injection"]
@@ -51,6 +53,7 @@ def build_agentic_rag_eval_report_summary(*, evidence_date: str) -> dict[str, An
             str(CHUNKING_SUMMARY),
             str(PGVECTOR_SUMMARY),
             str(PROMPTFOO_SUMMARY),
+            str(DECISION_REGISTER_SUMMARY),
         ],
         "golden_eval": {
             "dataset": eval_guardrail["golden_dataset"]["name"],
@@ -106,6 +109,13 @@ def build_agentic_rag_eval_report_summary(*, evidence_date: str) -> dict[str, An
             "production_mcp_auth_provider_selection": "pending_user_approval",
             "production_mcp_remote_client_smoke": "pending_user_approval",
         },
+        "pending_decision_register": {
+            "decision_count": decision_register["decision_count"],
+            "all_require_user_approval": decision_register["decisions_requiring_user_approval"]
+            == decision_register["decision_count"],
+            "production_claim_added": decision_register["production_claim_added"],
+            "decision_ids": [decision["id"] for decision in decision_register["decisions"]],
+        },
         "privacy_boundary": {
             "raw_inputs_committed": False,
             "paid_api_call_count": promptfoo["paid_api_call_count"],
@@ -118,6 +128,7 @@ def render_agentic_rag_eval_report(summary: dict[str, Any]) -> str:
     retrieval = summary["retrieval"]
     promptfoo = summary["promptfoo"]
     guardrails = summary["guardrails"]
+    pending = summary["pending_decision_register"]
     source_rows = "\n".join(f"- `{path}`" for path in summary["source_artifacts"])
     return f"""# Agentic RAG Eval Report
 
@@ -158,6 +169,13 @@ external MCP transports.
   planned tools
 - Unexpected tools: `{guardrails["unexpected_tools"]}`
 - Raw inputs absent from summary artifacts: `{guardrails["raw_inputs_absent"]}`
+
+## Pending Decision Register
+
+- Pending user decisions: `{pending["decision_count"]}`
+- All require user approval: `{pending["all_require_user_approval"]}`
+- Production claim added: `{pending["production_claim_added"]}`
+- Decision IDs: `{", ".join(pending["decision_ids"])}`
 
 ## Source Artifacts
 

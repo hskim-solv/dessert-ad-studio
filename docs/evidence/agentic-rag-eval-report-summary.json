@@ -7,7 +7,8 @@
     "docs/evidence/rag-baseline-results.json",
     "docs/evidence/rag-chunking-comparison-results.json",
     "docs/evidence/pgvector-baseline-results.json",
-    "docs/evidence/agentic-rag-promptfoo-package-summary.json"
+    "docs/evidence/agentic-rag-promptfoo-package-summary.json",
+    "docs/evidence/agentic-rag-decision-register-summary.json"
   ],
   "golden_eval": {
     "dataset": "agentic_rag_golden_v1",
@@ -60,6 +61,22 @@
     "mcp_remote_client_auth_contract": "first_gate_complete",
     "production_mcp_auth_provider_selection": "pending_user_approval",
     "production_mcp_remote_client_smoke": "pending_user_approval"
+  },
+  "pending_decision_register": {
+    "decision_count": 9,
+    "all_require_user_approval": true,
+    "production_claim_added": false,
+    "decision_ids": [
+      "ragas_live_eval",
+      "live_web_search_provider_smoke",
+      "credentialed_production_db_smoke",
+      "production_mcp_remote_auth",
+      "live_provider_cross_process_resume",
+      "production_replay_audit_storage",
+      "external_trace_backend_customer_capture",
+      "image_edit_latency_strategy",
+      "cloud_deployment_and_recorded_demo"
+    ]
   },
   "privacy_boundary": {
     "raw_inputs_committed": false,

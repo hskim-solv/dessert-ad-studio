@@ -38,6 +38,13 @@ external MCP transports.
 - Unexpected tools: `[]`
 - Raw inputs absent from summary artifacts: `True`
 
+## Pending Decision Register
+
+- Pending user decisions: `9`
+- All require user approval: `True`
+- Production claim added: `False`
+- Decision IDs: `ragas_live_eval, live_web_search_provider_smoke, credentialed_production_db_smoke, production_mcp_remote_auth, live_provider_cross_process_resume, production_replay_audit_storage, external_trace_backend_customer_capture, image_edit_latency_strategy, cloud_deployment_and_recorded_demo`
+
 ## Source Artifacts
 
 - `docs/evidence/agentic-rag-eval-guardrail-summary.json`
@@ -45,6 +52,7 @@ external MCP transports.
 - `docs/evidence/rag-chunking-comparison-results.json`
 - `docs/evidence/pgvector-baseline-results.json`
 - `docs/evidence/agentic-rag-promptfoo-package-summary.json`
+- `docs/evidence/agentic-rag-decision-register-summary.json`
 
 ## Reproduce
 

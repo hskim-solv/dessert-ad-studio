@@ -57,11 +57,16 @@ def test_agentic_rag_eval_report_script_writes_reviewer_report(tmp_path: Path) -
     assert summary["limits"]["mcp_remote_client_auth_contract"] == "first_gate_complete"
     assert summary["limits"]["production_mcp_auth_provider_selection"] == "pending_user_approval"
     assert summary["limits"]["production_mcp_remote_client_smoke"] == "pending_user_approval"
+    assert summary["pending_decision_register"]["decision_count"] == 9
+    assert summary["pending_decision_register"]["all_require_user_approval"] is True
+    assert summary["pending_decision_register"]["production_claim_added"] is False
+    assert "image_edit_latency_strategy" in summary["pending_decision_register"]["decision_ids"]
     assert summary["privacy_boundary"]["raw_inputs_committed"] is False
 
     assert "# Agentic RAG Eval Report" in report
     assert "Faithfulness" in report
     assert "promptfoo" in report
+    assert "Pending Decision Register" in report
     assert "Ragas live metrics remain pending" in report
     compact_report = " ".join(report.split())
     assert (
@@ -70,3 +75,4 @@ def test_agentic_rag_eval_report_script_writes_reviewer_report(tmp_path: Path) -
         "client auth contract first gates are complete"
     ) in compact_report
     assert "docs/evidence/agentic-rag-eval-guardrail-summary.json" in report
+    assert "docs/evidence/agentic-rag-decision-register-summary.json" in report
