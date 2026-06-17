@@ -4,7 +4,7 @@
   "model_id": "gpt-image-2",
   "quality": "medium",
   "used_reference": true,
-  "elapsed_ms": 68640,
+  "elapsed_ms": 72962,
   "usage": {
     "sample_count": 1,
     "total_tokens": 2953
@@ -52,16 +52,16 @@
     "sample_count": 1,
     "passed_count": 0,
     "pass_rate": 0.0,
-    "min_roi_color_histogram_similarity": 0.662552,
-    "min_roi_average_hash_similarity": 0.75,
-    "min_roi_edge_similarity": 0.75,
-    "max_text_contamination_risk_score": 1.0
+    "min_roi_color_histogram_similarity": 0.804179,
+    "min_roi_average_hash_similarity": 0.765625,
+    "min_roi_edge_similarity": 0.734375,
+    "max_text_contamination_risk_score": 0.0
   },
   "sample_results": [
     {
       "slug": "matcha-pudding",
       "product_name": "말차 푸딩",
-      "elapsed_ms": 68233,
+      "elapsed_ms": 72675,
       "usage": {
         "total_tokens": 2953
       },
@@ -80,8 +80,8 @@
         "exists": true,
         "committed": false,
         "path": "redacted_outputs_path",
-        "sha256": "6296e89cf9a2fb81daf27f7d638dec3f4165c7be723ca9fbdbef1f40475441d8",
-        "bytes": 1571081
+        "sha256": "c9d088091c2549147eaf6c30007c8db1e524712bc6afaf4abaa24841df50be70",
+        "bytes": 1390938
       },
       "prompt": {
         "length": 276,
@@ -99,12 +99,12 @@
           1024
         ],
         "generated_nonblank": true,
-        "color_histogram_similarity": 0.624262,
-        "average_hash_similarity": 0.71875,
-        "roi_color_histogram_similarity": 0.662552,
-        "roi_average_hash_similarity": 0.75,
-        "roi_edge_similarity": 0.75,
-        "text_contamination_risk_score": 1.0
+        "color_histogram_similarity": 0.790349,
+        "average_hash_similarity": 0.65625,
+        "roi_color_histogram_similarity": 0.804179,
+        "roi_average_hash_similarity": 0.765625,
+        "roi_edge_similarity": 0.734375,
+        "text_contamination_risk_score": 0.0
       },
       "checklist": {
         "generated_file_exists": true,
@@ -114,7 +114,7 @@
         "roi_color_histogram_similarity_ge_threshold": true,
         "roi_average_hash_similarity_ge_threshold": true,
         "roi_edge_similarity_ge_threshold": true,
-        "text_contamination_risk_le_threshold": false
+        "text_contamination_risk_le_threshold": true
       },
       "checklist_passed": false
     }
@@ -140,8 +140,8 @@
     "exists": true,
     "committed": false,
     "path": "redacted_outputs_path",
-    "sha256": "6296e89cf9a2fb81daf27f7d638dec3f4165c7be723ca9fbdbef1f40475441d8",
-    "bytes": 1571081
+    "sha256": "c9d088091c2549147eaf6c30007c8db1e524712bc6afaf4abaa24841df50be70",
+    "bytes": 1390938
   },
   "prompt": {
     "length": 276,
@@ -159,12 +159,12 @@
       1024
     ],
     "generated_nonblank": true,
-    "color_histogram_similarity": 0.624262,
-    "average_hash_similarity": 0.71875,
-    "roi_color_histogram_similarity": 0.662552,
-    "roi_average_hash_similarity": 0.75,
-    "roi_edge_similarity": 0.75,
-    "text_contamination_risk_score": 1.0
+    "color_histogram_similarity": 0.790349,
+    "average_hash_similarity": 0.65625,
+    "roi_color_histogram_similarity": 0.804179,
+    "roi_average_hash_similarity": 0.765625,
+    "roi_edge_similarity": 0.734375,
+    "text_contamination_risk_score": 0.0
   },
   "checklist": {
     "generated_file_exists": true,
@@ -174,7 +174,7 @@
     "roi_color_histogram_similarity_ge_threshold": true,
     "roi_average_hash_similarity_ge_threshold": true,
     "roi_edge_similarity_ge_threshold": true,
-    "text_contamination_risk_le_threshold": false
+    "text_contamination_risk_le_threshold": true
   },
   "checklist_passed": false
 }

@@ -42,15 +42,15 @@ def test_provider_gate_postmortem_summarizes_latest_failed_paid_gate(
     assert summary["source_summary"]["budget_over_by_usd"] == 0.0
     assert summary["preservation_result"]["roi_preservation_checks_passed"] is True
     assert summary["failure_counts"]["sample_elapsed_ms_le_threshold"] == 1
-    assert summary["failure_counts"]["text_contamination_risk_le_threshold"] == 1
+    assert "text_contamination_risk_le_threshold" not in summary["failure_counts"]
     assert "cost_guard_passed" not in summary["failure_counts"]
-    assert summary["root_causes"] == [
-        "latency_threshold_exceeded",
-        "text_contamination_heuristic_failed",
-    ]
+    assert summary["root_causes"] == ["latency_threshold_exceeded"]
     assert summary["next_paid_gate_conditions"] == [
         "review generated outputs locally before another paid full gate",
-        "rerun a one-sample paid canary after the offline text-contamination proxy calibration",
+        (
+            "decide whether to relax the latency threshold, switch model/quality, "
+            "or keep provider-quality image editing unproven"
+        ),
         "set an OpenAI dashboard hard budget because the script budget is post-response only",
         "keep deterministic Korean overlay rendering outside the image model",
     ]

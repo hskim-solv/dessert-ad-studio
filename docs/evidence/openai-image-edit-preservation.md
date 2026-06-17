@@ -13,7 +13,7 @@ metric summary.
 - Model: `gpt-image-2`
 - Quality: `medium`
 - Reference set: one committed public sample, `matcha-pudding`
-- Elapsed: `68,640 ms`
+- Elapsed: `72,962 ms`
 - Usage: `2,953 total_tokens`
 - Estimated cost: `$0.08859`
 - Budget guard: passed under `$0.10`
@@ -21,15 +21,16 @@ metric summary.
 - Generated file: exists, `1024x1024`, nonblank, not committed
 - ROI preservation: color histogram, average hash, and edge similarity checks
   passed
-- Checklist failures: sample exceeded the `30,000 ms` latency threshold and
-  failed the text-contamination heuristic
-- Manual local review: no visible text found in the generated output, so the
-  text-contamination failure is likely a proxy false positive
+- Checklist failure: sample exceeded the `30,000 ms` latency threshold
+- Text-contamination check: passed with score `0.00`
+- Manual local review: no visible text found in the generated output
 
 The latest canary confirms the API can be reached after credit recharge and the
 one-sample cost stayed inside the script budget. It still does not prove
-provider-quality image editing because latency failed and the design-safety
-proxy needs calibration. It reinforces the production boundary: image models
+provider-quality image editing because latency failed. The post-calibration
+text-contamination check passed, so the remaining blocker for this one-sample
+provider gate is operational latency, not credit, cost, ROI preservation, or
+visible generated text. It reinforces the production boundary: image models
 should produce or edit visuals, while Korean marketing copy should be rendered
 deterministically by the overlay layer.
 
@@ -121,13 +122,10 @@ Latest one-sample canary result:
 - sample: `matcha-pudding`
 - model/quality: `gpt-image-2` / `medium`
 - estimated cost: `$0.08859` under the `$0.10` budget
-- elapsed time: `68.64s`, above the `30s` threshold
+- elapsed time: `72.96s`, above the `30s` threshold
 - ROI preservation checks: passed
-- pre-calibration text-contamination proxy: failed with score `1.00`; manual
-  local review of the generated output found no visible text, so this is likely
-  a proxy false positive caused by dark components/edges rather than actual
-  rendered text. The local proxy calibration is tracked separately in
-  [`text-contamination-proxy-calibration.md`](text-contamination-proxy-calibration.md).
+- post-calibration text-contamination proxy: passed with score `0.00`; manual
+  local review of the generated output found no visible text.
 - provider-quality gate: failed; do not claim provider-quality image editing
 
 The `--max-estimated-cost-usd` guard uses the token usage returned by the image

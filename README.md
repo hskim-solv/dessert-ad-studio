@@ -85,7 +85,7 @@ Known gaps:
 - Paid OpenAI image-edit provider gates have failed; the deterministic
   preservation path and offline visual proxy pass, but provider-quality image
   editing is not proven. The latest paid canary passed ROI and script cost
-  checks but failed latency and the pre-calibration text proxy.
+  checks plus the post-calibration text proxy, but failed latency.
 - Agentic RAG is still at first-gate maturity. Local SQLite checkpointing,
   SSE/WebSocket streaming, graph tracing, local tool-suite orchestration, and a
   local eval/guardrail plus promptfoo package gate are proven, and reviewer
@@ -366,7 +366,7 @@ docs/runbooks/gcp-flux2-validation.md
 
 1. Extend the Agentic RAG control plane from local graph/tool-suite/SSE/WebSocket/SQLite/replay/trace/run-metrics/reviewer-approval/resume plus mock-only redacted cross-process resume, bidirectional approval, and retention-boundary first gates to live-provider cross-process resume, approved production storage, and deployment-specific external trace retention.
 2. Add Ragas live evaluator execution only after paid eval approval and trace/result payload review.
-3. Rerun a one-sample paid `gpt-image-2` + `quality=medium` canary after the offline text-contamination proxy calibration, then decide whether latency remediation or a full gate is warranted.
+3. Decide the paid image-edit latency strategy: keep the 30s production-style threshold and leave provider-quality unproven, relax the portfolio evidence threshold with explicit rationale, or try a different model/quality before any full three-sample paid gate.
 4. Add human visual review or provider-quality visual statistics for generated assets.
 5. Select MCP production auth provider and run a remote client transport/auth smoke before claiming production MCP operation.
 

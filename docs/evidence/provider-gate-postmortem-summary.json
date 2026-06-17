@@ -4,7 +4,7 @@
     "model_id": "gpt-image-2",
     "quality": "medium",
     "sample_count": 1,
-    "elapsed_ms": 68640,
+    "elapsed_ms": 72962,
     "total_tokens": 2953,
     "estimated_cost_usd": 0.08859,
     "budget_max_usd": 0.1,
@@ -17,21 +17,19 @@
   },
   "preservation_result": {
     "roi_preservation_checks_passed": true,
-    "minimum_roi_color_histogram_similarity": 0.662552,
-    "minimum_roi_average_hash_similarity": 0.75,
-    "minimum_roi_edge_similarity": 0.75
+    "minimum_roi_color_histogram_similarity": 0.804179,
+    "minimum_roi_average_hash_similarity": 0.765625,
+    "minimum_roi_edge_similarity": 0.734375
   },
   "failure_counts": {
-    "sample_elapsed_ms_le_threshold": 1,
-    "text_contamination_risk_le_threshold": 1
+    "sample_elapsed_ms_le_threshold": 1
   },
   "root_causes": [
-    "latency_threshold_exceeded",
-    "text_contamination_heuristic_failed"
+    "latency_threshold_exceeded"
   ],
   "next_paid_gate_conditions": [
     "review generated outputs locally before another paid full gate",
-    "rerun a one-sample paid canary after the offline text-contamination proxy calibration",
+    "decide whether to relax the latency threshold, switch model/quality, or keep provider-quality image editing unproven",
     "set an OpenAI dashboard hard budget because the script budget is post-response only",
     "keep deterministic Korean overlay rendering outside the image model"
   ],

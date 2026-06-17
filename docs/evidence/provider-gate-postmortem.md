@@ -31,7 +31,6 @@ Summary:
 - ROI preservation checks: passed
 - Root causes:
   - `latency_threshold_exceeded`
-  - `text_contamination_heuristic_failed`
 
 ## Interpretation
 
@@ -42,9 +41,8 @@ still useful evidence because it separates what worked from what did not:
   ROI metrics.
 - Operational readiness failed because the sample exceeded the 30 second
   threshold.
-- Design safety needs remediation because the sample triggered the
-  text-contamination heuristic. Manual local review found no visible text, so
-  the current proxy likely over-flags dark components or edges.
+- Design safety passed this canary: the text-contamination score was `0.00`,
+  and manual local review found no visible text in the generated output.
 - Budget control passed for this one-sample canary, but the script guard is
   still an evidence gate, not a pre-spend hard cap.
 
@@ -54,12 +52,11 @@ Before another paid image-edit provider gate:
 
 - review generated outputs locally;
 - use the 2026-06-17 one-sample canary result as the current baseline: API and
-  cost guard passed, ROI preservation passed, latency failed, and the
-  pre-calibration text-contamination proxy likely over-flagged a no-visible-text
-  output;
-- rerun a one-sample paid canary after the offline text-contamination proxy
-  calibration in
-  [`text-contamination-proxy-calibration.md`](text-contamination-proxy-calibration.md);
+  cost guard passed, ROI preservation passed, text-contamination passed, and
+  latency failed;
+- decide whether the next paid run should relax the latency threshold for
+  portfolio evidence, switch model/quality, or keep the 30 second target and
+  leave provider-quality image editing unproven;
 - set an OpenAI dashboard hard budget because the script budget is
   post-response only;
 - keep deterministic Korean overlay rendering outside the image model.
