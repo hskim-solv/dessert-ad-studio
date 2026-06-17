@@ -36,7 +36,8 @@
     "docs/evidence/generation-jobs.md",
     "docs/evidence/openai-image-edit-preservation.md",
     "docs/evidence/provider-visual-review.md",
-    "docs/evidence/provider-gate-postmortem.md"
+    "docs/evidence/provider-gate-postmortem.md",
+    "docs/evidence/agentic-rag-decision-register.md"
   ],
   "missing_artifacts": [],
   "coverage": {
@@ -44,7 +45,8 @@
     "streaming_and_hitl": true,
     "eval_report": true,
     "provider_quality_failure_disclosed": true,
-    "provider_visual_review_disclosed": true
+    "provider_visual_review_disclosed": true,
+    "pending_decision_register": true
   },
   "privacy_boundary": {
     "raw_customer_data_committed": false,

@@ -67,6 +67,9 @@ Verified:
   fallback summary.
 - Reviewer-facing offline Agentic RAG eval report that consolidates golden
   eval, retrieval, chunking, pgvector, promptfoo, and guardrail evidence.
+- No-external-call Agentic RAG pending decision register that lists the 9
+  user-gated items, approval reasons, no-claim boundaries, and next evidence
+  artifacts.
 - Demo video storyboard with an 8-shot, 180-second recording plan that references
   committed reviewer assets and keeps provider-quality image editing unproven.
 - Offline text-contamination proxy calibration for the provider-quality gate,
@@ -102,7 +105,8 @@ Known gaps:
   connection/audit-retention smoke, production MCP auth provider selection and
   remote client smoke, live-provider cross-process resume, approved production
   storage, external trace backend selection/production customer trace capture,
-  and Ragas live evaluator execution are still pending.
+  and Ragas live evaluator execution are still pending; the pending decision
+  register centralizes their approval reasons and next evidence artifacts.
 - Current eval sets are demo-scale and need a larger real/product-like scenario
   matrix before broader quality claims.
 
@@ -378,6 +382,9 @@ docs/runbooks/gcp-flux2-validation.md
    latency-resolved full paid gate before claiming provider-quality image
    editing.
 5. Select MCP production auth provider and run a remote client transport/auth smoke before claiming production MCP operation.
+
+The current user-gated pending list is tracked in
+[`docs/evidence/agentic-rag-decision-register.md`](docs/evidence/agentic-rag-decision-register.md).
 
 FastMCP is still a thin wrapper, not the core product path. The current server
 exposes local `search_marketing_guides`, `query_template_policy`, and
