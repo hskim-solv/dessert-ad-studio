@@ -48,6 +48,7 @@ def test_demo_video_storyboard_script_writes_reviewer_artifacts(tmp_path: Path) 
     assert summary["coverage"]["streaming_and_hitl"] is True
     assert summary["coverage"]["eval_report"] is True
     assert summary["coverage"]["provider_quality_failure_disclosed"] is True
+    assert summary["coverage"]["provider_visual_review_disclosed"] is True
 
     for artifact in summary["referenced_artifacts"]:
         assert (ROOT / artifact).exists(), artifact
@@ -55,5 +56,6 @@ def test_demo_video_storyboard_script_writes_reviewer_artifacts(tmp_path: Path) 
     assert "# Demo Video Storyboard" in storyboard
     assert "Production-grade Agentic RAG System" in storyboard
     assert "Do not claim provider-quality image editing" in storyboard
+    assert "docs/evidence/provider-visual-review.md" in storyboard
     assert "docs/evidence/agentic-rag-eval-report.md" in storyboard
     assert "docs/evidence/assets/streamlit-reviewer-result.png" in storyboard

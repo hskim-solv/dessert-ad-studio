@@ -35,6 +35,7 @@
     "docs/evidence/async-reliability-matrix.md",
     "docs/evidence/generation-jobs.md",
     "docs/evidence/openai-image-edit-preservation.md",
+    "docs/evidence/provider-visual-review.md",
     "docs/evidence/provider-gate-postmortem.md"
   ],
   "missing_artifacts": [],
@@ -42,7 +43,8 @@
     "agentic_rag_control_plane": true,
     "streaming_and_hitl": true,
     "eval_report": true,
-    "provider_quality_failure_disclosed": true
+    "provider_quality_failure_disclosed": true,
+    "provider_visual_review_disclosed": true
   },
   "privacy_boundary": {
     "raw_customer_data_committed": false,

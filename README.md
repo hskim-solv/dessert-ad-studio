@@ -85,7 +85,9 @@ Known gaps:
 - Paid OpenAI image-edit provider gates have failed; the deterministic
   preservation path and offline visual proxy pass, but provider-quality image
   editing is not proven. The latest paid canary passed ROI and script cost
-  checks plus the post-calibration text proxy, but failed latency.
+  checks plus the post-calibration text proxy, but failed latency. The offline
+  provider visual review first gate records the reviewer rubric without
+  upgrading that result into a provider-quality claim.
 - Agentic RAG is still at first-gate maturity. Local SQLite checkpointing,
   SSE/WebSocket streaming, graph tracing, local tool-suite orchestration, and a
   local eval/guardrail plus promptfoo package gate are proven, and reviewer
@@ -369,7 +371,9 @@ docs/runbooks/gcp-flux2-validation.md
 1. Extend the Agentic RAG control plane from local graph/tool-suite/SSE/WebSocket/SQLite/replay/trace/run-metrics/reviewer-approval/resume plus mock-only redacted cross-process resume, bidirectional approval, retention-boundary, live web search runtime policy, and production DB access/audit policy first gates to live web search provider smoke if approved, live-provider cross-process resume, credentialed production DB smoke if approved, approved production storage, and deployment-specific external trace retention.
 2. Add Ragas live evaluator execution only after paid eval approval and trace/result payload review.
 3. Decide the paid image-edit latency strategy: keep the 30s production-style threshold and leave provider-quality unproven, relax the portfolio evidence threshold with explicit rationale, or try a different model/quality before any full three-sample paid gate.
-4. Add human visual review or provider-quality visual statistics for generated assets.
+4. Expand provider visual review from the current offline first gate to a
+   latency-resolved full paid gate before claiming provider-quality image
+   editing.
 5. Select MCP production auth provider and run a remote client transport/auth smoke before claiming production MCP operation.
 
 FastMCP is still a thin wrapper, not the core product path. The current server

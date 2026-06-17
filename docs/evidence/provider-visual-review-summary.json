@@ -1,0 +1,47 @@
+{
+  "provider_visual_review_first_gate": "passed",
+  "scope": "offline_reviewer_rubric_no_paid_api_call",
+  "provider_quality_claimed": false,
+  "provider_quality_gate_passed": false,
+  "provider_quality_unproven": true,
+  "latest_paid_canary": {
+    "api_reached": true,
+    "model_id": "gpt-image-2",
+    "quality": "medium",
+    "sample_count": 1,
+    "elapsed_ms": 66984,
+    "cost_guard_passed": true,
+    "estimated_cost_usd": 0.08859,
+    "roi_preservation_checks_passed": true,
+    "text_contamination_passed": true,
+    "latency_passed": false,
+    "root_causes": [
+      "latency_threshold_exceeded"
+    ]
+  },
+  "offline_visual_proxy": {
+    "passed": true,
+    "sample_count": 6,
+    "passed_count": 6,
+    "pass_rate": 1.0,
+    "source": "docs/evidence/visual-quality-summary.json"
+  },
+  "manual_local_review": {
+    "status": "documented_prior_manual_review",
+    "visible_text_found": false,
+    "source": "docs/evidence/openai-image-edit-preservation.md",
+    "proof_level": "manual_local_review_only"
+  },
+  "privacy_boundary": {
+    "paid_api_call_made_by_script": false,
+    "raw_prompt_committed": false,
+    "raw_model_response_committed": false,
+    "generated_image_committed": false
+  },
+  "next_conditions": [
+    "resolve the image-edit latency strategy before any provider-quality claim",
+    "run a user-approved full paid provider gate after the latency strategy is chosen",
+    "keep deterministic Korean overlay rendering outside the image model",
+    "do not commit raw prompts, raw provider responses, or generated provider images"
+  ]
+}

@@ -49,6 +49,9 @@ def build_demo_video_storyboard_summary(*, evidence_date: str) -> dict[str, Any]
             "provider_quality_failure_disclosed": _contains_artifact(
                 referenced_artifacts, "openai-image-edit-preservation.md"
             ),
+            "provider_visual_review_disclosed": _contains_artifact(
+                referenced_artifacts, "provider-visual-review.md"
+            ),
         },
         "privacy_boundary": {
             "raw_customer_data_committed": False,
@@ -225,15 +228,21 @@ def _storyboard_shots() -> tuple[StoryboardShot, ...]:
             order=8,
             title="Honest pending scope",
             duration_seconds=20,
-            visual="Show provider-quality failure and final outcome pending rows.",
+            visual=(
+                "Show provider-quality failure, offline provider visual review, "
+                "and final outcome pending rows."
+            ),
             narration=(
                 "Provider-quality OpenAI image editing is not claimed as proven; "
+                "the offline provider visual review first gate is reviewer-rubric "
+                "evidence, not a success claim. "
                 "live web search provider smoke, credentialed production DB smoke, "
                 "production MCP auth, cloud deployment, and the final recorded video "
                 "remain pending."
             ),
             evidence=(
                 "docs/evidence/openai-image-edit-preservation.md",
+                "docs/evidence/provider-visual-review.md",
                 "docs/evidence/provider-gate-postmortem.md",
                 "docs/reference/dessert-ad-studio-final-outcome.md",
             ),

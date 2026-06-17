@@ -95,10 +95,11 @@ ad generation while keeping proven and pending scope explicit.
 ### 8. Honest pending scope
 
 - Duration: `20s`
-- Visual: Show provider-quality failure and final outcome pending rows.
-- Narration: Provider-quality OpenAI image editing is not claimed as proven; live web search provider smoke, credentialed production DB smoke, production MCP auth, cloud deployment, and the final recorded video remain pending.
+- Visual: Show provider-quality failure, offline provider visual review, and final outcome pending rows.
+- Narration: Provider-quality OpenAI image editing is not claimed as proven; the offline provider visual review first gate is reviewer-rubric evidence, not a success claim. live web search provider smoke, credentialed production DB smoke, production MCP auth, cloud deployment, and the final recorded video remain pending.
 - Evidence:
   - `docs/evidence/openai-image-edit-preservation.md`
+  - `docs/evidence/provider-visual-review.md`
   - `docs/evidence/provider-gate-postmortem.md`
   - `docs/reference/dessert-ad-studio-final-outcome.md`
 
@@ -132,6 +133,7 @@ ad generation while keeping proven and pending scope explicit.
 - `docs/evidence/async-reliability-matrix.md`
 - `docs/evidence/generation-jobs.md`
 - `docs/evidence/openai-image-edit-preservation.md`
+- `docs/evidence/provider-visual-review.md`
 - `docs/evidence/provider-gate-postmortem.md`
 
 ## Reproduce
