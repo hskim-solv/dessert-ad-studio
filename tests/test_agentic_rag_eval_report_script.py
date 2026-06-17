@@ -76,3 +76,61 @@ def test_agentic_rag_eval_report_script_writes_reviewer_report(tmp_path: Path) -
     ) in compact_report
     assert "docs/evidence/agentic-rag-eval-guardrail-summary.json" in report
     assert "docs/evidence/agentic-rag-decision-register-summary.json" in report
+
+
+def test_agentic_rag_eval_report_check_mode_detects_stale_outputs(
+    tmp_path: Path,
+) -> None:
+    report_path = tmp_path / "agentic-rag-eval-report.md"
+    summary_path = tmp_path / "agentic-rag-eval-report-summary.json"
+    base_command = [
+        sys.executable,
+        "scripts/build_agentic_rag_eval_report.py",
+        "--date",
+        "2026-06-17",
+        "--report-output",
+        str(report_path),
+        "--summary-output",
+        str(summary_path),
+    ]
+
+    write_completed = subprocess.run(
+        base_command,
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=60,
+    )
+    assert write_completed.returncode == 0, write_completed.stderr + write_completed.stdout
+
+    check_completed = subprocess.run(
+        [*base_command, "--check"],
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=60,
+    )
+    assert check_completed.returncode == 0, check_completed.stderr + check_completed.stdout
+    check_summary = json.loads(check_completed.stdout)
+    assert check_summary["agentic_rag_eval_report_check"] == "passed"
+    assert check_summary["mismatches"] == []
+
+    summary_payload = json.loads(summary_path.read_text(encoding="utf-8"))
+    summary_payload["scope"] = "stale"
+    summary_path.write_text(json.dumps(summary_payload, ensure_ascii=False, indent=2) + "\n")
+    stale_completed = subprocess.run(
+        [*base_command, "--check"],
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=60,
+    )
+    assert stale_completed.returncode == 1
+    stale_summary = json.loads(stale_completed.stdout)
+    assert stale_summary["agentic_rag_eval_report_check"] == "failed"
+    assert stale_summary["mismatches"] == [
+        {"path": str(summary_path), "reason": "stale_or_modified"}
+    ]

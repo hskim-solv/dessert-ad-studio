@@ -65,7 +65,7 @@ cloud deployment.
 
 - Workflow: `.github/workflows/ci.yml`
 - Required strings present:
-  `7`
+  `11`
 - Missing required strings:
   `[]`
 

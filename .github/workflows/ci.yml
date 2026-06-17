@@ -34,6 +34,13 @@ jobs:
           --summary-output /tmp/agentic-rag-promptfoo-package-summary.json
           --results-output /tmp/agentic-rag-promptfoo-results.json
           --timeout-seconds 180
+      - name: Agentic RAG eval report freshness gate
+        run: >
+          python scripts/build_agentic_rag_eval_report.py
+          --date 2026-06-17
+          --report-output docs/evidence/agentic-rag-eval-report.md
+          --summary-output docs/evidence/agentic-rag-eval-report-summary.json
+          --check
       - name: Agentic RAG final readiness gate
         run: >
           python scripts/build_agentic_rag_final_readiness.py
