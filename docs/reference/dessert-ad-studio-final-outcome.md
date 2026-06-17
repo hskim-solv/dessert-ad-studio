@@ -117,7 +117,9 @@ Verified:
 - Kubernetes async overlay and live `kind` smoke for Redis/RQ worker plus
   Postgres generation history.
 - First async reliability matrix for burst submit, failure state, queue enqueue
-  failure, duplicate polling, worker startup wait, and K8s async smoke.
+  failure, duplicate polling, worker startup wait, K8s async smoke, worker
+  outage/restore, explicit retry/timeout/cancel non-support, and scoped
+  multi-worker policy.
 - 30-scenario product-like deterministic workflow eval with failure-case summary
   fields.
 - Final target architecture decision: Agentic RAG control plane over the
@@ -239,10 +241,12 @@ Not yet proven:
   the latency strategy is resolved and a later paid gate passes.
 - Production async operation. Kubernetes now has a local/test async overlay
   smoke, first reliability matrix, single worker outage/restore evidence, and
-  explicit retry/timeout/cancel non-support evidence, but not multi-worker
-  failure handling or production storage policy.
-- Production trace privacy. The first allowlist gate is complete, but external
-  production trace rollout still needs a deployment-specific attribute review.
+  explicit retry/timeout/cancel non-support evidence plus scoped multi-worker
+  policy, but not exactly-once processing, worker affinity, or production
+  storage policy.
+- Production trace privacy. The first allowlist gate and deployment trace
+  retention contract are complete, but external backend selection and
+  production customer trace capture remain pending user decisions.
 - Broad real-world quality statistics. Current evals now include 30
   product-like deterministic scenarios and an offline visual proxy over 6
   committed banners, but not human-rated real customer outcomes or
@@ -391,9 +395,10 @@ The immediate M6 portfolio-packaging gate is complete, but the adversarial
 review moved the project into M7 hardening. Live K8s base-stack proof is now
 captured, the K8s async overlay smoke is complete, the first async reliability
 matrix is complete, the 30-scenario product-like eval is complete, the first
-trace/log privacy allowlist gate is complete, the first cost guard is complete,
-live worker outage/restore evidence is complete, retry/timeout/cancel
-non-support is explicit, and the strengthened paid provider-quality image-edit
+trace/log privacy allowlist gate is complete, the deployment trace retention
+contract is complete, the first cost guard is complete, live worker
+outage/restore evidence is complete, retry/timeout/cancel non-support and
+scoped multi-worker policy are explicit, and the strengthened paid provider-quality image-edit
 gate has failed with redacted evidence and an offline postmortem. The remaining
 portfolio gap is now latency strategy/remediation. The offline provider visual
 review first gate exists, but provider-quality image editing remains unproven.

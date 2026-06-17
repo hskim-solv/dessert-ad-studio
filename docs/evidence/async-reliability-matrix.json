@@ -58,6 +58,11 @@
       "case": "retry_timeout_policy",
       "status": "explicit_non_support",
       "evidence": "automatic retries, worker job timeout, and dead-letter queue are not claimed until a storage/retention policy is selected"
+    },
+    {
+      "case": "multi_worker_policy",
+      "status": "explicit_scoped_support",
+      "evidence": "RQ backend may run multiple workers, but exactly-once processing and worker affinity are not claimed"
     }
   ],
   "privacy_boundary": {

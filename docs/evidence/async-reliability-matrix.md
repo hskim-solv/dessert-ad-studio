@@ -10,8 +10,9 @@ startup, and K8s async overlay smoke.
 
 This is not a production queue reliability claim. Automatic retry, worker job
 timeout, cancellation, and dead-letter handling are explicit non-support until
-their storage/retention policy is selected. Multi-worker failure handling
-remains pending.
+their storage/retention policy is selected. Multi-worker support is scoped to
+the RQ backend only; exactly-once processing and worker affinity are explicitly
+not claimed.
 
 ## Command
 
@@ -49,6 +50,7 @@ The machine-readable summary is stored at
 | Policy endpoint | Passed | `GET /generation-jobs/policy` reports cancel unsupported, `automatic_retries=0`, `worker_job_timeout_seconds=null`, and no dead-letter queue. |
 | Cancel endpoint | Explicit non-support | `POST /generation-jobs/{job_id}/cancel` returns HTTP 501 with a bounded Korean detail. |
 | Retry/timeout policy | Explicit non-support | Automatic retries, worker job timeout, and dead-letter queue are not claimed until a storage/retention policy is selected. |
+| Multi-worker policy | Explicit scoped support | RQ backend may run multiple workers, but exactly-once processing and worker affinity are not claimed. |
 
 ## Privacy Boundary
 

@@ -927,6 +927,9 @@ def test_generation_job_policy_reports_explicit_async_limits() -> None:
         "worker_job_timeout_seconds": None,
         "dead_letter_queue_supported": False,
         "reference_image_async_supported": False,
+        "multi_worker_supported": "rq_backend_only",
+        "multi_worker_exactly_once_claimed": False,
+        "worker_affinity_supported": False,
         "policy": "explicit_non_support_until_storage_and_retry_policy_are_selected",
     }
 
