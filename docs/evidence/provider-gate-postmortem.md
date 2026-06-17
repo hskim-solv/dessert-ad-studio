@@ -25,14 +25,13 @@ Summary:
 
 - `provider_gate_postmortem`: `failed_gate_analyzed`
 - Model/quality: `gpt-image-2` / `medium`
-- Samples: 3
+- Samples: 1
 - Provider-quality pass rate: `0.00`
-- Estimated cost: `$0.2658`, over the `$0.20` script budget by `$0.0658`
+- Estimated cost: `$0.08859`, under the `$0.10` script budget
 - ROI preservation checks: passed
 - Root causes:
   - `latency_threshold_exceeded`
   - `text_contamination_heuristic_failed`
-  - `cost_budget_exceeded`
 
 ## Interpretation
 
@@ -41,20 +40,22 @@ still useful evidence because it separates what worked from what did not:
 
 - Product-region preservation was measurably strong enough under the current
   ROI metrics.
-- Operational readiness failed because every sample exceeded the 30 second
+- Operational readiness failed because the sample exceeded the 30 second
   threshold.
-- Design safety failed because every sample triggered the text-contamination
-  heuristic.
-- Budget control failed after usage was returned; the script guard is an
-  evidence gate, not a pre-spend hard cap.
+- Design safety needs remediation because the sample triggered the
+  text-contamination heuristic. Manual local review found no visible text, so
+  the current proxy likely over-flags dark components or edges.
+- Budget control passed for this one-sample canary, but the script guard is
+  still an evidence gate, not a pre-spend hard cap.
 
 ## Next Paid Gate Conditions
 
 Before another paid image-edit provider gate:
 
-- review ignored generated outputs locally;
-- run a one-sample paid canary with `--sample-slug` before the three-sample
-  provider gate;
+- review generated outputs locally;
+- use the 2026-06-17 one-sample canary result as the current baseline: API and
+  cost guard passed, ROI preservation passed, latency failed, and the
+  text-contamination proxy likely over-flagged a no-visible-text output;
 - set an OpenAI dashboard hard budget because the script budget is
   post-response only;
 - keep deterministic Korean overlay rendering outside the image model.

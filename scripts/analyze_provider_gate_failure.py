@@ -15,8 +15,8 @@ PRESERVATION_CHECKS = (
     "roi_edge_similarity_ge_threshold",
 )
 NEXT_PAID_GATE_CONDITIONS = [
-    "review ignored generated outputs locally before another paid run",
-    "run a one-sample paid canary with --sample-slug before the three-sample provider gate",
+    "review generated outputs locally before another paid full gate",
+    "calibrate or replace the text-contamination proxy against manually reviewed outputs",
     "set an OpenAI dashboard hard budget because the script budget is post-response only",
     "keep deterministic Korean overlay rendering outside the image model",
 ]

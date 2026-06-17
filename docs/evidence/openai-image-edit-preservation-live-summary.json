@@ -4,15 +4,15 @@
   "model_id": "gpt-image-2",
   "quality": "medium",
   "used_reference": true,
-  "elapsed_ms": 197305,
+  "elapsed_ms": 68640,
   "usage": {
-    "sample_count": 3,
-    "total_tokens": 8860
+    "sample_count": 1,
+    "total_tokens": 2953
   },
   "cost": {
     "estimated": true,
     "currency": "USD",
-    "total_usd": 0.2658,
+    "total_usd": 0.08859,
     "pricing_basis": "USD per 1M tokens",
     "pricing_source": {
       "url": "https://openai.com/api/pricing/",
@@ -23,20 +23,20 @@
       {
         "model_id": "gpt-image-2",
         "usage_type": "image_total_tokens_conservative",
-        "tokens": 8860,
+        "tokens": 2953,
         "usd_per_1m_tokens": 30.0,
-        "cost_usd": 0.2658
+        "cost_usd": 0.08859
       }
     ],
     "budget": {
-      "max_usd": 0.2,
-      "passed": false,
-      "over_by_usd": 0.0658
+      "max_usd": 0.1,
+      "passed": true,
+      "over_by_usd": 0.0
     }
   },
   "cost_guard": {
-    "passed": false,
-    "max_estimated_cost_usd": 0.2,
+    "passed": true,
+    "max_estimated_cost_usd": 0.1,
     "estimated": true
   },
   "thresholds": {
@@ -49,79 +49,19 @@
   },
   "provider_quality_gate": {
     "passed": false,
-    "sample_count": 3,
+    "sample_count": 1,
     "passed_count": 0,
     "pass_rate": 0.0,
-    "min_roi_color_histogram_similarity": 0.489395,
-    "min_roi_average_hash_similarity": 0.609375,
+    "min_roi_color_histogram_similarity": 0.662552,
+    "min_roi_average_hash_similarity": 0.75,
     "min_roi_edge_similarity": 0.75,
     "max_text_contamination_risk_score": 1.0
   },
   "sample_results": [
     {
-      "slug": "dessert-plate",
-      "product_name": "디저트 플레이트",
-      "elapsed_ms": 71251,
-      "usage": {
-        "total_tokens": 2954
-      },
-      "reference_image": {
-        "source": "docs/evidence/assets/real-sample-preservation/references/dessert-plate.png",
-        "sha256": "69f6fc8147c732ad0a1d8a7729f62d2d1546da7df07bd8ad466e457144430d49",
-        "committed_public_sample": true,
-        "roi": [
-          0.08,
-          0.06,
-          0.92,
-          0.76
-        ]
-      },
-      "generated_image": {
-        "exists": true,
-        "committed": false,
-        "path": "redacted_outputs_path",
-        "sha256": "3b5a57e3c2fb40784dbae3f86af1deb375ee2420b965b0de22ad6e046ea433a2",
-        "bytes": 1465291
-      },
-      "prompt": {
-        "length": 279,
-        "sha256": "3bae56c138467e0699c852556a45a3dd46f20ccbaf556cc599a20604e40140b2",
-        "no_text_instruction_present": true
-      },
-      "metrics": {
-        "generated_exists": true,
-        "reference_size": [
-          768,
-          768
-        ],
-        "generated_size": [
-          1024,
-          1024
-        ],
-        "generated_nonblank": true,
-        "color_histogram_similarity": 0.489685,
-        "average_hash_similarity": 0.6875,
-        "roi_color_histogram_similarity": 0.551036,
-        "roi_average_hash_similarity": 0.609375,
-        "roi_edge_similarity": 0.78125,
-        "text_contamination_risk_score": 1.0
-      },
-      "checklist": {
-        "generated_file_exists": true,
-        "generated_nonblank": true,
-        "generated_size_1024": true,
-        "sample_elapsed_ms_le_threshold": false,
-        "roi_color_histogram_similarity_ge_threshold": true,
-        "roi_average_hash_similarity_ge_threshold": true,
-        "roi_edge_similarity_ge_threshold": true,
-        "text_contamination_risk_le_threshold": false
-      },
-      "checklist_passed": false
-    },
-    {
       "slug": "matcha-pudding",
       "product_name": "말차 푸딩",
-      "elapsed_ms": 56366,
+      "elapsed_ms": 68233,
       "usage": {
         "total_tokens": 2953
       },
@@ -140,8 +80,8 @@
         "exists": true,
         "committed": false,
         "path": "redacted_outputs_path",
-        "sha256": "f75308e89170403f4e192b9f8f6bbd64cfad52f901414669421af608a2f46982",
-        "bytes": 1355117
+        "sha256": "6296e89cf9a2fb81daf27f7d638dec3f4165c7be723ca9fbdbef1f40475441d8",
+        "bytes": 1571081
       },
       "prompt": {
         "length": 276,
@@ -159,70 +99,10 @@
           1024
         ],
         "generated_nonblank": true,
-        "color_histogram_similarity": 0.424418,
-        "average_hash_similarity": 0.640625,
-        "roi_color_histogram_similarity": 0.489395,
-        "roi_average_hash_similarity": 0.640625,
-        "roi_edge_similarity": 0.796875,
-        "text_contamination_risk_score": 1.0
-      },
-      "checklist": {
-        "generated_file_exists": true,
-        "generated_nonblank": true,
-        "generated_size_1024": true,
-        "sample_elapsed_ms_le_threshold": false,
-        "roi_color_histogram_similarity_ge_threshold": true,
-        "roi_average_hash_similarity_ge_threshold": true,
-        "roi_edge_similarity_ge_threshold": true,
-        "text_contamination_risk_le_threshold": false
-      },
-      "checklist_passed": false
-    },
-    {
-      "slug": "flower-box",
-      "product_name": "플라워 박스",
-      "elapsed_ms": 63423,
-      "usage": {
-        "total_tokens": 2953
-      },
-      "reference_image": {
-        "source": "docs/evidence/assets/real-sample-preservation/references/flower-box.png",
-        "sha256": "12b8a09f836f6b520ec4756e41addd93472de03fab59b57b23d255562233ed74",
-        "committed_public_sample": true,
-        "roi": [
-          0.08,
-          0.08,
-          0.92,
-          0.76
-        ]
-      },
-      "generated_image": {
-        "exists": true,
-        "committed": false,
-        "path": "redacted_outputs_path",
-        "sha256": "a81491ae8fefc25e5b228a1f86a687b904be098b54ff87f331ff007a9ebc74b0",
-        "bytes": 1533190
-      },
-      "prompt": {
-        "length": 277,
-        "sha256": "f0df5cfa14828666f7a808b3eabd13978308759d69660ea55251a77bd4ec94fd",
-        "no_text_instruction_present": true
-      },
-      "metrics": {
-        "generated_exists": true,
-        "reference_size": [
-          768,
-          768
-        ],
-        "generated_size": [
-          1024,
-          1024
-        ],
-        "generated_nonblank": true,
-        "color_histogram_similarity": 0.509923,
-        "average_hash_similarity": 0.828125,
-        "roi_color_histogram_similarity": 0.716573,
-        "roi_average_hash_similarity": 0.8125,
+        "color_histogram_similarity": 0.624262,
+        "average_hash_similarity": 0.71875,
+        "roi_color_histogram_similarity": 0.662552,
+        "roi_average_hash_similarity": 0.75,
         "roi_edge_similarity": 0.75,
         "text_contamination_risk_score": 1.0
       },
@@ -244,5 +124,57 @@
     "raw_model_response_committed": false,
     "generated_image_committed": false,
     "reference_image_public_sample": true
-  }
+  },
+  "reference_image": {
+    "source": "docs/evidence/assets/real-sample-preservation/references/matcha-pudding.png",
+    "sha256": "c0475ccec6c51d4293c048e973119e0ed39cdc2a4e3dc0c26b26b0eeffcc1300",
+    "committed_public_sample": true,
+    "roi": [
+      0.15,
+      0.1,
+      0.85,
+      0.78
+    ]
+  },
+  "generated_image": {
+    "exists": true,
+    "committed": false,
+    "path": "redacted_outputs_path",
+    "sha256": "6296e89cf9a2fb81daf27f7d638dec3f4165c7be723ca9fbdbef1f40475441d8",
+    "bytes": 1571081
+  },
+  "prompt": {
+    "length": 276,
+    "sha256": "260bd0d9fa7081a9f14f40f4a9032fabf506b9b8beb71a75b9ab0fff98df8d66",
+    "no_text_instruction_present": true
+  },
+  "metrics": {
+    "generated_exists": true,
+    "reference_size": [
+      768,
+      768
+    ],
+    "generated_size": [
+      1024,
+      1024
+    ],
+    "generated_nonblank": true,
+    "color_histogram_similarity": 0.624262,
+    "average_hash_similarity": 0.71875,
+    "roi_color_histogram_similarity": 0.662552,
+    "roi_average_hash_similarity": 0.75,
+    "roi_edge_similarity": 0.75,
+    "text_contamination_risk_score": 1.0
+  },
+  "checklist": {
+    "generated_file_exists": true,
+    "generated_nonblank": true,
+    "generated_size_1024": true,
+    "sample_elapsed_ms_le_threshold": false,
+    "roi_color_histogram_similarity_ge_threshold": true,
+    "roi_average_hash_similarity_ge_threshold": true,
+    "roi_edge_similarity_ge_threshold": true,
+    "text_contamination_risk_le_threshold": false
+  },
+  "checklist_passed": false
 }

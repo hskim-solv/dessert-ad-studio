@@ -36,20 +36,21 @@ def test_provider_gate_postmortem_summarizes_latest_failed_paid_gate(
     assert summary["provider_gate_postmortem"] == "failed_gate_analyzed"
     assert summary["source_summary"]["model_id"] == "gpt-image-2"
     assert summary["source_summary"]["quality"] == "medium"
-    assert summary["source_summary"]["sample_count"] == 3
-    assert summary["source_summary"]["estimated_cost_usd"] == 0.2658
+    assert summary["source_summary"]["sample_count"] == 1
+    assert summary["source_summary"]["estimated_cost_usd"] == 0.08859
+    assert summary["source_summary"]["budget_max_usd"] == 0.1
+    assert summary["source_summary"]["budget_over_by_usd"] == 0.0
     assert summary["preservation_result"]["roi_preservation_checks_passed"] is True
-    assert summary["failure_counts"]["sample_elapsed_ms_le_threshold"] == 3
-    assert summary["failure_counts"]["text_contamination_risk_le_threshold"] == 3
-    assert summary["failure_counts"]["cost_guard_passed"] == 1
+    assert summary["failure_counts"]["sample_elapsed_ms_le_threshold"] == 1
+    assert summary["failure_counts"]["text_contamination_risk_le_threshold"] == 1
+    assert "cost_guard_passed" not in summary["failure_counts"]
     assert summary["root_causes"] == [
         "latency_threshold_exceeded",
         "text_contamination_heuristic_failed",
-        "cost_budget_exceeded",
     ]
     assert summary["next_paid_gate_conditions"] == [
-        "review ignored generated outputs locally before another paid run",
-        "run a one-sample paid canary with --sample-slug before the three-sample provider gate",
+        "review generated outputs locally before another paid full gate",
+        "calibrate or replace the text-contamination proxy against manually reviewed outputs",
         "set an OpenAI dashboard hard budget because the script budget is post-response only",
         "keep deterministic Korean overlay rendering outside the image model",
     ]
