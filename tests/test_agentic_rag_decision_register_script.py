@@ -76,3 +76,59 @@ def test_agentic_rag_decision_register_writes_gated_pending_scope(
     assert "Agentic RAG Pending Decision Register" in report
     assert "No external calls were made" in report
     assert "provider-quality image editing remains unproven" in report
+
+
+def test_agentic_rag_decision_register_check_mode_detects_stale_outputs(
+    tmp_path: Path,
+) -> None:
+    summary_path = tmp_path / "agentic-rag-decision-register-summary.json"
+    report_path = tmp_path / "agentic-rag-decision-register.md"
+    base_command = [
+        sys.executable,
+        "scripts/build_agentic_rag_decision_register.py",
+        "--date",
+        "2026-06-17",
+        "--summary-output",
+        str(summary_path),
+        "--report-output",
+        str(report_path),
+    ]
+
+    write_completed = subprocess.run(
+        base_command,
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=30,
+    )
+    assert write_completed.returncode == 0, write_completed.stderr + write_completed.stdout
+
+    check_completed = subprocess.run(
+        [*base_command, "--check"],
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=30,
+    )
+    assert check_completed.returncode == 0, check_completed.stderr + check_completed.stdout
+    check_summary = json.loads(check_completed.stdout)
+    assert check_summary["agentic_rag_decision_register_check"] == "passed"
+    assert check_summary["mismatches"] == []
+
+    report_path.write_text(report_path.read_text(encoding="utf-8") + "\nSTALE\n")
+    stale_completed = subprocess.run(
+        [*base_command, "--check"],
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+        text=True,
+        timeout=30,
+    )
+    assert stale_completed.returncode == 1
+    stale_summary = json.loads(stale_completed.stdout)
+    assert stale_summary["agentic_rag_decision_register_check"] == "failed"
+    assert stale_summary["mismatches"] == [
+        {"path": str(report_path), "reason": "stale_or_modified"}
+    ]

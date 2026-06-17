@@ -433,6 +433,10 @@ def _build_ci_gate_integrity() -> dict[str, Any]:
     required_strings = [
         "Agentic RAG eval guardrail gate",
         "Agentic RAG promptfoo package gate",
+        "Agentic RAG decision register freshness gate",
+        "python scripts/build_agentic_rag_decision_register.py",
+        "--summary-output docs/evidence/agentic-rag-decision-register-summary.json",
+        "--report-output docs/evidence/agentic-rag-decision-register.md",
         "Agentic RAG eval report freshness gate",
         "python scripts/build_agentic_rag_eval_report.py",
         "--summary-output docs/evidence/agentic-rag-eval-report-summary.json",
