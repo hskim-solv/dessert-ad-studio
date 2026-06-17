@@ -4,7 +4,8 @@ Date: 2026-06-17
 
 This evidence records the first local Agentic RAG golden eval and guardrail
 gate. It is designed to produce Ragas/promptfoo-compatible JSON fields without
-adding new eval dependencies or calling paid APIs.
+adding new eval dependencies or calling paid APIs. The same script is also run
+as a dedicated GitHub Actions CI step.
 
 ## Scope
 
@@ -27,6 +28,7 @@ adding new eval dependencies or calling paid APIs.
   - does not execute the worker before approval
 - tool allowlist and max tool-call budget checks
 - raw input redaction checks
+- GitHub Actions step: `Agentic RAG eval guardrail gate`
 
 ## Result
 
@@ -49,6 +51,7 @@ Current result:
 - prompt-injection case: blocked before worker
 - tool budget: max tool calls `4`, no unexpected tools
 - raw inputs committed: `false`
+- CI gate: `.github/workflows/ci.yml` runs the same command on push/PR
 
 ## Reproduce
 
@@ -64,6 +67,7 @@ Focused tests:
 .venv/bin/pytest \
   tests/test_agentic_rag.py::test_agentic_rag_graph_routes_prompt_injection_to_human_approval_without_raw_inputs \
   tests/test_agentic_rag.py::test_agentic_rag_guardrail_flags_unapproved_tool_and_budget \
+  tests/test_ci_workflow.py::test_ci_runs_agentic_rag_eval_guardrail_gate \
   tests/test_agentic_rag_eval_guardrail_script.py -q
 ```
 
