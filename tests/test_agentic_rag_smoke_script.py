@@ -30,24 +30,38 @@ def test_agentic_rag_graph_smoke_writes_redacted_summary(tmp_path: Path) -> None
     summary = json.loads(output_path.read_text(encoding="utf-8"))
 
     assert summary["agentic_rag_graph_smoke"] == "passed"
-    assert summary["scope"] == "offline_langgraph_control_plane_no_api_call"
-    assert summary["graph"]["status"] == "needs_approval"
-    assert summary["graph"]["next_action"] == "wait_for_human_approval"
-    assert summary["graph"]["node_trace"] == [
+    assert summary["scope"] == "offline_langgraph_control_plane_no_paid_api_call"
+    assert summary["approval_route"]["status"] == "needs_approval"
+    assert summary["approval_route"]["next_action"] == "wait_for_human_approval"
+    assert summary["approval_route"]["node_trace"] == [
         "plan_campaign",
         "retrieve_context",
         "build_citations",
         "guardrail_check",
         "human_approval",
     ]
-    assert summary["graph"]["checkpoint_count"] >= 1
-    assert summary["graph"]["citation_count"] >= 1
-    assert summary["graph"]["approval_required"] is True
+    assert summary["approval_route"]["checkpoint_count"] >= 1
+    assert summary["approval_route"]["citation_count"] >= 1
+    assert summary["approval_route"]["approval_required"] is True
+    assert summary["worker_route"]["status"] == "completed"
+    assert summary["worker_route"]["next_action"] == "return_cited_ad_package"
+    assert summary["worker_route"]["worker_status"] == "succeeded"
+    assert summary["worker_route"]["copy_option_count"] == 3
+    assert summary["worker_route"]["node_trace"] == [
+        "plan_campaign",
+        "retrieve_context",
+        "build_citations",
+        "guardrail_check",
+        "execute_worker",
+        "finalize",
+    ]
 
     serialized = json.dumps(summary, ensure_ascii=False)
     for raw_value in [
         "비공개 말차 푸딩",
         "VIP 고객에게만 보일 문구",
+        "비공개 딸기 크림 크루아상",
+        "VIP 촬영본",
         "secret-reference.png",
         "c2VjcmV0LWltYWdlLWJ5dGVz",
     ]:

@@ -4,16 +4,21 @@ Date: 2026-06-17
 
 This evidence records the first offline LangGraph control-plane gate for
 Dessert Ad Studio. It proves the graph skeleton and privacy boundary without
-calling paid providers, web search, MCP tools, or the downstream image/copy
-generation worker.
+calling paid providers, web search, or MCP tools. It also proves that the graph
+can dispatch the existing local mock image/copy generation workflow as a worker
+node after guardrails pass.
 
 ## Scope
 
 - LangGraph `StateGraph` with typed state schema.
-- Deterministic planner, retrieval, citation, guardrail, HITL, and finalize
-  nodes.
+- Deterministic planner, retrieval, citation, guardrail, worker, reflection,
+  HITL, and finalize nodes.
 - Conditional edge from guardrail check to either human approval or worker
   dispatch.
+- Worker execution through the existing `run_generation_workflow()` path using
+  local mock backends.
+- Retry/reflection behavior covered by focused tests without persisting raw
+  exception detail.
 - In-memory checkpointer for local proof only.
 - Redacted graph state: raw product name, user constraints, revision request,
   reference image bytes, and reference filename are not committed to the
@@ -30,9 +35,12 @@ docs/evidence/agentic-rag-graph-summary.json
 Current result:
 
 - `agentic_rag_graph_smoke`: `passed`
-- `scope`: `offline_langgraph_control_plane_no_api_call`
+- `scope`: `offline_langgraph_control_plane_no_paid_api_call`
 - `langgraph_version`: `1.2.5`
-- final graph status: `needs_approval`
+
+Approval route:
+
+- final status: `needs_approval`
 - next action: `wait_for_human_approval`
 - node trace:
   - `plan_campaign`
@@ -43,6 +51,24 @@ Current result:
 - retrieved docs: `3`
 - citations: `3`
 - checkpoints: `7`
+- raw inputs committed: `false`
+
+Worker route:
+
+- final status: `completed`
+- next action: `return_cited_ad_package`
+- worker status: `succeeded`
+- copy backend: `mock`
+- image backend: `mock`
+- copy options: `3`
+- node trace:
+  - `plan_campaign`
+  - `retrieve_context`
+  - `build_citations`
+  - `guardrail_check`
+  - `execute_worker`
+  - `finalize`
+- checkpoints: `8`
 - raw inputs committed: `false`
 
 ## Reproduce
@@ -63,10 +89,9 @@ Focused tests:
 
 This is not yet the full Agentic RAG system. The following remain pending:
 
-- downstream worker execution from the graph
-- retry/reflection loop
 - persistent SQLite/Postgres checkpointer
 - SSE/WebSocket streaming
+- production API graph wiring
 - Ragas and promptfoo eval gates
 - web search, SQL, internal API, and MCP tools
 - production citation assembly over generated ad packages

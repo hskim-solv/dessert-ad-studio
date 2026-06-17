@@ -16,16 +16,34 @@ from langgraph.checkpoint.memory import InMemorySaver  # noqa: E402
 from dessert_ad_studio.agentic_rag import (  # noqa: E402
     build_agentic_rag_graph,
     build_agentic_rag_initial_state,
+    build_generation_workflow_executor,
 )
+from dessert_ad_studio.backends.mock import MockAdBackend  # noqa: E402
+from dessert_ad_studio.product_analysis import MockProductAnalyzer  # noqa: E402
 from dessert_ad_studio.schemas import GenerationRequest  # noqa: E402
+from dessert_ad_studio.triton import LocalTemplateScorer  # noqa: E402
+from dessert_ad_studio.workflow import GenerationWorkflowDependencies  # noqa: E402
 
 
 DEFAULT_OUTPUT_PATH = Path("docs/evidence/agentic-rag-graph-summary.json")
 
 
 def build_agentic_rag_graph_summary(*, evidence_date: str) -> dict[str, Any]:
+    approval_route = _run_approval_route()
+    worker_route = _run_worker_route()
+    return {
+        "agentic_rag_graph_smoke": "passed",
+        "scope": "offline_langgraph_control_plane_no_paid_api_call",
+        "evidence_date": evidence_date,
+        "langgraph_version": importlib.metadata.version("langgraph"),
+        "approval_route": approval_route,
+        "worker_route": worker_route,
+    }
+
+
+def _run_approval_route() -> dict[str, Any]:
     checkpointer = InMemorySaver()
-    thread_id = "agentic-rag-smoke"
+    thread_id = "agentic-rag-approval-smoke"
     graph = build_agentic_rag_graph(checkpointer=checkpointer)
     state = build_agentic_rag_initial_state(
         GenerationRequest(
@@ -45,7 +63,7 @@ def build_agentic_rag_graph_summary(*, evidence_date: str) -> dict[str, Any]:
     )
     result = graph.invoke(state, {"configurable": {"thread_id": thread_id}})
     checkpoints = list(checkpointer.list({"configurable": {"thread_id": thread_id}}))
-    graph_summary = {
+    return {
         "status": result["status"],
         "next_action": result["next_action"],
         "node_trace": result["node_trace"],
@@ -58,12 +76,54 @@ def build_agentic_rag_graph_summary(*, evidence_date: str) -> dict[str, Any]:
         "request_summary_fields": sorted(result["request_summary"].keys()),
         "raw_inputs_committed": False,
     }
+
+
+def _run_worker_route() -> dict[str, Any]:
+    checkpointer = InMemorySaver()
+    thread_id = "agentic-rag-worker-smoke"
+    request = GenerationRequest(
+        campaign_purpose="brand_awareness",
+        product_name="비공개 딸기 크림 크루아상",
+        tone="warm",
+        template_hint="cozy_cafe",
+        user_constraints="VIP 촬영본으로 인스타그램 피드용",
+    )
+    backend = MockAdBackend(output_dir="outputs/agentic-rag-graph-smoke")
+    dependencies = GenerationWorkflowDependencies(
+        template_scorer=LocalTemplateScorer(),
+        copy_backend=backend,
+        image_backend=backend,
+        product_analyzer=MockProductAnalyzer(),
+        log_path=Path("logs/agentic-rag-graph-smoke-generations.jsonl"),
+    )
+    graph = build_agentic_rag_graph(
+        checkpointer=checkpointer,
+        worker_executor=build_generation_workflow_executor(request, dependencies),
+    )
+    state = build_agentic_rag_initial_state(
+        request,
+        requires_paid_provider=False,
+        estimated_cost_usd=0.0,
+        approval_cost_threshold_usd=0.10,
+    )
+    result = graph.invoke(state, {"configurable": {"thread_id": thread_id}})
+    checkpoints = list(checkpointer.list({"configurable": {"thread_id": thread_id}}))
+    worker_result = result["worker_result"]
     return {
-        "agentic_rag_graph_smoke": "passed",
-        "scope": "offline_langgraph_control_plane_no_api_call",
-        "evidence_date": evidence_date,
-        "langgraph_version": importlib.metadata.version("langgraph"),
-        "graph": graph_summary,
+        "status": result["status"],
+        "next_action": result["next_action"],
+        "node_trace": result["node_trace"],
+        "retriever_backend": result["marketing_context"]["retriever_backend"],
+        "retrieved_docs_count": result["marketing_context"]["retrieved_docs_count"],
+        "citation_count": len(result["citations"]),
+        "checkpoint_count": len(checkpoints),
+        "worker_status": worker_result["status"],
+        "copy_backend": worker_result["copy_backend"],
+        "image_backend": worker_result["image_backend"],
+        "copy_option_count": worker_result["copy_option_count"],
+        "used_reference": worker_result["used_reference"],
+        "workflow_trace_steps": worker_result["workflow_trace_steps"],
+        "raw_inputs_committed": False,
     }
 
 

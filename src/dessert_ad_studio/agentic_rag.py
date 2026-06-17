@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from hashlib import sha256
-from typing import Any, Literal, TypedDict
+from typing import Any, Callable, Literal, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
@@ -13,9 +13,25 @@ from dessert_ad_studio.schemas import (
     TemplateHint,
     Tone,
 )
+from dessert_ad_studio.workflow import GenerationWorkflowDependencies, run_generation_workflow
 
-AgenticRagStatus = Literal["planned", "context_ready", "needs_approval", "ready_for_worker"]
-AgenticRagNextAction = Literal["wait_for_human_approval", "dispatch_generation_worker"]
+AgenticRagStatus = Literal[
+    "planned",
+    "context_ready",
+    "needs_approval",
+    "ready_for_worker",
+    "running_worker",
+    "worker_failed",
+    "completed",
+    "failed",
+]
+AgenticRagNextAction = Literal[
+    "wait_for_human_approval",
+    "dispatch_generation_worker",
+    "return_cited_ad_package",
+    "inspect_failed_run",
+]
+AgenticRagWorkerExecutor = Callable[["AgenticRagState"], dict[str, Any]]
 
 
 class AgenticRagRequestSummary(TypedDict, total=False):
@@ -53,6 +69,8 @@ class AgenticRagState(TypedDict, total=False):
     marketing_context: dict[str, Any]
     citations: list[AgenticRagCitation]
     approval: AgenticRagApproval
+    worker_result: dict[str, Any]
+    reflection: dict[str, Any]
     status: AgenticRagStatus
     next_action: AgenticRagNextAction
     node_trace: list[str]
@@ -95,7 +113,11 @@ def build_agentic_rag_initial_state(
     }
 
 
-def build_agentic_rag_graph(*, checkpointer: Any | None = None) -> Any:
+def build_agentic_rag_graph(
+    *,
+    checkpointer: Any | None = None,
+    worker_executor: AgenticRagWorkerExecutor | None = None,
+) -> Any:
     workflow = StateGraph(AgenticRagState)
     workflow.add_node("plan_campaign", _plan_campaign)
     workflow.add_node("retrieve_context", _retrieve_context)
@@ -103,22 +125,67 @@ def build_agentic_rag_graph(*, checkpointer: Any | None = None) -> Any:
     workflow.add_node("guardrail_check", _guardrail_check)
     workflow.add_node("human_approval", _human_approval)
     workflow.add_node("finalize", _finalize)
+    if worker_executor is not None:
+        workflow.add_node("execute_worker", _execute_worker_node(worker_executor))
+        workflow.add_node("reflect_on_worker_failure", _reflect_on_worker_failure)
 
     workflow.add_edge(START, "plan_campaign")
     workflow.add_edge("plan_campaign", "retrieve_context")
     workflow.add_edge("retrieve_context", "build_citations")
     workflow.add_edge("build_citations", "guardrail_check")
-    workflow.add_conditional_edges(
-        "guardrail_check",
-        _route_after_guardrail,
-        {
-            "human_approval": "human_approval",
-            "finalize": "finalize",
-        },
-    )
+    if worker_executor is None:
+        workflow.add_conditional_edges(
+            "guardrail_check",
+            _route_after_guardrail_without_worker,
+            {
+                "human_approval": "human_approval",
+                "finalize": "finalize",
+            },
+        )
+    else:
+        workflow.add_conditional_edges(
+            "guardrail_check",
+            _route_after_guardrail_with_worker,
+            {
+                "human_approval": "human_approval",
+                "execute_worker": "execute_worker",
+            },
+        )
+        workflow.add_conditional_edges(
+            "execute_worker",
+            _route_after_worker,
+            {
+                "reflect_on_worker_failure": "reflect_on_worker_failure",
+                "finalize": "finalize",
+            },
+        )
+        workflow.add_edge("reflect_on_worker_failure", "execute_worker")
     workflow.add_edge("human_approval", END)
     workflow.add_edge("finalize", END)
     return workflow.compile(checkpointer=checkpointer)
+
+
+def build_generation_workflow_executor(
+    request: GenerationRequest,
+    dependencies: GenerationWorkflowDependencies,
+) -> AgenticRagWorkerExecutor:
+    def execute_generation_workflow(_state: AgenticRagState) -> dict[str, Any]:
+        output = run_generation_workflow(request, dependencies)
+        response = output.response
+        return {
+            "status": "succeeded",
+            "copy_backend": response.copy_backend,
+            "image_backend": response.image_backend,
+            "copy_option_count": len(response.copy_options),
+            "used_reference": response.used_reference,
+            "elapsed_ms": response.elapsed_ms,
+            "workflow_trace_steps": [entry.step for entry in output.trace],
+            "marketing_context_retrieved_docs_count": (
+                response.marketing_context.retrieved_docs_count
+            ),
+        }
+
+    return execute_generation_workflow
 
 
 def _plan_campaign(state: AgenticRagState) -> dict[str, Any]:
@@ -187,10 +254,64 @@ def _guardrail_check(state: AgenticRagState) -> dict[str, Any]:
     }
 
 
-def _route_after_guardrail(state: AgenticRagState) -> Literal["human_approval", "finalize"]:
+def _route_after_guardrail_without_worker(
+    state: AgenticRagState,
+) -> Literal["human_approval", "finalize"]:
     if state.get("approval", {}).get("required", False):
         return "human_approval"
     return "finalize"
+
+
+def _route_after_guardrail_with_worker(
+    state: AgenticRagState,
+) -> Literal["human_approval", "execute_worker"]:
+    if state.get("approval", {}).get("required", False):
+        return "human_approval"
+    return "execute_worker"
+
+
+def _execute_worker_node(
+    worker_executor: AgenticRagWorkerExecutor,
+) -> Callable[[AgenticRagState], dict[str, Any]]:
+    def execute_worker(state: AgenticRagState) -> dict[str, Any]:
+        try:
+            worker_result = _redacted_worker_result(worker_executor(state))
+        except Exception as exc:
+            worker_result = {
+                "status": "failed",
+                "error_type": exc.__class__.__name__,
+            }
+        return {
+            "worker_result": worker_result,
+            "status": "completed"
+            if worker_result.get("status") == "succeeded"
+            else "worker_failed",
+            "node_trace": _trace_after(state, "execute_worker"),
+        }
+
+    return execute_worker
+
+
+def _route_after_worker(
+    state: AgenticRagState,
+) -> Literal["reflect_on_worker_failure", "finalize"]:
+    if state.get("worker_result", {}).get("status") == "succeeded":
+        return "finalize"
+    if _reflection_attempts(state) < _reflection_budget(state):
+        return "reflect_on_worker_failure"
+    return "finalize"
+
+
+def _reflect_on_worker_failure(state: AgenticRagState) -> dict[str, Any]:
+    return {
+        "reflection": {
+            "attempts": _reflection_attempts(state) + 1,
+            "last_error_type": state.get("worker_result", {}).get("error_type", "WorkerError"),
+            "retry_budget": _reflection_budget(state),
+        },
+        "status": "worker_failed",
+        "node_trace": _trace_after(state, "reflect_on_worker_failure"),
+    }
 
 
 def _human_approval(state: AgenticRagState) -> dict[str, Any]:
@@ -202,6 +323,19 @@ def _human_approval(state: AgenticRagState) -> dict[str, Any]:
 
 
 def _finalize(state: AgenticRagState) -> dict[str, Any]:
+    worker_result = state.get("worker_result")
+    if worker_result and worker_result.get("status") == "succeeded":
+        return {
+            "status": "completed",
+            "next_action": "return_cited_ad_package",
+            "node_trace": _trace_after(state, "finalize"),
+        }
+    if worker_result and worker_result.get("status") == "failed":
+        return {
+            "status": "failed",
+            "next_action": "inspect_failed_run",
+            "node_trace": _trace_after(state, "finalize"),
+        }
     return {
         "status": "ready_for_worker",
         "next_action": "dispatch_generation_worker",
@@ -254,6 +388,31 @@ def _mentions_instagram(text: str) -> bool:
 
 def _trace_after(state: AgenticRagState, node_name: str) -> list[str]:
     return [*state.get("node_trace", []), node_name]
+
+
+def _reflection_attempts(state: AgenticRagState) -> int:
+    return int(state.get("reflection", {}).get("attempts", 0))
+
+
+def _reflection_budget(state: AgenticRagState) -> int:
+    return int(state.get("plan", {}).get("reflection_budget", 1))
+
+
+def _redacted_worker_result(worker_result: dict[str, Any]) -> dict[str, Any]:
+    allowed_keys = {
+        "status",
+        "copy_backend",
+        "image_backend",
+        "copy_option_count",
+        "used_reference",
+        "elapsed_ms",
+        "workflow_trace_steps",
+        "marketing_context_retrieved_docs_count",
+        "error_type",
+    }
+    redacted = {key: worker_result[key] for key in allowed_keys if key in worker_result}
+    redacted.setdefault("status", "succeeded")
+    return redacted
 
 
 def _hash_text(value: str) -> str:

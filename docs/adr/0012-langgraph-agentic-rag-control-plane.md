@@ -50,14 +50,16 @@ generation workflow until the graph contract is proven.
 The first implementation is deliberately narrow:
 
 - use a typed graph state for redacted request summaries, plan, retrieval
-  context, citations, approval decision, and node trace
-- route through deterministic nodes only: plan, retrieve, cite, guardrail,
-  human approval, finalize
+  context, citations, approval decision, worker result summary, reflection
+  summary, and node trace
+- route through deterministic nodes: plan, retrieve, cite, guardrail, optional
+  local worker execution, reflection retry, human approval, and finalize
 - use an in-memory checkpointer only for local tests and evidence
-- do not call paid providers, web search, external MCP tools, or the image/copy
-  generation worker in the first slice
-- keep the existing `run_generation_workflow` as the downstream worker until a
-  later API/streaming milestone wires the graph into production request flow
+- call the existing `run_generation_workflow` only through local mock backends
+  in the evidence smoke
+- do not call paid providers, web search, external MCP tools, or production
+  image/copy providers in this slice
+- keep production API/streaming graph wiring for a later milestone
 
 ## 결과 및 재평가 조건 (Consequences)
 
@@ -65,8 +67,9 @@ The first implementation is deliberately narrow:
   - `langgraph` becomes a runtime dependency and must stay covered by local
     tests and CI.
   - In-memory checkpointing is not a production durability claim.
-  - The first graph proves routing/control-plane behavior, not full Ragas,
-    promptfoo, MCP, web search, or provider-quality image generation.
+  - The first graph proves routing, local worker dispatch, redacted worker
+    summary, and retry/reflection behavior, not full Ragas, promptfoo, MCP,
+    web search, production streaming, or provider-quality image generation.
 - 재평가 트리거:
   - LangGraph cannot keep raw customer/product inputs out of persisted state
     without harming core functionality.

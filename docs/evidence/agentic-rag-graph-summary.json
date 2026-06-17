@@ -1,9 +1,9 @@
 {
   "agentic_rag_graph_smoke": "passed",
-  "scope": "offline_langgraph_control_plane_no_api_call",
+  "scope": "offline_langgraph_control_plane_no_paid_api_call",
   "evidence_date": "2026-06-17",
   "langgraph_version": "1.2.5",
-  "graph": {
+  "approval_route": {
     "status": "needs_approval",
     "next_action": "wait_for_human_approval",
     "node_trace": [
@@ -35,6 +35,38 @@
       "template_hint",
       "tone",
       "user_constraints_sha256"
+    ],
+    "raw_inputs_committed": false
+  },
+  "worker_route": {
+    "status": "completed",
+    "next_action": "return_cited_ad_package",
+    "node_trace": [
+      "plan_campaign",
+      "retrieve_context",
+      "build_citations",
+      "guardrail_check",
+      "execute_worker",
+      "finalize"
+    ],
+    "retriever_backend": "keyword",
+    "retrieved_docs_count": 3,
+    "citation_count": 3,
+    "checkpoint_count": 8,
+    "worker_status": "succeeded",
+    "copy_backend": "mock",
+    "image_backend": "mock",
+    "copy_option_count": 3,
+    "used_reference": false,
+    "workflow_trace_steps": [
+      "rank_templates",
+      "decode_reference",
+      "analyze_product",
+      "retrieve_marketing_context",
+      "build_image_prompt",
+      "generate_copy",
+      "generate_image",
+      "write_log"
     ],
     "raw_inputs_committed": false
   }

@@ -25,7 +25,16 @@ def sensitive_request() -> GenerationRequest:
 
 def test_agentic_rag_graph_routes_paid_provider_to_human_approval_without_raw_inputs():
     checkpointer = InMemorySaver()
-    graph = build_agentic_rag_graph(checkpointer=checkpointer)
+    worker_calls: list[dict] = []
+
+    def worker_executor(state: dict) -> dict:
+        worker_calls.append(state)
+        return {"status": "succeeded"}
+
+    graph = build_agentic_rag_graph(
+        checkpointer=checkpointer,
+        worker_executor=worker_executor,
+    )
     state = build_agentic_rag_initial_state(
         sensitive_request(),
         requires_paid_provider=True,
@@ -41,6 +50,7 @@ def test_agentic_rag_graph_routes_paid_provider_to_human_approval_without_raw_in
         "required": True,
         "reasons": ["paid_provider_requested", "estimated_cost_exceeds_threshold"],
     }
+    assert worker_calls == []
     assert result["node_trace"] == [
         "plan_campaign",
         "retrieve_context",
@@ -65,6 +75,119 @@ def test_agentic_rag_graph_routes_paid_provider_to_human_approval_without_raw_in
     assert result["request_summary"]["has_reference_image"] is True
     assert len(result["request_summary"]["product_name_sha256"]) == 64
     assert len(result["request_summary"]["reference_image_name_sha256"]) == 64
+
+
+def test_agentic_rag_graph_executes_worker_after_guardrail_clear_without_raw_inputs():
+    worker_calls: list[dict] = []
+
+    def worker_executor(state: dict) -> dict:
+        worker_calls.append(state)
+        return {
+            "status": "succeeded",
+            "copy_backend": "mock",
+            "image_backend": "mock",
+            "copy_option_count": 3,
+            "used_reference": False,
+            "elapsed_ms": 18.5,
+            "workflow_trace_steps": ["rank_templates", "generate_copy", "generate_image"],
+        }
+
+    graph = build_agentic_rag_graph(worker_executor=worker_executor)
+    state = build_agentic_rag_initial_state(
+        GenerationRequest(
+            campaign_purpose="brand_awareness",
+            product_name="비공개 딸기 크림 크루아상",
+            tone="warm",
+            template_hint="cozy_cafe",
+            user_constraints="VIP 촬영본으로 인스타그램 피드용",
+        ),
+        requires_paid_provider=False,
+        estimated_cost_usd=0.0,
+        approval_cost_threshold_usd=0.10,
+    )
+
+    result = graph.invoke(state)
+
+    assert len(worker_calls) == 1
+    assert result["status"] == "completed"
+    assert result["next_action"] == "return_cited_ad_package"
+    assert result["worker_result"] == {
+        "status": "succeeded",
+        "copy_backend": "mock",
+        "image_backend": "mock",
+        "copy_option_count": 3,
+        "used_reference": False,
+        "elapsed_ms": 18.5,
+        "workflow_trace_steps": ["rank_templates", "generate_copy", "generate_image"],
+    }
+    assert result["node_trace"] == [
+        "plan_campaign",
+        "retrieve_context",
+        "build_citations",
+        "guardrail_check",
+        "execute_worker",
+        "finalize",
+    ]
+
+    serialized = json.dumps(result, ensure_ascii=False)
+    assert "비공개 딸기 크림 크루아상" not in serialized
+    assert "VIP 촬영본" not in serialized
+
+
+def test_agentic_rag_graph_reflects_and_retries_worker_failure_without_error_detail():
+    attempts = 0
+
+    def worker_executor(state: dict) -> dict:
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            raise RuntimeError("raw provider error with private customer text")
+        return {
+            "status": "succeeded",
+            "copy_backend": "mock",
+            "image_backend": "mock",
+            "copy_option_count": 3,
+            "used_reference": False,
+            "elapsed_ms": 22.0,
+            "workflow_trace_steps": ["rank_templates", "generate_copy", "generate_image"],
+        }
+
+    graph = build_agentic_rag_graph(worker_executor=worker_executor)
+    state = build_agentic_rag_initial_state(
+        GenerationRequest(
+            campaign_purpose="new_menu",
+            product_name="말차 푸딩",
+            tone="clean",
+            template_hint="minimal_premium",
+        ),
+        requires_paid_provider=False,
+        estimated_cost_usd=0.0,
+        approval_cost_threshold_usd=0.10,
+    )
+
+    result = graph.invoke(state)
+
+    assert attempts == 2
+    assert result["status"] == "completed"
+    assert result["reflection"] == {
+        "attempts": 1,
+        "last_error_type": "RuntimeError",
+        "retry_budget": 1,
+    }
+    assert result["node_trace"] == [
+        "plan_campaign",
+        "retrieve_context",
+        "build_citations",
+        "guardrail_check",
+        "execute_worker",
+        "reflect_on_worker_failure",
+        "execute_worker",
+        "finalize",
+    ]
+
+    serialized = json.dumps(result, ensure_ascii=False)
+    assert "raw provider error" not in serialized
+    assert "private customer text" not in serialized
 
 
 def test_agentic_rag_graph_routes_low_cost_local_run_to_worker():

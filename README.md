@@ -32,8 +32,9 @@ Verified:
 - Deterministic Korean overlay and demo banner generation.
 - Curated marketing retrieval eval plus a measured pgvector storage/query lane.
 - Offline LangGraph control-plane first gate with typed state, conditional
-  HITL routing, keyword retrieval, citations, checkpoint evidence, and redacted
-  summary artifact.
+  HITL routing, keyword retrieval, citations, checkpoint evidence, local mock
+  worker execution, retry/reflection test coverage, and redacted summary
+  artifact.
 - Docker Compose smoke, Redis/RQ job path, redacted Postgres history, and
   local AgentOps trace evidence.
 - Kubernetes manifests that render through Kustomize with probes, ingress, HPA,
@@ -46,9 +47,9 @@ Known gaps:
 - Paid OpenAI image-edit provider gates have failed; the deterministic
   preservation path and offline visual proxy pass, but provider-quality image
   editing is not proven.
-- Agentic RAG is only at the offline control-plane first gate. Worker
-  execution, retry/reflection, durable checkpointing, API streaming, and full
-  agent eval gates are still pending.
+- Agentic RAG is still at the offline control-plane stage. Production durable
+  checkpointing, API streaming, API wiring, and full agent eval gates are still
+  pending.
 - Current eval sets are demo-scale and need a larger real/product-like scenario
   matrix before broader quality claims.
 
