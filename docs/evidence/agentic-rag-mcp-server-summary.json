@@ -1,0 +1,42 @@
+{
+  "agentic_rag_mcp_server_smoke": "passed",
+  "scope": "local_fastmcp_import_and_tool_call_no_network",
+  "evidence_date": "2026-06-17",
+  "mcp_package_imported": true,
+  "mcp_version": "1.28.0",
+  "server_name": "Dessert Ad Studio",
+  "transport_for_manual_run": "streamable-http",
+  "tool_names": [
+    "search_marketing_guides",
+    "query_template_policy",
+    "preview_generation_policy"
+  ],
+  "tool_results": {
+    "search_marketing_guides": {
+      "tool": "web_search",
+      "mode": "local_curated_snapshot",
+      "result_count": 2,
+      "source_ids": [
+        "hiring-agent-rag-tools",
+        "ad-policy-local-guides"
+      ]
+    },
+    "query_template_policy": {
+      "tool": "sql_query",
+      "mode": "sqlite_allowlisted_query",
+      "query_id": "template_policy_summary",
+      "row_count": 3,
+      "min_score_threshold": 0.62,
+      "policy_guardrail_count": 3
+    },
+    "preview_generation_policy": {
+      "tool": "internal_api",
+      "mode": "in_process_contract",
+      "endpoint": "preview_generation_policy",
+      "requires_reference_image": true,
+      "recommended_review_lane": "enhanced",
+      "policy_count": 3
+    }
+  },
+  "raw_inputs_committed": false
+}

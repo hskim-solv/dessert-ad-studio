@@ -19,8 +19,8 @@ docs/adr/0017-agentic-rag-tool-suite.md
 - `sql_query`: in-memory SQLite allowlisted query, no arbitrary SQL.
 - `internal_api`: in-process `preview_generation_policy` contract.
 - `document_retrieval`: existing keyword marketing-context retriever.
-- MCP server scaffold: `mcp_servers/dessert_ad_studio_server.py` with FastMCP
-  tool wrappers.
+- MCP server: `mcp_servers/dessert_ad_studio_server.py` with FastMCP tool
+  wrappers and local package import/tool-call smoke.
 - Graph node: `run_tool_suite`.
 - Tool budget: 7 planned tools, all allowlisted.
 
@@ -30,6 +30,7 @@ Summary artifact:
 
 ```text
 docs/evidence/agentic-rag-tools-summary.json
+docs/evidence/agentic-rag-mcp-server-summary.json
 ```
 
 Current result:
@@ -47,6 +48,12 @@ Current result:
 - web search mode: `local_curated_snapshot`
 - SQL mode: `sqlite_allowlisted_query`
 - internal API mode: `in_process_contract`
+- MCP package smoke: `passed`
+- MCP version: `1.28.0`
+- MCP tools:
+  - `search_marketing_guides`
+  - `query_template_policy`
+  - `preview_generation_policy`
 - raw inputs committed: `false`
 
 ## Reproduce
@@ -55,16 +62,23 @@ Current result:
 .venv/bin/python scripts/agentic_rag_tools_smoke.py \
   --date 2026-06-17 \
   --output docs/evidence/agentic-rag-tools-summary.json
+
+.venv/bin/python scripts/agentic_rag_mcp_server_smoke.py \
+  --date 2026-06-17 \
+  --output docs/evidence/agentic-rag-mcp-server-summary.json
 ```
 
 Focused tests:
 
 ```bash
-.venv/bin/pytest tests/test_agentic_rag_tools.py tests/test_agentic_rag.py -q
+.venv/bin/pytest \
+  tests/test_agentic_rag_tools.py \
+  tests/test_agentic_rag_mcp_server.py \
+  tests/test_agentic_rag.py -q
 ```
 
 ## Limits
 
-This is not yet live web search, production SQL access, or a proven MCP package
-execution gate. The FastMCP server is a scaffold and remains optional until
-`mcp` dependency/runtime behavior is measured.
+This is not yet live web search or production SQL access. The MCP proof imports
+the package and calls the FastMCP-wrapped local tools, but it does not start a
+long-running production MCP service or test remote client auth/transport.

@@ -37,7 +37,7 @@ Verified:
   redacted summary artifact.
 - Local Agentic RAG tool-suite first gate with document retrieval, local
   web-search snapshot, allowlisted SQLite SQL query, in-process internal API
-  policy preview, and FastMCP server scaffold.
+  policy preview, and FastMCP package import/tool-call smoke.
 - FastAPI async SSE run-streaming and local SQLite replay first gate for the
   Agentic RAG control plane, with node progress events through the local mock
   worker and redacted event/replay payloads.
@@ -60,7 +60,7 @@ Known gaps:
 - Agentic RAG is still at first-gate maturity. Local SQLite checkpointing,
   SSE/WebSocket streaming, graph tracing, local tool-suite orchestration, and a
   local eval/guardrail gate are proven, but reviewer approval UI, bidirectional
-  approval, live web search, production SQL policy, MCP package execution,
+  approval, live web search, production SQL policy, production MCP transport/auth,
   production stream replay retention policy, production storage policy,
   production trace retention policy, and full Ragas/promptfoo package execution
   are still pending.
@@ -131,8 +131,8 @@ python scripts/a2a_smoke.py --base-url http://127.0.0.1:8000
 
 Use A2A when another agent needs to discover and call Dessert Ad Studio as a remote
 agent capability. Use the normal REST API for app/frontend calls. FastMCP now has
-a scaffold at `mcp_servers/dessert_ad_studio_server.py`, but it is still an
-optional tool-server layer until the `mcp` extra and runtime smoke are measured.
+a local server at `mcp_servers/dessert_ad_studio_server.py` with package
+import/tool-call smoke coverage; served transport/auth remains a later boundary.
 
 Run Streamlit:
 
@@ -334,8 +334,9 @@ docs/runbooks/gcp-flux2-validation.md
 2. Promote the local Ragas/promptfoo-compatible eval gate to actual Ragas + promptfoo package execution after dependency/runtime ADR.
 3. Implement remediation for the failed paid `gpt-image-2` + `quality=medium` provider-quality gate before any further paid full-gate iteration.
 4. Add human visual review or provider-quality visual statistics for generated assets.
-5. Bound and run the optional FastMCP package smoke before claiming MCP server execution.
+5. Define MCP served transport/auth boundaries before claiming production MCP operation.
 
-FastMCP is still a thin wrapper, not the core product path. The current scaffold
+FastMCP is still a thin wrapper, not the core product path. The current server
 exposes local `search_marketing_guides`, `query_template_policy`, and
-`preview_generation_policy` tools; live MCP execution remains pending.
+`preview_generation_policy` tools; production MCP transport/auth remains
+pending.
