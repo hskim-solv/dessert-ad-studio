@@ -29,6 +29,20 @@ def tiny_png_b64() -> str:
     return base64.b64encode(buffer.getvalue()).decode("ascii")
 
 
+def _parse_sse_events(body: str) -> list[dict]:
+    events: list[dict] = []
+    for raw_event in body.strip().split("\n\n"):
+        event_name = ""
+        data = ""
+        for line in raw_event.splitlines():
+            if line.startswith("event: "):
+                event_name = line.removeprefix("event: ")
+            elif line.startswith("data: "):
+                data = line.removeprefix("data: ")
+        events.append({"event": event_name, "data": json.loads(data)})
+    return events
+
+
 def test_health() -> None:
     response = client.get("/health")
     assert response.status_code == 200
@@ -231,6 +245,100 @@ def test_generate_maps_pgvector_connection_failure_to_503(
 
     assert response.status_code == 503
     assert "pgvector_hybrid retriever is not ready" in response.json()["detail"]
+
+
+def test_agentic_rag_run_stream_emits_redacted_worker_events(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path / "outputs"))
+    monkeypatch.setenv("GENERATION_LOG_PATH", str(tmp_path / "generations.jsonl"))
+    payload = {
+        **base_payload(),
+        "product_name": "비공개 말차 푸딩",
+        "user_constraints": "VIP 고객에게만 보일 문구",
+    }
+
+    with client.stream("POST", "/agentic-rag/runs/stream", json=payload) as response:
+        body = response.read().decode("utf-8")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/event-stream")
+    events = _parse_sse_events(body)
+    assert [event["event"] for event in events] == [
+        "run_started",
+        "node_completed",
+        "node_completed",
+        "node_completed",
+        "node_completed",
+        "node_completed",
+        "node_completed",
+        "run_completed",
+    ]
+    assert [
+        event["data"].get("node") for event in events if event["event"] == "node_completed"
+    ] == [
+        "plan_campaign",
+        "retrieve_context",
+        "build_citations",
+        "guardrail_check",
+        "execute_worker",
+        "finalize",
+    ]
+    assert events[-1]["data"] == {
+        "status": "completed",
+        "next_action": "return_cited_ad_package",
+        "raw_inputs_committed": False,
+    }
+    worker_event = next(event for event in events if event["data"].get("node") == "execute_worker")
+    assert worker_event["data"]["worker_status"] == "succeeded"
+    assert worker_event["data"]["copy_option_count"] == 3
+    assert worker_event["data"]["copy_backend"] == "mock"
+    assert worker_event["data"]["image_backend"] == "mock"
+
+    for raw_value in ["비공개 말차 푸딩", "VIP 고객에게만 보일 문구"]:
+        assert raw_value not in body
+
+
+def test_agentic_rag_run_stream_routes_paid_provider_to_approval(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import api.main as api_main
+
+    monkeypatch.setenv("OUTPUT_DIR", str(tmp_path / "outputs"))
+    monkeypatch.setenv("GENERATION_LOG_PATH", str(tmp_path / "generations.jsonl"))
+    monkeypatch.setattr(api_main, "_agentic_rag_requires_paid_provider", lambda deps: True)
+
+    with client.stream("POST", "/agentic-rag/runs/stream", json=base_payload()) as response:
+        body = response.read().decode("utf-8")
+
+    assert response.status_code == 200
+    events = _parse_sse_events(body)
+    assert [
+        event["data"].get("node") for event in events if event["event"] == "node_completed"
+    ] == [
+        "plan_campaign",
+        "retrieve_context",
+        "build_citations",
+        "guardrail_check",
+        "human_approval",
+    ]
+    assert events[-1]["data"] == {
+        "status": "needs_approval",
+        "next_action": "wait_for_human_approval",
+        "raw_inputs_committed": False,
+    }
+    guardrail_event = next(
+        event for event in events if event["data"].get("node") == "guardrail_check"
+    )
+    assert guardrail_event["data"] == {
+        "node": "guardrail_check",
+        "status": "needs_approval",
+        "approval_required": True,
+        "approval_reasons": ["paid_provider_requested"],
+    }
+    assert "execute_worker" not in body
 
 
 def test_create_generation_job_runs_inline_and_status_is_redacted(

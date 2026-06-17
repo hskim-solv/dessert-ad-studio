@@ -1,16 +1,19 @@
 from __future__ import annotations
 
+import asyncio
+import json
 import os
 from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
 from threading import Lock
 from time import perf_counter
-from typing import Any
+from typing import Any, AsyncIterator
 from uuid import uuid4
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.responses import StreamingResponse
 
 from dessert_ad_studio.a2a import (
     A2AInputError,
@@ -18,6 +21,11 @@ from dessert_ad_studio.a2a import (
     build_agent_card,
     completed_generation_task,
     extract_generation_request,
+)
+from dessert_ad_studio.agentic_rag import (
+    build_agentic_rag_graph,
+    build_agentic_rag_initial_state,
+    build_generation_workflow_executor,
 )
 from dessert_ad_studio.backends.base import AdBackendError, CopyBackend, ImageBackend
 from dessert_ad_studio.backends.flux2 import Flux2Backend
@@ -428,6 +436,106 @@ def build_workflow_dependencies(request: GenerationRequest) -> GenerationWorkflo
     )
 
 
+def _agentic_rag_requires_paid_provider(dependencies: GenerationWorkflowDependencies) -> bool:
+    backend_names = {
+        dependencies.copy_backend.name,
+        dependencies.image_backend.name,
+        dependencies.product_analyzer.name,
+    }
+    return any(name != "mock" for name in backend_names)
+
+
+async def _agentic_rag_sse_events(
+    request: GenerationRequest,
+    dependencies: GenerationWorkflowDependencies,
+) -> AsyncIterator[str]:
+    requires_paid_provider = _agentic_rag_requires_paid_provider(dependencies)
+    graph = build_agentic_rag_graph(
+        worker_executor=build_generation_workflow_executor(request, dependencies),
+    )
+    state = build_agentic_rag_initial_state(
+        request,
+        requires_paid_provider=requires_paid_provider,
+        estimated_cost_usd=0.0,
+        approval_cost_threshold_usd=0.0,
+    )
+
+    yield _sse_event(
+        "run_started",
+        {
+            "status": "started",
+            "stream_protocol": "sse",
+            "raw_inputs_committed": False,
+        },
+    )
+    final_status = "started"
+    final_next_action = None
+    for chunk in graph.stream(state, stream_mode="updates"):
+        for node_name, update in chunk.items():
+            payload = _agentic_rag_stream_update(node_name, update)
+            final_status = payload.get("status", final_status)
+            final_next_action = payload.get("next_action", final_next_action)
+            yield _sse_event("node_completed", payload)
+            await asyncio.sleep(0)
+
+    run_completed = {
+        "status": final_status,
+        "raw_inputs_committed": False,
+    }
+    if final_next_action is not None:
+        run_completed["next_action"] = final_next_action
+    yield _sse_event("run_completed", run_completed)
+
+
+def _agentic_rag_stream_update(node_name: str, update: dict[str, Any]) -> dict[str, Any]:
+    payload: dict[str, Any] = {"node": node_name}
+    if "status" in update:
+        payload["status"] = update["status"]
+    if "next_action" in update:
+        payload["next_action"] = update["next_action"]
+
+    approval = update.get("approval")
+    if isinstance(approval, dict):
+        payload["approval_required"] = approval.get("required", False)
+        payload["approval_reasons"] = list(approval.get("reasons", []))
+
+    marketing_context = update.get("marketing_context")
+    if isinstance(marketing_context, dict):
+        payload["retriever_backend"] = marketing_context.get("retriever_backend")
+        payload["retrieved_docs_count"] = marketing_context.get("retrieved_docs_count")
+
+    citations = update.get("citations")
+    if isinstance(citations, list):
+        payload["citation_count"] = len(citations)
+
+    worker_result = update.get("worker_result")
+    if isinstance(worker_result, dict):
+        payload["worker_status"] = worker_result.get("status")
+        for key in (
+            "copy_backend",
+            "image_backend",
+            "copy_option_count",
+            "used_reference",
+            "workflow_trace_steps",
+        ):
+            if key in worker_result:
+                payload[key] = worker_result[key]
+
+    reflection = update.get("reflection")
+    if isinstance(reflection, dict):
+        payload["reflection"] = {
+            "attempts": reflection.get("attempts"),
+            "last_error_type": reflection.get("last_error_type"),
+            "retry_budget": reflection.get("retry_budget"),
+        }
+    return payload
+
+
+def _sse_event(event_name: str, data: dict[str, Any]) -> str:
+    payload = json.dumps(data, ensure_ascii=False, sort_keys=True)
+    return f"event: {event_name}\ndata: {payload}\n\n"
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
@@ -523,6 +631,25 @@ def generate(request: GenerationRequest) -> GenerationResponse:
         if not _is_marketing_context_dependency_error(exc):
             raise
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.post("/agentic-rag/runs/stream")
+async def stream_agentic_rag_run(request: GenerationRequest) -> StreamingResponse:
+    try:
+        dependencies = build_workflow_dependencies(request)
+    except ReferenceImageError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except AdBackendError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        if not _is_marketing_context_dependency_error(exc):
+            raise
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    return StreamingResponse(
+        _agentic_rag_sse_events(request, dependencies),
+        media_type="text/event-stream",
+    )
 
 
 @app.post("/generation-jobs", status_code=202)
