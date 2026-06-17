@@ -20,7 +20,7 @@ deployment readiness, privacy boundaries, and model-backed product analysis.
 docker compose config -q
 ```
 
-Latest local regression snapshot: `214 passed, 1 warning`.
+Latest local regression snapshot: `217 passed, 1 warning`.
 
 ## Evidence Map
 
@@ -29,7 +29,7 @@ Latest local regression snapshot: `214 passed, 1 warning`.
 | Retrieval baseline | [`rag-baseline.md`](rag-baseline.md), [`rag-baseline-results.json`](rag-baseline-results.json) | 10 samples, category hit rate 1.00, prohibited-claims hit rate 1.00, precision 0.75 | `.venv/bin/python scripts/eval_marketing_context.py --output docs/evidence/rag-baseline-results.json` |
 | Hybrid vector retrieval | [`pgvector-retrieval.md`](pgvector-retrieval.md), [`pgvector-baseline-results.json`](pgvector-baseline-results.json), [`pgvector-db-smoke-results.json`](pgvector-db-smoke-results.json) | pgvector hybrid preserves hit rate 1.00 and improves precision to 1.00 on the current 10-sample set | `.venv/bin/python scripts/eval_pgvector_marketing_context.py --output docs/evidence/pgvector-baseline-results.json` |
 | Async job reliability | [`generation-jobs.md`](generation-jobs.md) | Redis/RQ queue, redacted Postgres history, job status API, Streamlit polling/history UX | See focused test and smoke commands in the evidence note |
-| Async reliability matrix | [`async-reliability-matrix.md`](async-reliability-matrix.md), [`async-reliability-matrix.json`](async-reliability-matrix.json) | Burst submit, failure state, queue enqueue failure, duplicate polling, worker startup wait, and K8s async smoke passed; cancel/retry/timeout remain pending | `.venv/bin/pytest tests/test_async_reliability.py tests/test_generation_jobs.py::test_generation_worker_waits_for_redis_until_ready -q` |
+| Async reliability matrix | [`async-reliability-matrix.md`](async-reliability-matrix.md), [`async-reliability-matrix.json`](async-reliability-matrix.json) | Burst submit, failure state, queue enqueue failure, duplicate polling, worker startup wait, K8s async smoke, and live worker outage/restore smoke passed; cancel/retry/timeout remain pending | `.venv/bin/pytest tests/test_async_reliability.py tests/test_generation_jobs.py::test_generation_worker_waits_for_redis_until_ready tests/test_k8s_async_failure_smoke.py -q` |
 | AgentOps observability | [`agentops-phoenix.md`](agentops-phoenix.md), [`assets/phoenix-workflow-trace.png`](assets/phoenix-workflow-trace.png), [`assets/phoenix-trace-detail.png`](assets/phoenix-trace-detail.png) | OTEL console smoke, Phoenix OTLP trace export, UI screenshots, trace count verification, trace/log privacy allowlist tests | `WORKFLOW_TRACING=otel WORKFLOW_TRACE_EXPORT=console .venv/bin/python scripts/otel_trace_smoke.py` |
 | Workflow eval and failure report | [`workflow-eval-summary.json`](workflow-eval-summary.json) | 3 demo samples, average score 1.00, failure_count 0, failure_cases present | `.venv/bin/python scripts/eval_demo_samples.py --output docs/evidence/workflow-eval-summary.json` |
 | Product-like workflow eval | [`product-like-workflow-eval.md`](product-like-workflow-eval.md), [`product-like-workflow-eval-summary.json`](product-like-workflow-eval-summary.json) | 30 product-like scenarios, average score 1.00, failure_count 0 | `.venv/bin/python scripts/eval_product_like_samples.py --output docs/evidence/product-like-workflow-eval-summary.json` |
@@ -40,7 +40,7 @@ Latest local regression snapshot: `214 passed, 1 warning`.
 | OpenAI image-edit preservation | [`openai-image-edit-preservation.md`](openai-image-edit-preservation.md), [`openai-image-edit-preservation-live-summary.json`](openai-image-edit-preservation-live-summary.json) | Paid live edit completed under the initial single-sample gate and failed: color similarity 0.234960 vs 0.25 threshold; script now supports strengthened multi-sample provider-quality gate | `.venv/bin/python scripts/openai_image_edit_preservation_smoke.py --reference-set public-samples --model-id gpt-image-2 --quality medium --date 2026-06-17` |
 | Adversarial portfolio review | [`../reference/adversarial-portfolio-review.md`](../reference/adversarial-portfolio-review.md) | Three independent subagents identified overclaiming and converted it into an M7 hardening roadmap | Review-only artifact; no paid/API calls |
 | Architecture preview | [`assets/architecture.svg`](assets/architecture.svg) | README-ready architecture image maps UX, workflow, RAG/eval/ops/deploy/privacy layers | `rsvg-convert docs/evidence/assets/architecture.svg -o /tmp/dessert-ad-studio-architecture.png` |
-| Kubernetes deployability | [`k8s-deployment.md`](k8s-deployment.md), [`k8s-live-smoke-summary.json`](k8s-live-smoke-summary.json), [`k8s-async-smoke-summary.json`](k8s-async-smoke-summary.json) | Base, GPU, AgentOps, and async overlays render; live `kind` smokes passed base API/Triton `/generate` and async Redis/RQ worker plus Postgres history | `.venv/bin/python scripts/k8s_live_smoke.py --context kind-dessert-ad-studio --timeout 900 --summary docs/evidence/k8s-live-smoke-summary.json` |
+| Kubernetes deployability | [`k8s-deployment.md`](k8s-deployment.md), [`k8s-live-smoke-summary.json`](k8s-live-smoke-summary.json), [`k8s-async-smoke-summary.json`](k8s-async-smoke-summary.json), [`k8s-async-failure-smoke.md`](k8s-async-failure-smoke.md), [`k8s-async-failure-smoke-summary.json`](k8s-async-failure-smoke-summary.json) | Base, GPU, AgentOps, and async overlays render; live `kind` smokes passed base API/Triton `/generate`, async Redis/RQ worker plus Postgres history, and worker outage/restore behavior | `.venv/bin/python scripts/k8s_async_failure_smoke.py --context kind-dessert-ad-studio --namespace dessert-ad-studio --local-port 18082 --timeout 240 --pending-observation-count 3 --poll-interval 2 --summary docs/evidence/k8s-async-failure-smoke-summary.json` |
 | OpenAI product analysis | [`product-analysis-openai.md`](product-analysis-openai.md), [`product-analysis-openai-live-summary.json`](product-analysis-openai-live-summary.json), [`product-analysis-openai-eval-results.json`](product-analysis-openai-eval-results.json) | Live smoke passed; 10-case synthetic reference eval pass rate 1.00, p95 latency 13.15s | `.venv/bin/python scripts/openai_product_analysis_smoke.py --eval --eval-count 10 --output docs/evidence/product-analysis-openai-eval-results.json` |
 
 ## Decision Records
@@ -70,5 +70,5 @@ Latest local regression snapshot: `214 passed, 1 warning`.
 
 - Run the strengthened provider-quality gate with `gpt-image-2` and
   `quality=medium` only if a second paid image-edit iteration is approved.
-- Add live worker failure-injection evidence before making broader async
-  operations claims.
+- Add retry/timeout/cancel behavior or explicit non-support evidence before
+  making broader async operations claims.

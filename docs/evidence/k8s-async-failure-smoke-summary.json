@@ -1,0 +1,89 @@
+{
+  "k8s_async_failure_smoke": "passed",
+  "context": "kind-dessert-ad-studio",
+  "namespace": "dessert-ad-studio",
+  "worker_deployment": "deploy/worker",
+  "elapsed_ms": 20681,
+  "pending_observation_count": 3,
+  "poll_interval_seconds": 2.0,
+  "checks": {
+    "safe_context": true,
+    "worker_scaled_down": true,
+    "api_port_forward": true,
+    "job_pending_without_worker": true,
+    "worker_restored": true,
+    "job_succeeded_after_restore": true
+  },
+  "job": {
+    "job_id_sha256": "d162c7c65f36eac0fab5fcf0f112f3e92669bc2cf2e331bb6d33087ca4550352",
+    "initial_status": "queued",
+    "pending_statuses": [
+      "queued",
+      "queued",
+      "queued"
+    ],
+    "pending_observations": 3,
+    "final_status": "succeeded"
+  },
+  "commands": [
+    [
+      "kubectl",
+      "--context",
+      "kind-dessert-ad-studio",
+      "-n",
+      "dessert-ad-studio",
+      "scale",
+      "deploy/worker",
+      "--replicas=0"
+    ],
+    [
+      "kubectl",
+      "--context",
+      "kind-dessert-ad-studio",
+      "-n",
+      "dessert-ad-studio",
+      "rollout",
+      "status",
+      "deploy/worker",
+      "--timeout=240s"
+    ],
+    [
+      "kubectl",
+      "--context",
+      "kind-dessert-ad-studio",
+      "-n",
+      "dessert-ad-studio",
+      "port-forward",
+      "svc/api",
+      "18082:8000"
+    ],
+    [
+      "kubectl",
+      "--context",
+      "kind-dessert-ad-studio",
+      "-n",
+      "dessert-ad-studio",
+      "scale",
+      "deploy/worker",
+      "--replicas=1"
+    ],
+    [
+      "kubectl",
+      "--context",
+      "kind-dessert-ad-studio",
+      "-n",
+      "dessert-ad-studio",
+      "rollout",
+      "status",
+      "deploy/worker",
+      "--timeout=240s"
+    ]
+  ],
+  "privacy_boundary": {
+    "raw_prompt_committed": false,
+    "raw_model_response_committed": false,
+    "raw_product_name_committed": false,
+    "raw_user_constraints_committed": false,
+    "raw_job_id_committed": false
+  }
+}

@@ -362,15 +362,28 @@ triton    1/1 Running 0
 The redacted machine-readable summary is committed at
 `docs/evidence/k8s-async-smoke-summary.json`.
 
+Failure-injection follow-up:
+
+```text
+k8s_async_failure_smoke=passed
+worker_scaled_down=True
+job_pending_without_worker=True
+worker_restored=True
+job_succeeded_after_restore=True
+```
+
+The redacted machine-readable summary is committed at
+`docs/evidence/k8s-async-failure-smoke-summary.json`.
+
 ## What This Does Not Prove Yet
 
 - The base `ReadWriteOnce` outputs PVC is local/test friendly but is not a
   multi-node artifact strategy. Production scaling should use object storage or
   a dedicated `ReadWriteMany` overlay/storage class.
 - The async overlay live proof covers one local/test `kind` run of Redis/RQ
-  worker plus Postgres history. It does not yet prove multi-replica queue
-  behavior, worker failure recovery, retry policy, cancellation, or timeout
-  behavior under load.
+  worker plus Postgres history and a single worker outage/restore path. It does
+  not yet prove multi-replica queue behavior, retry policy, cancellation, or
+  timeout behavior under load.
 - `kind` does not include metrics-server by default, so HPA rendering is proven
   but live CPU autoscaling behavior is not.
 - Production hardening such as TLS, image registry pinning, auth, network policy,

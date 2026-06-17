@@ -74,8 +74,9 @@ Not yet proven:
 - Provider-quality image editing. The first paid OpenAI image-edit gate failed;
   a stronger `gpt-image-2` + `quality=medium` gate is prepared but not run.
 - Production async operation. Kubernetes now has a local/test async overlay
-  smoke and first reliability matrix, but not multi-worker failure injection,
-  retry/timeout policy, cancellation, or production storage policy.
+  smoke, first reliability matrix, and single worker outage/restore evidence,
+  but not multi-worker failure handling, retry/timeout policy, cancellation, or
+  production storage policy.
 - Production trace privacy. The first allowlist gate is complete, but external
   production trace rollout still needs a deployment-specific attribute review.
 - Broad real-world quality statistics. Current evals now include 30
@@ -152,7 +153,7 @@ flowchart LR
 | M4 Real product analysis | Replace mock product analysis with a real VLM-backed analyzer while preserving redaction policy. | Complete first analyzer gate: OpenAI Responses Vision adapter, ADR, no-network tests, env/compose wiring, one redacted live smoke, 10-case synthetic reference eval, pass rate 1.00, p95 latency 13.15s. |
 | M5 Observability and eval package | Make quality, latency, cost, and failure behavior reviewable. | Complete first gate: Phoenix/OTEL trace screenshots, JSONL logs, `docs/evidence/workflow-eval-summary.json`, deterministic workflow score 1.00, failure_count 0, failure-case report fields, and `docs/evidence/cost-guard-summary.json`. |
 | M6 Portfolio packaging | Turn implementation into a senior-reviewable artifact. | Complete first gate: evidence index at `docs/evidence/README.md`, demo gallery at `docs/evidence/demo-gallery.md`, architecture image at `docs/evidence/assets/architecture.svg`, Streamlit reviewer screenshots at `docs/evidence/streamlit-reviewer-flow.md`, real-sample preservation evidence at `docs/evidence/real-sample-preservation.md`, paid OpenAI image-edit failure evidence at `docs/evidence/openai-image-edit-preservation.md`, README links, reproducible command map. |
-| M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, 30-scenario product-like eval, first trace/log privacy allowlist gate, and first cost guard are complete. Next evidence should cover provider-quality image-edit gate and live worker failure injection. |
+| M7 Adversarial hardening | Apply independent senior-review criticism to remove overclaiming and close the strongest evidence gaps. | In progress: `docs/reference/adversarial-portfolio-review.md` captures findings; live K8s base-stack proof, K8s async overlay smoke, first async reliability matrix, live worker outage/restore smoke, 30-scenario product-like eval, first trace/log privacy allowlist gate, and first cost guard are complete. Next evidence should cover provider-quality image-edit gate plus retry/timeout/cancel policy. |
 
 ## Failure Conditions
 
@@ -209,7 +210,8 @@ The immediate M6 portfolio-packaging gate is complete, but the adversarial
 review moved the project into M7 hardening. Live K8s base-stack proof is now
 captured, the K8s async overlay smoke is complete, the first async reliability
 matrix is complete, the 30-scenario product-like eval is complete, the first
-trace/log privacy allowlist gate is complete, and the first cost guard is
-complete. The next non-paid milestone should add live worker failure-injection
-evidence. The strengthened `gpt-image-2` + `quality=medium` provider-quality
-image-edit gate still needs explicit paid-run approval.
+trace/log privacy allowlist gate is complete, the first cost guard is complete,
+and live worker outage/restore evidence is complete. The remaining non-paid
+async work is explicit retry/timeout/cancel policy. The strengthened
+`gpt-image-2` + `quality=medium` provider-quality image-edit gate still needs
+explicit paid-run approval.

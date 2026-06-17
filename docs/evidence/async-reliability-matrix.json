@@ -1,8 +1,8 @@
 {
   "date": "2026-06-17",
-  "scope": "generation job API, inline deterministic adapter, worker startup, and K8s async smoke evidence",
-  "command": ".venv/bin/pytest tests/test_async_reliability.py tests/test_generation_jobs.py::test_generation_worker_waits_for_redis_until_ready -q",
-  "result": "5 passed, 1 warning",
+  "scope": "generation job API, inline deterministic adapter, worker startup, K8s async smoke, and worker outage/restore evidence",
+  "command": ".venv/bin/pytest tests/test_async_reliability.py tests/test_generation_jobs.py::test_generation_worker_waits_for_redis_until_ready tests/test_k8s_async_failure_smoke.py -q",
+  "result": "8 passed, 1 warning",
   "cases": [
     {
       "case": "burst_submit",
@@ -35,6 +35,11 @@
       "evidence": "kind async overlay smoke passed Redis/RQ worker plus Postgres history"
     },
     {
+      "case": "live_worker_outage_restore",
+      "status": "passed",
+      "evidence": "kind failure-injection smoke scaled deploy/worker to 0, observed the same job remain queued 3 times, restored worker to 1 replica, and observed final succeeded"
+    },
+    {
       "case": "reference_image_async_payload",
       "status": "explicit_non_support",
       "evidence": "POST /generation-jobs rejects reference_image_b64 until object storage and retention policy are selected"
@@ -47,7 +52,7 @@
     {
       "case": "retry_timeout_policy",
       "status": "pending",
-      "evidence": "retry, timeout, and dead-letter policy still need live worker failure injection"
+      "evidence": "explicit retry policy and timeout/dead-letter behavior remain pending"
     }
   ],
   "privacy_boundary": {
